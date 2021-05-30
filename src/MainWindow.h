@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "Commons.h"
+#include "ControlDebounce.h"
 
 namespace Ui {
 class MainWindow;
@@ -25,6 +26,9 @@ signals:
 
     void onMemoryKey(TMemoryKey key);
 
+    void onVoltageChanged(TChannel channel, double value);
+    void onCurrentChanged(TChannel channel, double value);
+
 public slots:
     void enableMemoryKey(TMemoryKey key);
 
@@ -34,8 +38,17 @@ private slots:
     void slotParallelMode();
     void slotMemoryKeyChanged(bool toggle);
 
+    void slotDialControlChanged();
+    void slotSpinControlChanged();
+    void slotControlValueChanged();
+    void slotControlValueChangedDebounced(double value);
+
 private:
     Ui::MainWindow *ui;
+    ControlDebounce mDebouncedCh1V;
+    ControlDebounce mDebouncedCh1A;
+    ControlDebounce mDebouncedCh2V;
+    ControlDebounce mDebouncedCh2A;
 
 private:
     void showIndependentOutputConfiguration();

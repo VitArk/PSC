@@ -18,12 +18,17 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
     QApplication::setApplicationVersion("1.0");
 
     QTimer::singleShot(0, this, SLOT(slotAppRun()));
+
 }
 
 void Application::slotAppRun() {
     auto w = new MainWindow();
     connect(w, &MainWindow::onMemoryKey, this, &Application::slotOnMemoryKey);
     w->show();
+
+    connect(w, &MainWindow::onVoltageChanged, this, &Application::slotVoltageChanged);
+    connect(w, &MainWindow::onCurrentChanged, this, &Application::slotCurrentChanged);
+
 
     QTimer::singleShot(1000, this, [=](){
         w->enableMemoryKey(M2);
@@ -38,4 +43,12 @@ void Application::slotAppRun() {
 
 void Application::slotOnMemoryKey(TMemoryKey key) {
     qDebug() << "slotOnMemoryKey" << key;
+}
+
+void Application::slotVoltageChanged(TChannel channel, double value) {
+    qDebug() << "slotVoltageChanged" << channel << value;
+}
+
+void Application::slotCurrentChanged(TChannel channel, double value) {
+    qDebug() << "slotCurrentChanged" << channel << value;
 }

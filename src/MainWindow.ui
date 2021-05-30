@@ -26,7 +26,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>UTP3000C Series Programmable DC Power Suppliesare</string>
+   <string>Power Supply Controller for UTP300xC Series Programmable DC Power supplies</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -39,19 +39,22 @@
     <property name="verticalSpacing">
      <number>0</number>
     </property>
-    <item row="1" column="0">
-     <widget class="QGroupBox" name="groupBoxCh1">
+    <item row="1" column="1">
+     <widget class="QGroupBox" name="groupBoxCh2">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_8">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
-        <layout class="QFormLayout" name="formLayout">
+        <layout class="QFormLayout" name="formLayout_2">
          <item row="0" column="0">
-          <widget class="QLCDNumber" name="lcdCh1V">
+          <widget class="QLCDNumber" name="lcdCh2V">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -80,7 +83,7 @@
             <bool>true</bool>
            </property>
            <property name="digitCount">
-            <number>4</number>
+            <number>5</number>
            </property>
            <property name="mode">
             <enum>QLCDNumber::Dec</enum>
@@ -97,7 +100,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLabel" name="lblCh1V">
+          <widget class="QLabel" name="lblCh2V">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -123,7 +126,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLCDNumber" name="lcdCh1A">
+          <widget class="QLCDNumber" name="lcdCh2A">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -152,7 +155,7 @@
             <bool>true</bool>
            </property>
            <property name="digitCount">
-            <number>4</number>
+            <number>5</number>
            </property>
            <property name="mode">
             <enum>QLCDNumber::Dec</enum>
@@ -169,7 +172,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLabel" name="lblCh1A">
+          <widget class="QLabel" name="lblCh2A">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -197,15 +200,15 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QGroupBox" name="groupBoxCh1SetV">
+          <widget class="QGroupBox" name="groupBoxCh2SetV">
            <property name="title">
             <string>Voltage (V)</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout">
+           <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
-             <widget class="QDial" name="dialCh1V">
+             <widget class="QDial" name="dialCh2V">
               <property name="minimumSize">
                <size>
                 <width>60</width>
@@ -218,6 +221,18 @@
                 <height>60</height>
                </size>
               </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>3000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+              <property name="pageStep">
+               <number>100</number>
+              </property>
               <property name="wrapping">
                <bool>false</bool>
               </property>
@@ -227,9 +242,18 @@
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="spinCh1V">
+             <widget class="QDoubleSpinBox" name="spinCh2V">
               <property name="suffix">
                <string>V</string>
+              </property>
+              <property name="minimum">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>30.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
               </property>
              </widget>
             </item>
@@ -237,13 +261,13 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBoxCh1SetA">
+          <widget class="QGroupBox" name="groupBoxCh2SetA">
            <property name="title">
             <string>Current (A)</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_7">
+           <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
-             <widget class="QDial" name="dialCh1A">
+             <widget class="QDial" name="dialCh2A">
               <property name="minimumSize">
                <size>
                 <width>60</width>
@@ -256,6 +280,18 @@
                 <height>60</height>
                </size>
               </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>3000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+              <property name="pageStep">
+               <number>100</number>
+              </property>
               <property name="wrapping">
                <bool>false</bool>
               </property>
@@ -265,12 +301,21 @@
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="spinCh1A">
+             <widget class="QDoubleSpinBox" name="spinCh2A">
               <property name="suffix">
                <string>A</string>
               </property>
               <property name="decimals">
                <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>0.001000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>3.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.001000000000000</double>
               </property>
              </widget>
             </item>
@@ -280,39 +325,57 @@
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBoxCh1SetProtection">
+        <widget class="QGroupBox" name="groupBoxCh2SetProtection">
          <property name="title">
           <string>Protection</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_3">
+         <layout class="QFormLayout" name="formLayout_4">
           <item row="0" column="0">
-           <widget class="QLabel" name="lblCh1OVP">
+           <widget class="QLabel" name="lblCh2OVP">
             <property name="text">
              <string>OVP Value</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spinCh1OVP">
+           <widget class="QDoubleSpinBox" name="spinCh2OVP">
             <property name="suffix">
              <string>V</string>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>30.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="lblCh1OCP">
+           <widget class="QLabel" name="lblCh2OCP">
             <property name="text">
              <string>OCP Value</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="spinCh1OCP">
+           <widget class="QDoubleSpinBox" name="spinCh2OCP">
             <property name="suffix">
              <string>A</string>
             </property>
             <property name="decimals">
              <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.001000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>3.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
             </property>
            </widget>
           </item>
@@ -322,44 +385,21 @@
       </layout>
      </widget>
     </item>
-    <item row="0" column="2">
-     <spacer name="verticalSpacer_5">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLabel" name="lblCh2">
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>CH2</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-      <property name="indent">
-       <number>0</number>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="2">
      <widget class="QGroupBox" name="groupBoxOp">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="title">
        <string/>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_11">
+       <property name="leftMargin">
+        <number>12</number>
+       </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <property name="spacing">
@@ -636,22 +676,38 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QGroupBox" name="groupBoxCh2">
+    <item row="0" column="1">
+     <widget class="QLabel" name="lblCh2">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>CH2</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="indent">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QGroupBox" name="groupBoxCh1">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_9">
+      <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
-        <layout class="QFormLayout" name="formLayout_2">
+        <layout class="QFormLayout" name="formLayout">
          <item row="0" column="0">
-          <widget class="QLCDNumber" name="lcdCh2V">
+          <widget class="QLCDNumber" name="lcdCh1V">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -680,7 +736,7 @@
             <bool>true</bool>
            </property>
            <property name="digitCount">
-            <number>4</number>
+            <number>5</number>
            </property>
            <property name="mode">
             <enum>QLCDNumber::Dec</enum>
@@ -697,7 +753,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLabel" name="lblCh2V">
+          <widget class="QLabel" name="lblCh1V">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -723,7 +779,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLCDNumber" name="lcdCh2A">
+          <widget class="QLCDNumber" name="lcdCh1A">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -752,7 +808,7 @@
             <bool>true</bool>
            </property>
            <property name="digitCount">
-            <number>4</number>
+            <number>5</number>
            </property>
            <property name="mode">
             <enum>QLCDNumber::Dec</enum>
@@ -769,7 +825,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLabel" name="lblCh2A">
+          <widget class="QLabel" name="lblCh1A">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -797,15 +853,15 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QGroupBox" name="groupBoxCh2SetV">
+          <widget class="QGroupBox" name="groupBoxCh1SetV">
            <property name="title">
             <string>Voltage (V)</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
+           <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="QDial" name="dialCh2V">
+             <widget class="QDial" name="dialCh1V">
               <property name="minimumSize">
                <size>
                 <width>60</width>
@@ -818,6 +874,18 @@
                 <height>60</height>
                </size>
               </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>3000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+              <property name="pageStep">
+               <number>100</number>
+              </property>
               <property name="wrapping">
                <bool>false</bool>
               </property>
@@ -827,9 +895,18 @@
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="spinCh2V">
+             <widget class="QDoubleSpinBox" name="spinCh1V">
               <property name="suffix">
                <string>V</string>
+              </property>
+              <property name="minimum">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>30.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
               </property>
              </widget>
             </item>
@@ -837,13 +914,13 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBoxCh2SetA">
+          <widget class="QGroupBox" name="groupBoxCh1SetA">
            <property name="title">
             <string>Current (A)</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_10">
+           <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
-             <widget class="QDial" name="dialCh2A">
+             <widget class="QDial" name="dialCh1A">
               <property name="minimumSize">
                <size>
                 <width>60</width>
@@ -856,6 +933,18 @@
                 <height>60</height>
                </size>
               </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>3000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+              <property name="pageStep">
+               <number>100</number>
+              </property>
               <property name="wrapping">
                <bool>false</bool>
               </property>
@@ -865,12 +954,21 @@
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="spinCh2A">
+             <widget class="QDoubleSpinBox" name="spinCh1A">
               <property name="suffix">
                <string>A</string>
               </property>
               <property name="decimals">
                <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>0.001000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>3.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.001000000000000</double>
               </property>
              </widget>
             </item>
@@ -880,39 +978,57 @@
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBoxCh2SetProtection">
+        <widget class="QGroupBox" name="groupBoxCh1SetProtection">
          <property name="title">
           <string>Protection</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_4">
+         <layout class="QFormLayout" name="formLayout_3">
           <item row="0" column="0">
-           <widget class="QLabel" name="lblCh2OVP">
+           <widget class="QLabel" name="lblCh1OVP">
             <property name="text">
              <string>OVP Value</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spinCh2OVP">
+           <widget class="QDoubleSpinBox" name="spinCh1OVP">
             <property name="suffix">
              <string>V</string>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>30.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="lblCh2OCP">
+           <widget class="QLabel" name="lblCh1OCP">
             <property name="text">
              <string>OCP Value</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="spinCh2OCP">
+           <widget class="QDoubleSpinBox" name="spinCh1OCP">
             <property name="suffix">
              <string>A</string>
             </property>
             <property name="decimals">
              <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.001000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>3.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
             </property>
            </widget>
           </item>
@@ -921,6 +1037,19 @@
        </item>
       </layout>
      </widget>
+    </item>
+    <item row="0" column="2">
+     <spacer name="verticalSpacer_5">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>

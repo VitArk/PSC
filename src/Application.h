@@ -32,6 +32,8 @@ private slots:
     void slotAppRun();
 
     static void slotOnMemoryKey(TMemoryKey key);
+    void slotVoltageChanged(TChannel channel, double value);
+    void slotCurrentChanged(TChannel channel, double value);
 };
 
 

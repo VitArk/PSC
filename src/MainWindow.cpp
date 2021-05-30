@@ -7,6 +7,9 @@
 #include <QTextCharFormat>
 #include <QGraphicsSvgItem>
 
+const double vDialCorrection = 100.0;
+const double aDialCorrection = 1000.0;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -33,11 +36,32 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnM4, &QPushButton::clicked, this, &MainWindow::slotMemoryKeyChanged);
     connect(ui->btnM5, &QPushButton::clicked, this, &MainWindow::slotMemoryKeyChanged);
 
+    connect(ui->dialCh1V, &QDial::valueChanged, this, &MainWindow::slotDialControlChanged);
+    connect(ui->dialCh1A, &QDial::valueChanged, this, &MainWindow::slotDialControlChanged);
+    connect(ui->dialCh2V, &QDial::valueChanged, this, &MainWindow::slotDialControlChanged);
+    connect(ui->dialCh2A, &QDial::valueChanged, this, &MainWindow::slotDialControlChanged);
+
+    connect(ui->dialCh1V, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
+    connect(ui->dialCh1A, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
+    connect(ui->dialCh2V, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
+    connect(ui->dialCh2A, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
+
+    connect(ui->spinCh1V, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotSpinControlChanged);
+    connect(ui->spinCh1A, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotSpinControlChanged);
+    connect(ui->spinCh2V, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotSpinControlChanged);
+    connect(ui->spinCh2A, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotSpinControlChanged);
+
+    connect(&mDebouncedCh1V, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
+    connect(&mDebouncedCh1A, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
+    connect(&mDebouncedCh2V, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
+    connect(&mDebouncedCh2A, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
+
 
 //    const QString message =
 //            tr("%1x%2 SCENE: %3x%4").arg(size.width()).arg(size.height()).arg(view->size().width()).arg(view->size().height());
 //    statusBar()->showMessage(message);
 
+    slotControlValueChanged(); // ???
     showIndependentOutputConfiguration();
 }
 
@@ -112,21 +136,11 @@ void MainWindow::setEnableChannel(TChannel ch, bool enable) {
 
 void MainWindow::enableMemoryKey(TMemoryKey key) {
     switch (key) {
-        case M1:
-            ui->btnM1->setChecked(true);
-            break;
-        case M2:
-            ui->btnM2->setChecked(true);
-            break;
-        case M3:
-            ui->btnM3->setChecked(true);
-            break;
-        case M4:
-            ui->btnM4->setChecked(true);
-            break;
-        case M5:
-            ui->btnM5->setChecked(true);
-            break;
+        case M1: ui->btnM1->setChecked(true); break;
+        case M2: ui->btnM2->setChecked(true); break;
+        case M3: ui->btnM3->setChecked(true); break;
+        case M4: ui->btnM4->setChecked(true); break;
+        case M5: ui->btnM5->setChecked(true); break;
     }
 }
 
@@ -157,4 +171,39 @@ void MainWindow::openSvg(const QString &resource) {
     item->setCacheMode(QGraphicsItem::NoCache);
     item->setZValue(0);
     s->addItem(item);
+}
+
+void MainWindow::slotDialControlChanged() {
+    ui->spinCh1V->setValue(ui->dialCh1V->value() / vDialCorrection);
+    ui->spinCh2V->setValue(ui->dialCh2V->value() / vDialCorrection);
+    ui->spinCh1A->setValue(ui->dialCh1A->value() / aDialCorrection);
+    ui->spinCh2A->setValue(ui->dialCh2A->value() / aDialCorrection);
+
+    ui->lcdCh1V->display( ui->spinCh1V->value()); // temporary solution, must show real device's info.
+    ui->lcdCh2V->display( ui->spinCh2V->value()); // temporary solution, must show real device's info.
+    ui->lcdCh1A->display( ui->spinCh1A->value()); // temporary solution, must show real device's info.
+    ui->lcdCh2A->display( ui->spinCh2A->value()); // temporary solution, must show real device's info.
+}
+
+void MainWindow::slotSpinControlChanged() {
+    ui->dialCh1V->setValue(ui->spinCh1V->value() * vDialCorrection);
+    ui->dialCh2V->setValue(ui->spinCh2V->value() * vDialCorrection);
+    ui->dialCh1A->setValue(ui->spinCh1A->value() * aDialCorrection);
+    ui->dialCh2A->setValue(ui->spinCh2A->value() * aDialCorrection);
+
+    slotControlValueChanged();
+}
+
+void MainWindow::slotControlValueChanged() {
+    mDebouncedCh1V.setValue(ui->spinCh1V->value());
+    mDebouncedCh1A.setValue(ui->spinCh1A->value());
+    mDebouncedCh2V.setValue(ui->spinCh2V->value());
+    mDebouncedCh2A.setValue(ui->spinCh2A->value());
+}
+
+void MainWindow::slotControlValueChangedDebounced(double value) {
+    if (sender() == &mDebouncedCh1V) emit onVoltageChanged(Channel1, value); else
+    if (sender() == &mDebouncedCh1A) emit onCurrentChanged(Channel1, value); else
+    if (sender() == &mDebouncedCh2V) emit onVoltageChanged(Channel2, value); else
+    if (sender() == &mDebouncedCh2A) emit onCurrentChanged(Channel2, value);
 }
