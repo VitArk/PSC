@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
 #include "Commons.h"
 #include "ControlDebounce.h"
 
@@ -23,6 +24,8 @@ signals:
 
     void onOverVoltageProtection(bool enabled);
     void onOverCurrentProtection(bool enabled);
+    void onOverVoltageProtectionChanged(TChannel channel, double value);
+    void onOverCurrentProtectionChanged(TChannel channel, double value);
 
     void onMemoryKey(TMemoryKey key);
 
@@ -31,6 +34,9 @@ signals:
 
 public slots:
     void enableMemoryKey(TMemoryKey key);
+    void slotDisplayVoltage(TChannel channel, double value);
+    void slotDisplayCurrent(TChannel channel, double value);
+    void slotUpdateOutputStatus(TOutputStatus channel1, TOutputStatus channel2, bool outputOn);
 
 private slots:
     void slotIndependentMode();
@@ -42,8 +48,15 @@ private slots:
     void slotSpinControlChanged();
     void slotControlValueChanged();
     void slotControlValueChangedDebounced(double value);
+    void slotOverProtectionChanged(double value);
 
 private:
+    enum {
+        HighlightNone = 0,
+        HighlightRed = 1,
+        HighlightGreen = 2,
+    } typedef THighlight;
+
     Ui::MainWindow *ui;
     ControlDebounce mDebouncedCh1V;
     ControlDebounce mDebouncedCh1A;
@@ -59,6 +72,8 @@ private:
     void showOutputMode(OutputMode mode);
 
     void openSvg(const QString &resource);
+
+    void highlight(THighlight color, QLabel *label);
 };
 
 #endif // MAINWINDOW_H

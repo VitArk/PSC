@@ -22,6 +22,11 @@ enum OutputMode {
     Independent = 1,
     Serial = 2,
     Parallel = 3,
-};
+} typedef TOutputMode;
+
+enum OutputStatus {
+    ConstantCurrent = 1,
+    ConstantVoltage = 2
+} typedef TOutputStatus;
 
 #endif //POWER_SUPPLY_CONTROLLER_COMMONS_H

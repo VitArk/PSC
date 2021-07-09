@@ -56,6 +56,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&mDebouncedCh2V, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
     connect(&mDebouncedCh2A, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
 
+    connect(ui->spinCh1OVP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
+    connect(ui->spinCh2OVP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
+    connect(ui->spinCh1OCP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
+    connect(ui->spinCh2OCP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
 
 //    const QString message =
 //            tr("%1x%2 SCENE: %3x%4").arg(size.width()).arg(size.height()).arg(view->size().width()).arg(view->size().height());
@@ -179,10 +183,10 @@ void MainWindow::slotDialControlChanged() {
     ui->spinCh1A->setValue(ui->dialCh1A->value() / aDialCorrection);
     ui->spinCh2A->setValue(ui->dialCh2A->value() / aDialCorrection);
 
-    ui->lcdCh1V->display( ui->spinCh1V->value()); // temporary solution, must show real device's info.
-    ui->lcdCh2V->display( ui->spinCh2V->value()); // temporary solution, must show real device's info.
-    ui->lcdCh1A->display( ui->spinCh1A->value()); // temporary solution, must show real device's info.
-    ui->lcdCh2A->display( ui->spinCh2A->value()); // temporary solution, must show real device's info.
+    slotDisplayVoltage(Channel1, ui->spinCh1V->value()); // temporary solution, must show real device's info.
+    slotDisplayVoltage(Channel2, ui->spinCh2V->value()); // temporary solution, must show real device's info.
+    slotDisplayCurrent(Channel1, ui->spinCh1A->value()); // temporary solution, must show real device's info.
+    slotDisplayCurrent(Channel2, ui->spinCh2A->value()); // temporary solution, must show real device's info.
 }
 
 void MainWindow::slotSpinControlChanged() {
@@ -206,4 +210,59 @@ void MainWindow::slotControlValueChangedDebounced(double value) {
     if (sender() == &mDebouncedCh1A) emit onCurrentChanged(Channel1, value); else
     if (sender() == &mDebouncedCh2V) emit onVoltageChanged(Channel2, value); else
     if (sender() == &mDebouncedCh2A) emit onCurrentChanged(Channel2, value);
+}
+
+void MainWindow::slotDisplayVoltage(TChannel channel, double value) {
+    if (channel == Channel1) {
+        ui->lcdCh1V->display(value);
+    } else {
+        ui->lcdCh2V->display(value);
+    }
+}
+
+void MainWindow::slotDisplayCurrent(TChannel channel, double value) {
+    if (channel == Channel1) {
+        ui->lcdCh1A->display(value);
+    } else {
+        ui->lcdCh2A->display(value);
+    }
+}
+
+void MainWindow::slotOverProtectionChanged(double value) {
+    if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Channel1, value); else
+    if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Channel1, value); else
+    if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Channel2, value); else
+    if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Channel2, value);
+}
+
+void MainWindow::slotUpdateOutputStatus(TOutputStatus channel1, TOutputStatus channel2, bool outputOn) {
+    if (channel1 == ConstantCurrent) {
+        highlight(HighlightRed, ui->lblCh1CC);
+        highlight(HighlightNone, ui->lblCh1CV);
+    } else {
+        highlight(HighlightNone, ui->lblCh1CC);
+        highlight(HighlightGreen, ui->lblCh1CV);
+    }
+
+    if (channel2 == ConstantCurrent) {
+        highlight(HighlightRed, ui->lblCh2CC);
+        highlight(HighlightNone, ui->lblCh2CV);
+    } else {
+        highlight(HighlightNone, ui->lblCh2CC);
+        highlight(HighlightGreen, ui->lblCh2CV);
+    }
+}
+
+void MainWindow::highlight(MainWindow::THighlight color, QLabel *label) {
+    switch (color) {
+        case HighlightRed:
+            label->setStyleSheet("background-color: rgb(210, 0, 0)");
+            break;
+        case HighlightGreen:
+            label->setStyleSheet("background-color: rgb(0, 210, 0)");
+            break;
+        default:
+            label->setStyleSheet("");
+            break;
+    }
 }
