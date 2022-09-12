@@ -30,15 +30,15 @@ void Application::slotAppRun() {
     connect(w, &MainWindow::onCurrentChanged, this, &Application::slotCurrentChanged);
 
 
-    QTimer::singleShot(1000, this, [=](){
+    QTimer::singleShot(1000, this, [=]() {
         w->enableMemoryKey(M2);
         w->slotUpdateOutputStatus(ConstantCurrent, ConstantVoltage, false);
     });
-    QTimer::singleShot(2000, this, [=](){
+    QTimer::singleShot(2000, this, [=]() {
         w->enableMemoryKey(M4);
         w->slotUpdateOutputStatus(ConstantVoltage, ConstantVoltage, false);
     });
-    QTimer::singleShot(3000, this, [=](){
+    QTimer::singleShot(3000, this, [=]() {
         w->enableMemoryKey(M5);
         w->slotUpdateOutputStatus(ConstantVoltage, ConstantCurrent, false);
     });
@@ -55,3 +55,4 @@ void Application::slotVoltageChanged(TChannel channel, double value) {
 void Application::slotCurrentChanged(TChannel channel, double value) {
     qDebug() << "slotCurrentChanged" << channel << value;
 }
+

@@ -8,10 +8,10 @@
 #include <QObject>
 #include <QTimer>
 
-class ControlDebounce : public QObject {
+class Debounce : public QObject {
 Q_OBJECT
 public:
-    explicit ControlDebounce(QObject *parent = nullptr);
+    explicit Debounce(QObject *parent = nullptr);
     void setValue(double value);
 
 signals:

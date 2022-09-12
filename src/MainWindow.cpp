@@ -51,10 +51,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->spinCh2V, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotSpinControlChanged);
     connect(ui->spinCh2A, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotSpinControlChanged);
 
-    connect(&mDebouncedCh1V, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
-    connect(&mDebouncedCh1A, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
-    connect(&mDebouncedCh2V, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
-    connect(&mDebouncedCh2A, &ControlDebounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
+    connect(&mDebouncedCh1V, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
+    connect(&mDebouncedCh1A, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
+    connect(&mDebouncedCh2V, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
+    connect(&mDebouncedCh2A, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
 
     connect(ui->spinCh1OVP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
     connect(ui->spinCh2OVP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));

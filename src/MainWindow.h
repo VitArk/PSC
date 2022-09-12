@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QLabel>
 #include "Commons.h"
-#include "ControlDebounce.h"
+#include "Debounce.h"
 
 namespace Ui {
 class MainWindow;
@@ -58,10 +58,10 @@ private:
     } typedef THighlight;
 
     Ui::MainWindow *ui;
-    ControlDebounce mDebouncedCh1V;
-    ControlDebounce mDebouncedCh1A;
-    ControlDebounce mDebouncedCh2V;
-    ControlDebounce mDebouncedCh2A;
+    Debounce mDebouncedCh1V;
+    Debounce mDebouncedCh1A;
+    Debounce mDebouncedCh2V;
+    Debounce mDebouncedCh2A;
 
 private:
     void showIndependentOutputConfiguration();
