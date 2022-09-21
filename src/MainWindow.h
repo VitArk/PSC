@@ -32,11 +32,17 @@ signals:
     void onVoltageChanged(TChannel channel, double value);
     void onCurrentChanged(TChannel channel, double value);
 
+    void onConnectionChanged(QString serialPortName, int baudRate);
+
 public slots:
-    void enableMemoryKey(TMemoryKey key);
+    void slotSerialPortOpened();
+    void slotSerialPortClosed();
+
+    void slotEnableMemoryKey(TMemoryKey key);
     void slotDisplayVoltage(TChannel channel, double value);
     void slotDisplayCurrent(TChannel channel, double value);
     void slotUpdateOutputStatus(TOutputStatus channel1, TOutputStatus channel2, bool outputOn);
+    void slotDisplayDeviceInfo(const QString &deviceInfo);
 
 private slots:
     void slotIndependentMode();
@@ -49,6 +55,8 @@ private slots:
     void slotControlValueChanged();
     void slotControlValueChangedDebounced(double value);
     void slotOverProtectionChanged(double value);
+
+    void slotConnectionToggled(bool toggled);
 
 private:
     enum {
@@ -63,6 +71,9 @@ private:
     Debounce mDebouncedCh2V;
     Debounce mDebouncedCh2A;
 
+    QLabel *mStatusBarConnectionStatus;
+    QLabel *mStatusBarDeviceInfo;
+
 private:
     void showIndependentOutputConfiguration();
     void showSerialOutputConfiguration();
@@ -74,6 +85,13 @@ private:
     void openSvg(const QString &resource);
 
     void highlight(THighlight color, QLabel *label);
+
+    void createSerialPortMenu();
+    void createBaudRatesMenu(int defaultValue = 9600);
+    QString chosenSerialPort() const;
+    int chosenBaudRates(int defaultValue = 9600) const;
+
+    void resetStatusBarText();
 };
 
 #endif // MAINWINDOW_H

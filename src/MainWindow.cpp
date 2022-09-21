@@ -6,14 +6,14 @@
 #include <QSvgRenderer>
 #include <QTextCharFormat>
 #include <QGraphicsSvgItem>
+#include <QSerialPortInfo>
 
 const double vDialCorrection = 100.0;
 const double aDialCorrection = 1000.0;
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+        QMainWindow(parent),
+        ui(new Ui::MainWindow) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     setFixedSize(maximumSize());
@@ -21,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setScene(new QGraphicsScene(this));
     ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     ui->graphicsView->setStyleSheet("background-color: transparent;");
+
+    mStatusBarDeviceInfo = new QLabel(this);
+    QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 120);
+    mStatusBarConnectionStatus = new QLabel(this);
+    QMainWindow::statusBar()->addPermanentWidget(mStatusBarConnectionStatus);
+    resetStatusBarText();
 
 
     connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::slotIndependentMode);
@@ -61,16 +67,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->spinCh1OCP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
     connect(ui->spinCh2OCP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
 
+
 //    const QString message =
 //            tr("%1x%2 SCENE: %3x%4").arg(size.width()).arg(size.height()).arg(view->size().width()).arg(view->size().height());
 //    statusBar()->showMessage(message);
 
     slotControlValueChanged(); // ???
     showIndependentOutputConfiguration();
+    createSerialPortMenu();
+    createBaudRatesMenu();
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 }
 
@@ -138,25 +146,35 @@ void MainWindow::setEnableChannel(TChannel ch, bool enable) {
     }
 }
 
-void MainWindow::enableMemoryKey(TMemoryKey key) {
+void MainWindow::slotEnableMemoryKey(TMemoryKey key) {
     switch (key) {
-        case M1: ui->btnM1->setChecked(true); break;
-        case M2: ui->btnM2->setChecked(true); break;
-        case M3: ui->btnM3->setChecked(true); break;
-        case M4: ui->btnM4->setChecked(true); break;
-        case M5: ui->btnM5->setChecked(true); break;
+        case M1:
+            ui->btnM1->setChecked(true);
+            break;
+        case M2:
+            ui->btnM2->setChecked(true);
+            break;
+        case M3:
+            ui->btnM3->setChecked(true);
+            break;
+        case M4:
+            ui->btnM4->setChecked(true);
+            break;
+        case M5:
+            ui->btnM5->setChecked(true);
+            break;
     }
 }
 
 void MainWindow::slotMemoryKeyChanged(bool toggle) {
     if (toggle) {
-        if (ui->btnM1 == sender()) emit onMemoryKey(M1); else
-        if (ui->btnM2 == sender()) emit onMemoryKey(M2); else
-        if (ui->btnM3 == sender()) emit onMemoryKey(M3); else
-        if (ui->btnM4 == sender()) emit onMemoryKey(M4); else
-        if (ui->btnM5 == sender()) emit onMemoryKey(M5);
+        if (ui->btnM1 == sender()) emit onMemoryKey(M1);
+        else if (ui->btnM2 == sender()) emit onMemoryKey(M2);
+        else if (ui->btnM3 == sender()) emit onMemoryKey(M3);
+        else if (ui->btnM4 == sender()) emit onMemoryKey(M4);
+        else if (ui->btnM5 == sender()) emit onMemoryKey(M5);
     } else {
-        auto senderBtn = qobject_cast<QPushButton*>(sender());
+        auto senderBtn = qobject_cast<QPushButton *>(sender());
         senderBtn->toggle();
     }
 }
@@ -206,10 +224,10 @@ void MainWindow::slotControlValueChanged() {
 }
 
 void MainWindow::slotControlValueChangedDebounced(double value) {
-    if (sender() == &mDebouncedCh1V) emit onVoltageChanged(Channel1, value); else
-    if (sender() == &mDebouncedCh1A) emit onCurrentChanged(Channel1, value); else
-    if (sender() == &mDebouncedCh2V) emit onVoltageChanged(Channel2, value); else
-    if (sender() == &mDebouncedCh2A) emit onCurrentChanged(Channel2, value);
+    if (sender() == &mDebouncedCh1V) emit onVoltageChanged(Channel1, value);
+    else if (sender() == &mDebouncedCh1A) emit onCurrentChanged(Channel1, value);
+    else if (sender() == &mDebouncedCh2V) emit onVoltageChanged(Channel2, value);
+    else if (sender() == &mDebouncedCh2A) emit onCurrentChanged(Channel2, value);
 }
 
 void MainWindow::slotDisplayVoltage(TChannel channel, double value) {
@@ -229,10 +247,10 @@ void MainWindow::slotDisplayCurrent(TChannel channel, double value) {
 }
 
 void MainWindow::slotOverProtectionChanged(double value) {
-    if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Channel1, value); else
-    if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Channel1, value); else
-    if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Channel2, value); else
-    if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Channel2, value);
+    if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Channel1, value);
+    else if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Channel1, value);
+    else if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Channel2, value);
+    else if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Channel2, value);
 }
 
 void MainWindow::slotUpdateOutputStatus(TOutputStatus channel1, TOutputStatus channel2, bool outputOn) {
@@ -266,3 +284,89 @@ void MainWindow::highlight(MainWindow::THighlight color, QLabel *label) {
             break;
     }
 }
+
+
+int MainWindow::chosenBaudRates(int defaultValue) const {
+    foreach(auto item, ui->menuBaudRate->actions()) {
+        if (item->isChecked()) {
+            return item->text().toInt();
+        }
+    }
+    return defaultValue;
+}
+
+QString MainWindow::chosenSerialPort() const {
+    foreach(auto item, ui->menuPort->actions()) {
+        if (item->isChecked()) {
+            return item->text();
+        }
+    }
+    return "";
+}
+
+
+void MainWindow::slotConnectionToggled(bool toggled) {
+    if (!toggled) {
+        return;
+    }
+
+    emit onConnectionChanged(chosenSerialPort(), chosenBaudRates());
+}
+
+void MainWindow::createSerialPortMenu() {
+    ui->menuPort->addAction(tr("Serial ports"))->setEnabled(false);
+    auto availableSerialPortsGroup = new QActionGroup(this);
+    availableSerialPortsGroup->setExclusive(true);
+
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        auto action = new QAction(info.portName(), this);
+        action->setCheckable(true);
+
+        availableSerialPortsGroup->addAction(action);
+        ui->menuPort->addAction(action);
+
+        connect(action, &QAction::toggled, this, &MainWindow::slotConnectionToggled);
+    }
+}
+
+void MainWindow::createBaudRatesMenu(int defaultValue) {
+    ui->menuBaudRate->addAction(tr("Baud Rate"))->setEnabled(false);
+    auto baudRatesGroup = new QActionGroup(this);
+    baudRatesGroup->setExclusive(true);
+
+    foreach (auto baud, QSerialPortInfo::standardBaudRates()) {
+        if (baud < 9600 || baud > 115200) {
+            continue;
+        }
+        auto action = new QAction(QString::number(baud), this);
+        action->setCheckable(true);
+        action->setChecked(baud == defaultValue);
+
+        baudRatesGroup->addAction(action);
+        ui->menuBaudRate->addAction(action);
+
+        connect(action, &QAction::toggled, this, &MainWindow::slotConnectionToggled);
+    }
+}
+
+void MainWindow::slotSerialPortOpened() {
+    mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(chosenSerialPort()).arg(chosenBaudRates()));
+}
+
+void MainWindow::slotSerialPortClosed() {
+    resetStatusBarText();
+}
+
+void MainWindow::resetStatusBarText() {
+    mStatusBarConnectionStatus->setText(tr("No Connection"));
+    mStatusBarDeviceInfo->setText(tr("N/A"));
+}
+
+void MainWindow::slotDisplayDeviceInfo(const QString &deviceInfo) {
+    mStatusBarDeviceInfo->setText(deviceInfo);
+}
+
+
+
+
+

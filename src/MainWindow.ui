@@ -1103,7 +1103,7 @@
      <x>0</x>
      <y>0</y>
      <width>890</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1127,9 +1127,27 @@
     <addaction name="actionMode"/>
     <addaction name="actionProtection"/>
    </widget>
+   <widget class="QMenu" name="menuConnection">
+    <property name="title">
+     <string>Connection</string>
+    </property>
+    <widget class="QMenu" name="menuPort">
+     <property name="title">
+      <string>Port</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuBaudRate">
+     <property name="title">
+      <string>Baud Rate</string>
+     </property>
+    </widget>
+    <addaction name="menuPort"/>
+    <addaction name="menuBaudRate"/>
+   </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuHelp"/>
    <addaction name="menuOptions"/>
+   <addaction name="menuConnection"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionConnect">

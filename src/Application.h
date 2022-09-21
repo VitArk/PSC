@@ -8,6 +8,8 @@
 #include <QObject>
 #include <QApplication>
 #include "Commons.h"
+#include "Communication.h"
+#include "MainWindow.h"
 
 #if defined(App)
 #undef App
@@ -18,22 +20,32 @@ class Application : public QApplication {
     Q_DISABLE_COPY(Application)
 
 Q_OBJECT
-
 public:
     explicit Application(int &argc, char **argv, int = ApplicationFlags);
-    ~Application() override = default;
+
+    ~Application() override;
 
     static Application *i() { return inst; }
 
+public slots:
+
+
 private:
     static Application *inst;
+    Communication *mCommunication;
+    MainWindow *mMainWindow;
+    QTimer     mWorkingTimer;
 
 private slots:
     void slotAppRun();
 
-    static void slotOnMemoryKey(TMemoryKey key);
+    void slotSerialPortOpened();
+    void slotSerialPortClosed();
+
     void slotVoltageChanged(TChannel channel, double value);
     void slotCurrentChanged(TChannel channel, double value);
+
+    void slotWorkingCycle();
 };
 
 

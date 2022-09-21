@@ -19,14 +19,14 @@ enum MemoryKey {
 } typedef TMemoryKey;
 
 enum OutputMode {
-    Independent = 1,
-    Serial = 2,
-    Parallel = 3,
+    Independent = 0,
+    Serial = 1,
+    Parallel = 2,
 } typedef TOutputMode;
 
 enum OutputStatus {
-    ConstantCurrent = 1,
-    ConstantVoltage = 2
+    ConstantCurrent = 0,
+    ConstantVoltage = 1
 } typedef TOutputStatus;
 
 #endif //POWER_SUPPLY_CONTROLLER_COMMONS_H
