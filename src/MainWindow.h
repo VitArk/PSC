@@ -59,7 +59,7 @@ private slots:
     void slotSpinControlChanged();
     void slotControlValueChanged();
     void slotControlValueChangedDebounced(double value);
-    void slotOverProtectionChanged(double value);
+    void slotOverProtectionChanged();
 
     // Serial port
     void slotSerialPortConnectionToggled(bool toggled);
@@ -94,7 +94,6 @@ private:
     int chosenBaudRates(int defaultValue = 9600) const;
 
     void resetStatusBarText();
-    void clearControlFocus();
 
     static QString currentFormat(double value) ;
     static QString voltageFormat(double value) ;

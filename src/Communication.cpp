@@ -9,16 +9,18 @@
 
 #define DELAY_BETWEEN_REQUEST_MS 40
 
-
-
 Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setDataBits(QSerialPort::Data8);
     mSerialPort.setParity(QSerialPort::NoParity);
     mSerialPort.setStopBits(QSerialPort::OneStop);
     mSerialPort.setFlowControl(QSerialPort::NoFlowControl);
 
-    connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::serialReadData);
 
+    mRequestQueueTimer.setTimerType(Qt::PreciseTimer);
+    mRequestQueueTimer.setInterval(1);
+
+    connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::slotSerialReadData);
+    connect(&mRequestQueueTimer, &QTimer::timeout, this, &Communication::slotProcessRequestQueue);
 }
 
 void Communication::openSerialPort(const QString &name, int baudRate) {
@@ -28,6 +30,8 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
     mSerialPort.setBaudRate(baudRate);
 
     if (mSerialPort.open(QIODevice::ReadWrite)) {
+        mSerialPort.clear();
+        mRequestQueueTimer.start();
         emit onSerialPortOpened();
     } else {
         emit onSerialPortError(mSerialPort.errorString());
@@ -37,6 +41,7 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
 void Communication::closeSerialPort() {
     if (mSerialPort.isOpen()) {
         mSerialPort.close();
+        mRequestQueueTimer.stop();
         emit onSerialPortClosed();
     }
 }
@@ -50,7 +55,12 @@ QStringList Communication::availableSerialPorts() {
     return serialPorts;
 }
 
-void Communication::serialReadData() {
+void Communication::slotProcessRequestQueue() {
+    serialSendRequest();
+}
+
+
+void Communication::slotSerialReadData() {
     if (mRequestQueue.isEmpty()) {
         mSerialPort.clear();
         return;
@@ -64,7 +74,7 @@ void Communication::serialReadData() {
         delete request;
         mRequestQueue.dequeue();
 
-        serialSendRequest(); // here we are able to send request (process queue) immediately
+        serialSendRequest(true); // here we are able to send request (process queue) immediately
     }
 }
 
@@ -94,29 +104,28 @@ void Communication::dispatchData(const Protocol::IProtocol &request, const QByte
     }
 }
 
-void Communication::serialSendRequest() {
+void Communication::serialSendRequest(bool ignoreDelay) {
     if (mRequestQueue.isEmpty()) {
+        return;
+    }
+
+    if (!ignoreDelay && mRequestNextTime > QTime::currentTime()) {
         return;
     }
 
     auto request = mRequestQueue.head();
     mSerialPort.write(request->requestQuery());
+    mRequestNextTime = QTime::currentTime().addMSecs(DELAY_BETWEEN_REQUEST_MS);
+
     mSerialPort.flush();
 
-    if (request->responseDataSize() == 0) { // not expect response
+    if (request->responseDataSize() == 0) { // not expect response, remove
         mRequestQueue.dequeue();
-        // we need to give some time for executing the request on the device.
-        QTimer::singleShot(DELAY_BETWEEN_REQUEST_MS, this, &Communication::serialSendRequest);
     }
 }
 
 void Communication::enqueueRequest(Protocol::IProtocol *request) {
     mRequestQueue.enqueue(request);
-    if (mRequestQueue.length() == 1) { // just added request, and that means no executing requests at the moment.
-        // We need to give some time for executing the request on the device.
-        // So we have to take care about delay between request.
-        QTimer::singleShot(DELAY_BETWEEN_REQUEST_MS, this, &Communication::serialSendRequest);
-    }
 }
 
 void Communication::lockOperationPanel(bool lock) {
@@ -126,7 +135,6 @@ void Communication::lockOperationPanel(bool lock) {
 void Communication::isOperationPanelLocked() {
     enqueueRequest(new Protocol::IsOperationPanelLocked());
 }
-
 
 void Communication::setCurrent(TChannel channel, double value) {
     enqueueRequest(new Protocol::SetCurrent(channel, value));
@@ -211,6 +219,7 @@ void Communication::setOverVoltageProtectionValue(TChannel channel, double volta
 void Communication::getOverVoltageProtectionValue(TChannel channel) {
     enqueueRequest(new Protocol::GetOverVoltageProtectionValue(channel));
 }
+
 
 
 

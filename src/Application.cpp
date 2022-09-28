@@ -18,7 +18,8 @@ Application::Application(int &argc, char **argv, int) : QApplication(argc, argv)
     mCommunication = new Communication(this);
     mMainWindow = new MainWindow();
 
-    mWorkingTimer.setInterval(250);
+    mWorkingTimer.setTimerType(Qt::PreciseTimer);
+    mWorkingTimer.setInterval(250); // 150 min (9600), 250 norm.
     connect(&mWorkingTimer, &QTimer::timeout, this, &Application::slotWorkingCycle);
 
     QTimer::singleShot(0, this, SLOT(slotAppRun()));
@@ -46,7 +47,8 @@ void Application::slotAppRun() {
     connect(mCommunication, &Communication::onOverVoltageProtectionValue, mMainWindow, &MainWindow::slotDisplayOverVoltageProtectionValue);
     connect(mMainWindow, &MainWindow::onOverCurrentProtectionChanged, mCommunication, &Communication::setOverCurrentProtectionValue);
     connect(mMainWindow, &MainWindow::onOverVoltageProtectionChanged, mCommunication, &Communication::setOverVoltageProtectionValue);
-//    connect(mMainWindow, &MainWindow::onOverVoltageProtectionChanged, this, [=]() {
+
+    //    connect(mMainWindow, &MainWindow::onOverVoltageProtectionChanged, this, [=]() {
 //        mCommunication->setOverVoltageProtectionValue(Channel1, 12.44);
 //        qDebug() << "onOverVoltageProtectionChanged";
 //    });

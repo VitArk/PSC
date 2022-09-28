@@ -7,6 +7,8 @@
 
 #include <QObject>
 #include <QQueue>
+#include <QTimer>
+#include <QTime>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
@@ -67,16 +69,19 @@ signals:
     void onOverVoltageProtectionValue(TChannel channel, double voltage);
 
 private slots:
-    void serialReadData();
-    void serialSendRequest();
+    void slotSerialReadData();
+    void slotProcessRequestQueue();
 
 private:
+    void serialSendRequest(bool ignoreDelay = false);
     void dispatchData(const Protocol::IProtocol &request, const QByteArray &data);
     void enqueueRequest(Protocol::IProtocol *request);
 
 private:
     QSerialPort                  mSerialPort;
     QQueue<Protocol::IProtocol*> mRequestQueue;
+    QTimer                       mRequestQueueTimer;
+    QTime                        mRequestNextTime;
 };
 
 

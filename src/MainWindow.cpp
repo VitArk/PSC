@@ -65,10 +65,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&mDebouncedCh2A, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
 
 
-    connect(ui->spinCh1OVP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
-    connect(ui->spinCh2OVP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
-    connect(ui->spinCh1OCP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
-    connect(ui->spinCh2OCP, SIGNAL(valueChanged(double)), this, SLOT(slotOverProtectionChanged(double)));
+    connect(ui->spinCh1OVP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
+    connect(ui->spinCh2OVP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
+    connect(ui->spinCh1OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
+    connect(ui->spinCh2OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
 
     //slotControlValueChanged(); // ???
 
@@ -349,11 +349,13 @@ QString MainWindow::voltageFormat(double value) {
 }
 
 
-void MainWindow::slotOverProtectionChanged(double value) {
-    if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Channel1, value);
-    else if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Channel1, value);
-    else if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Channel2, value);
-    else if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Channel2, value);
+void MainWindow::slotOverProtectionChanged() {
+    qDebug() << "slotOverProtectionChanged";
+
+    if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Channel1, ui->spinCh1OVP->value());
+    else if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Channel1, ui->spinCh2OVP->value());
+    else if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Channel2, ui->spinCh1OCP->value());
+    else if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Channel2, ui->spinCh2OCP->value());
 }
 
 void MainWindow::highlight(MainWindow::THighlight color, QLabel *label) {
