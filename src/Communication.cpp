@@ -7,7 +7,9 @@
 #include <QDebug>
 #include <QThread>
 
-#define DELAY_BETWEEN_REQUEST_MS 30
+#define DELAY_BETWEEN_REQUEST_MS 40
+
+
 
 Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setDataBits(QSerialPort::Data8);
@@ -67,21 +69,28 @@ void Communication::serialReadData() {
 }
 
 void Communication::dispatchData(const Protocol::IProtocol &request, const QByteArray &data) {
-    if (typeid(request) == typeid(Protocol::ReadOutputStatus)) {
-        char d = data.at(0);
-        emit onOutputStatus(TOutputStatus(d & 0x1), TOutputStatus(d & 0x2), d & 0x40);
-    } else if (typeid(request) == typeid(Protocol::ReadOutputCurrent)) {
+    if (typeid(request) == typeid(Protocol::GetOutputStatus)) {
+        emit onDeviceStatus(DeviceStatus(data.at(0)));
+    } else if (typeid(request) == typeid(Protocol::GetOutputCurrent)) {
         emit onOutputCurrent(request.channel(), data.toDouble());
-    } else if (typeid(request) == typeid(Protocol::ReadOutputVoltage)) {
+    } else if (typeid(request) == typeid(Protocol::GetOutputVoltage)) {
         emit onOutputVoltage(request.channel(), data.toDouble());
-    } else if (typeid(request) == typeid(Protocol::ReadSetCurrent)) {
+    } else if (typeid(request) == typeid(Protocol::GetCurrent)) {
         emit onSetCurrent(request.channel(), data.toDouble());
-    } else if (typeid(request) == typeid(Protocol::ReadSetVoltage)) {
+    } else if (typeid(request) == typeid(Protocol::GetVoltage)) {
         emit onSetVoltage(request.channel(), data.toDouble());
-    } else if (typeid(request) == typeid(Protocol::ReadDeviceInfo)) {
+    } else if (typeid(request) == typeid(Protocol::GetOverCurrentProtectionValue)) {
+        emit onOverCurrentProtectionValue(request.channel(), data.toDouble());
+    } else if (typeid(request) == typeid(Protocol::GetOverVoltageProtectionValue)) {
+        emit onOverVoltageProtectionValue(request.channel(), data.toDouble());
+    } else if (typeid(request) == typeid(Protocol::GetDeviceInfo)) {
         emit onDeviceInfo(data);
-    } else if (typeid(request) == typeid(Protocol::ReadActiveSetting)) {
-        emit onActiveSetting(TMemoryKey(data.toInt()));
+    } else if (typeid(request) == typeid(Protocol::GetRecalledSetting)) {
+        emit onRecalledSetting(TMemoryKey(data.toInt()));
+    } else if (typeid(request) == typeid(Protocol::IsOperationPanelLocked)) {
+        emit onOperationPanelLocked(bool(data.toInt()));
+    } else if (typeid(request) == typeid(Protocol::IsBuzzerEnabled)) {
+        emit onBeepEnabled(bool(data.toInt()));
     }
 }
 
@@ -110,78 +119,98 @@ void Communication::enqueueRequest(Protocol::IProtocol *request) {
     }
 }
 
-void Communication::LockOperationPanel(bool state) {
-    enqueueRequest(new Protocol::Lock(state));
+void Communication::lockOperationPanel(bool lock) {
+    enqueueRequest(new Protocol::LockOperationPanel(lock));
 }
 
-void Communication::SetCurrent(TChannel channel, double value) {
+void Communication::isOperationPanelLocked() {
+    enqueueRequest(new Protocol::IsOperationPanelLocked());
+}
+
+
+void Communication::setCurrent(TChannel channel, double value) {
     enqueueRequest(new Protocol::SetCurrent(channel, value));
 }
 
-void Communication::ReadSetCurrent(TChannel channel) {
-    enqueueRequest(new Protocol::ReadSetCurrent(channel));
+void Communication::getCurrent(TChannel channel) {
+    enqueueRequest(new Protocol::GetCurrent(channel));
 }
 
-void Communication::SetVoltage(TChannel channel, double value) {
+void Communication::setVoltage(TChannel channel, double value) {
     enqueueRequest(new Protocol::SetVoltage(channel, value));
 }
 
-void Communication::ReadSetVoltage(TChannel channel) {
-    enqueueRequest(new Protocol::ReadSetVoltage(channel));
+void Communication::getVoltage(TChannel channel) {
+    enqueueRequest(new Protocol::GetVoltage(channel));
 }
 
-void Communication::ReadOutputCurrent(TChannel channel) {
-    enqueueRequest(new Protocol::ReadOutputCurrent(channel));
+void Communication::getOutputCurrent(TChannel channel) {
+    enqueueRequest(new Protocol::GetOutputCurrent(channel));
 }
 
-void Communication::ReadOutputVoltage(TChannel channel) {
-    enqueueRequest(new Protocol::ReadOutputVoltage(channel));
+void Communication::getOutputVoltage(TChannel channel) {
+    enqueueRequest(new Protocol::GetOutputVoltage(channel));
 }
 
-void Communication::Output(bool state) {
-    enqueueRequest(new Protocol::Output(state));
+void Communication::setOutputSwitch(bool ON) {
+    enqueueRequest(new Protocol::SetOutputSwitch(ON));
 }
 
-void Communication::Buzzer(bool state) {
-    enqueueRequest(new Protocol::Buzzer(state));
+void Communication::enableBeep(bool enable) {
+    enqueueRequest(new Protocol::EnableBuzzer(enable));
 }
 
-void Communication::ReadOutputStatus() {
-    enqueueRequest(new Protocol::ReadOutputStatus());
+void Communication::isBeepEnabled() {
+    enqueueRequest(new Protocol::IsBuzzerEnabled());
 }
 
-void Communication::ReadDeviceInfo() {
-    enqueueRequest(new Protocol::ReadDeviceInfo());
+void Communication::getDeviceStatus() {
+    enqueueRequest(new Protocol::GetOutputStatus());
 }
 
-void Communication::RecallSetting(TMemoryKey key) {
+void Communication::getDeviceInfo() {
+    enqueueRequest(new Protocol::GetDeviceInfo());
+}
+
+void Communication::recallSetting(TMemoryKey key) {
     enqueueRequest(new Protocol::RecallSetting(key));
 }
 
-void Communication::ReadActiveSetting() {
-    enqueueRequest(new Protocol::ReadActiveSetting());
+void Communication::getActiveSetting() {
+    enqueueRequest(new Protocol::GetRecalledSetting());
 }
 
-void Communication::SaveSetting(TMemoryKey key) {
+void Communication::saveSetting(TMemoryKey key) {
     enqueueRequest(new Protocol::SaveSetting(key));
 }
 
-void Communication::OutputMode(TOutputMode mode) {
-    enqueueRequest(new Protocol::OutputMode(mode));
+void Communication::changeOutputConnectionMethod(TOutputConnectionMethod method) {
+    enqueueRequest(new Protocol::OutputConnectionMethod(method));
 }
 
-void Communication::OverCurrentProtection(bool state) {
-    enqueueRequest(new Protocol::OverCurrentProtection(state));
+void Communication::enableOverCurrentProtection(bool enable) {
+    enqueueRequest(new Protocol::EnableOverCurrentProtection(enable));
 }
 
-void Communication::OverVoltageProtection(bool state) {
-    enqueueRequest(new Protocol::OverVoltageProtection(state));
+void Communication::enableOverVoltageProtection(bool enable) {
+    enqueueRequest(new Protocol::EnableOverVoltageProtection(enable));
 }
 
-void Communication::SetOverCurrentProtection(TChannel channel, double value) {
-    enqueueRequest(new Protocol::SetOverCurrentProtection(channel, value));
+void Communication::setOverCurrentProtectionValue(TChannel channel, double current) {
+    enqueueRequest(new Protocol::SetOverCurrentProtectionValue(channel, current));
 }
 
-void Communication::SetOverVoltageProtection(TChannel channel, double value) {
-    enqueueRequest(new Protocol::SetOverVoltageProtection(channel, value));
+void Communication::getOverCurrentProtectionValue(TChannel channel) {
+    enqueueRequest(new Protocol::GetOverCurrentProtectionValue(channel));
 }
+
+void Communication::setOverVoltageProtectionValue(TChannel channel, double voltage) {
+    enqueueRequest(new Protocol::SetOverVoltageProtectionValue(channel, voltage));
+}
+
+void Communication::getOverVoltageProtectionValue(TChannel channel) {
+    enqueueRequest(new Protocol::GetOverVoltageProtectionValue(channel));
+}
+
+
+

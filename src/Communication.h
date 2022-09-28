@@ -12,6 +12,7 @@
 
 #include "Commons.h"
 #include "Protocol.h"
+#include "DeviceStatus.h"
 
 class Communication : public QObject {
     Q_OBJECT
@@ -24,39 +25,46 @@ public slots:
     void openSerialPort(const QString &name, int baudRate);
     void closeSerialPort();
 
-    void LockOperationPanel(bool state);
-    void SetCurrent(TChannel channel, double value);
-    void ReadSetCurrent(TChannel channel);
-    void SetVoltage(TChannel channel, double value);
-    void ReadSetVoltage(TChannel channel);
-    void ReadOutputCurrent(TChannel channel);
-    void ReadOutputVoltage(TChannel channel);
-    void Output(bool state);
-    void Buzzer(bool state);
-    void ReadOutputStatus();
-    void ReadDeviceInfo();
-    void RecallSetting(TMemoryKey key);
-    void ReadActiveSetting();
-    void SaveSetting(TMemoryKey key);
-    void OutputMode(TOutputMode mode);
-    void OverCurrentProtection(bool state);
-    void OverVoltageProtection(bool state);
-    void SetOverCurrentProtection(TChannel channel, double value);
-    void SetOverVoltageProtection(TChannel channel, double value);
+    void lockOperationPanel(bool lock);
+    void isOperationPanelLocked();
+    void setCurrent(TChannel channel, double value);
+    void getCurrent(TChannel channel);
+    void setVoltage(TChannel channel, double value);
+    void getVoltage(TChannel channel);
+    void getOutputCurrent(TChannel channel);
+    void getOutputVoltage(TChannel channel);
+    void setOutputSwitch(bool ON);
+    void enableBeep(bool enable);
+    void isBeepEnabled();
+    void getDeviceStatus();
+    void getDeviceInfo();
+    void recallSetting(TMemoryKey key);
+    void getActiveSetting();
+    void saveSetting(TMemoryKey key);
+    void changeOutputConnectionMethod(TOutputConnectionMethod method);
+    void enableOverCurrentProtection(bool enable);
+    void enableOverVoltageProtection(bool enable);
+    void setOverCurrentProtectionValue(TChannel channel, double current);
+    void getOverCurrentProtectionValue(TChannel channel);
+    void setOverVoltageProtectionValue(TChannel channel, double voltage);
+    void getOverVoltageProtectionValue(TChannel channel);
 
 signals:
     void onSerialPortOpened();
     void onSerialPortClosed();
     void onSerialPortError(const QString &error);
 
-
-    void onSetCurrent(TChannel channel, double value);
-    void onSetVoltage(TChannel channel, double value);
-    void onOutputCurrent(TChannel channel, double value);
-    void onOutputVoltage(TChannel channel, double value);
-    void onOutputStatus(TOutputStatus channel1, TOutputStatus channel2, bool outputOn);
+    void onOperationPanelLocked(bool locked);
+    void onSetCurrent(TChannel channel, double current);
+    void onSetVoltage(TChannel channel, double voltage);
+    void onOutputCurrent(TChannel channel, double current);
+    void onOutputVoltage(TChannel channel, double voltage);
+    void onBeepEnabled(bool enabled);
+    void onDeviceStatus(DeviceStatus status);
     void onDeviceInfo(const QString &info);
-    void onActiveSetting(TMemoryKey key);
+    void onRecalledSetting(TMemoryKey key);
+    void onOverCurrentProtectionValue(TChannel channel, double current);
+    void onOverVoltageProtectionValue(TChannel channel, double voltage);
 
 private slots:
     void serialReadData();

@@ -23,13 +23,13 @@ namespace Protocol {
      * LOCK<NR2>
      * Function Description:Lock power supply operation panel
      * Example: LOCK1
-     * Lock power supply operation panel
+     * LockOperationPanel power supply operation panel
      * Example:LOCK0
      * Unlock power supply operation panel
      */
-    class Lock : public IProtocol {
+    class LockOperationPanel : public IProtocol {
     public:
-        Lock(bool lock) {
+        LockOperationPanel(bool lock) {
             mLock = lock;
         }
 
@@ -41,6 +41,24 @@ namespace Protocol {
     };
 
     /**
+     * LOCK?
+     * Function Description: Check lock status of power supply operation panel
+     * Example: LOCK?
+     * Response: 0 | 1
+     */
+    class IsOperationPanelLocked : public IProtocol {
+    public:
+        QByteArray requestQuery() const override {
+            return "LOCK?";
+        }
+
+        int responseDataSize() const override {
+            return 1;
+        };
+    };
+
+
+    /**
      * ISET<X>: <NR2>
      * Function Description: Set current value
      * Example: ISET1:2.225
@@ -48,17 +66,17 @@ namespace Protocol {
      */
     class SetCurrent : public IProtocol {
     public:
-        SetCurrent(TChannel channel, double value) {
+        SetCurrent(TChannel channel, double current) {
             mChannel = channel;
-            mValue = value;
+            mCurrent = current;
         }
 
         QByteArray requestQuery() const override {
-            return QString("ISET%1:%2").arg(mChannel).arg(mValue).toLatin1();
+            return QString("ISET%1:%2").arg(mChannel).arg(mCurrent).toLatin1();
         }
 
     private:
-        double   mValue;
+        double   mCurrent;
     };
 
     /**
@@ -67,9 +85,9 @@ namespace Protocol {
      * Example: ISET1?
      * Returns current value
      */
-    class ReadSetCurrent : public IProtocol {
+    class GetCurrent : public IProtocol {
     public:
-        ReadSetCurrent(TChannel channel) {
+        GetCurrent(TChannel channel) {
             mChannel = channel;
         }
 
@@ -90,17 +108,17 @@ namespace Protocol {
      */
     class SetVoltage : public IProtocol {
     public:
-        SetVoltage(TChannel channel, double value) {
+        SetVoltage(TChannel channel, double voltage) {
             mChannel = channel;
-            mValue = value;
+            mVoltage = voltage;
         }
 
         QByteArray requestQuery() const override {
-            return QString("VSET%1:%2").arg(mChannel).arg(mValue).toLatin1();
+            return QString("VSET%1:%2").arg(mChannel).arg(mVoltage).toLatin1();
         }
 
     private:
-        double   mValue;
+        double   mVoltage;
     };
 
     /**
@@ -109,9 +127,9 @@ namespace Protocol {
      * Example: VSET1?
      * Returns voltage value
      */
-    class ReadSetVoltage : public IProtocol {
+    class GetVoltage : public IProtocol {
     public:
-        ReadSetVoltage(TChannel channel) {
+        GetVoltage(TChannel channel) {
             mChannel = channel;
         }
 
@@ -126,13 +144,13 @@ namespace Protocol {
 
     /**
      * IOUT<X>?
-     * Function Description: Read current output value
+     * Function Description: Read current setOutputSwitch value
      * Example: IOUT1?
      * Read the set current value
      */
-    class ReadOutputCurrent : public IProtocol {
+    class GetOutputCurrent : public IProtocol {
     public:
-        ReadOutputCurrent(TChannel channel) {
+        GetOutputCurrent(TChannel channel) {
             mChannel = channel;
         }
 
@@ -147,13 +165,13 @@ namespace Protocol {
 
     /**
     * VOUT<X>?
-    * Function Description: Read voltage output value
+    * Function Description: Read voltage setOutputSwitch value
     * Example: VOUT1?
     * Read the set voltage value
     */
-    class ReadOutputVoltage : public IProtocol {
+    class GetOutputVoltage : public IProtocol {
     public:
-        ReadOutputVoltage(TChannel channel) {
+        GetOutputVoltage(TChannel channel) {
             mChannel = channel;
         }
 
@@ -168,13 +186,13 @@ namespace Protocol {
 
     /**
     * OUT<Boolean>
-    * Function Description: Turn on/off power supply output
+    * Function Description: Turn on/off power supply setOutputSwitch
     * Boolean: 0 off; 1 on
-    * Example: OUT1 Turn on power supply output
+    * Example: OUT1 Turn on power supply setOutputSwitch
     */
-    class Output : public IProtocol {
+    class SetOutputSwitch : public IProtocol {
     public:
-        Output(bool state) {
+        SetOutputSwitch(bool state) {
             mState = state;
         }
 
@@ -187,12 +205,12 @@ namespace Protocol {
 
     /**
     * BEEP<Boolean>
-    * Function Description: Turn on/off buzzer
-    * Example: BEEP1 Turn on buzzer
+    * Function Description: Turn on/off enableBeep
+    * Example: BEEP1 Turn on enableBeep
     */
-    class Buzzer : public IProtocol {
+    class EnableBuzzer : public IProtocol {
     public:
-        Buzzer(bool state) {
+        EnableBuzzer(bool state) {
             mState = state;
         }
 
@@ -204,17 +222,38 @@ namespace Protocol {
     };
 
     /**
-     * STATUS?
-     * Function Description: Read power supply output status
-     * Contents 8 bits in the following format:
-     *  Bit     Item    Description
-     *  0       CH1     0=CC mode, 1=CV mode
-     *  1       CH2     0=CC mode, 1=CV mode
-     *  2,3,4,5 N/A     N/A
-     *  6       Output  0=Off, 1=On
-     *  7       N/A     N/A
+     * BEEP?
+     * Function Description: Check buzzer on/off status
+     * Example: BEEP?
+     * Response: 1 | 0
      */
-    class ReadOutputStatus : public IProtocol {
+    class IsBuzzerEnabled : public IProtocol {
+    public:
+        QByteArray requestQuery() const override {
+            return "BEEP?";
+        }
+        int responseDataSize() const override {
+            return 1;
+        };
+    };
+
+    /**
+     * STATUS?
+     * Function Description: Read power supply setOutputSwitch status
+     * Contents 8 bits in the following format:
+     *  Bit     Item            Description
+     *  0       CH1             0=CC mode, 1=CV mode
+     *  1       CH2             0=CC mode, 1=CV mode
+     *  2       SerialMode      0=Off, 1=On
+     *  3       ParallelMode    0=Off, 1=On
+     *  4       OVP             0=Off, 1=On
+     *  5       OCP             0=Off, 1=On
+     *  6       setOutputSwitch 0=Off, 1=On
+     *  7       N/A             N/A
+     *
+     *  ** if bits (2=0 and 3=0) -- Independent method.
+     */
+    class GetOutputStatus : public IProtocol {
     public:
         QByteArray requestQuery() const override {
             return "STATUS?";
@@ -230,7 +269,7 @@ namespace Protocol {
      * Example: *IDN?
      * Contents UNI-T P33XC V2.0 (manufacturer, model name)
      */
-    class ReadDeviceInfo : public IProtocol {
+    class GetDeviceInfo : public IProtocol {
     public:
         QByteArray requestQuery() const override {
             return "*IDN?";
@@ -262,7 +301,7 @@ namespace Protocol {
      * RCL?
      * Function Description:Read current/active setting number (keys from M1-M5)
      */
-    class ReadActiveSetting : public IProtocol {
+    class GetRecalledSetting : public IProtocol {
     public:
         QByteArray requestQuery() const override {
             return "RCL?";
@@ -292,13 +331,13 @@ namespace Protocol {
 
     /**
      * TRACK<NR1>
-     * Function Description: Set series & parallel output
-     * NR1: 0=independent output; 1=series output; 2=parallel output
+     * Function Description: Set series & parallel setOutputSwitch
+     * NR1: 0=independent output; 1=series output; 2=parallel setOutputSwitch
      * Example: TRACK1
      */
-    class OutputMode : public IProtocol {
+    class OutputConnectionMethod : public IProtocol {
     public:
-        OutputMode(TOutputMode mode) {
+        OutputConnectionMethod(TOutputConnectionMethod mode) {
             mMode = mode;
         }
 
@@ -306,7 +345,7 @@ namespace Protocol {
             return QString("TRACK%1").arg(mMode).toLatin1();
         }
     private:
-        TOutputMode mMode;
+        TOutputConnectionMethod mMode;
     };
 
     /**
@@ -315,9 +354,9 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OCP1 Turn on OCP
      */
-    class OverCurrentProtection : public IProtocol {
+    class EnableOverCurrentProtection : public IProtocol {
     public:
-        OverCurrentProtection(bool state) {
+        EnableOverCurrentProtection(bool state) {
             mState = state;
         }
 
@@ -328,15 +367,16 @@ namespace Protocol {
         bool mState;
     };
 
+
     /**
      * OVP<Boolean>
      * Function Description: Turn on over voltage protection
      * Boolean: 0 OFF, 1 ON
      * Example: OVP1 Turn on OVP
      */
-    class OverVoltageProtection : public IProtocol {
+    class EnableOverVoltageProtection : public IProtocol {
     public:
-        OverVoltageProtection(bool state) {
+        EnableOverVoltageProtection(bool state) {
             mState = state;
         }
 
@@ -348,19 +388,19 @@ namespace Protocol {
     };
 
     /**
-    * OCPSTE:<X>:<NR2>
+    * OCPSET:<X>:<NR2>
     * Function Description: Set OCP value
-    * Example: OCPSTE1: 5.100
+    * Example: OCPSET1: 5.100
     */
-    class SetOverCurrentProtection : public IProtocol {
+    class SetOverCurrentProtectionValue : public IProtocol {
     public:
-        SetOverCurrentProtection(TChannel channel, double value) {
+        SetOverCurrentProtectionValue(TChannel channel, double value) {
             mChannel = channel;
             mValue = value;
         }
 
         QByteArray requestQuery() const override {
-            return QString("OCPSTE%1:%2").arg(mChannel).arg(mValue).toLatin1();
+            return QString("OCPSET%1:%2").arg(mChannel).arg(mValue).toLatin1();
         }
 
     private:
@@ -368,23 +408,63 @@ namespace Protocol {
     };
 
     /**
-     * OVPSTE:<X>:<NR2>
-     * Function Description: Set OVP value
-     * Example: OVPSTE1:31.00
-     */
-    class SetOverVoltageProtection : public IProtocol {
+    * OCPSET<X>?
+    * Function Description: Get OCP value
+    * Example: OCPSET1?
+    */
+    class GetOverCurrentProtectionValue : public IProtocol {
     public:
-        SetOverVoltageProtection(TChannel channel, double value) {
+        GetOverCurrentProtectionValue(TChannel channel) {
             mChannel = channel;
-            mValue = value;
         }
 
         QByteArray requestQuery() const override {
-            return QString("OVPSTE%1:%2").arg(mChannel).arg(mValue).toLatin1();
+            return QString("OCPSET%1?").arg(mChannel).toLatin1();
+        }
+
+        int responseDataSize() const override {
+            return 5;
+        };
+    };
+
+    /**
+     * OVPSET:<X>:<NR2>
+     * Function Description: Set OVP value
+     * Example: OVPSET1:31.00
+     */
+    class SetOverVoltageProtectionValue : public IProtocol {
+    public:
+        SetOverVoltageProtectionValue(TChannel channel, double voltage) {
+            mChannel = channel;
+            mVoltage = voltage;
+        }
+
+        QByteArray requestQuery() const override {
+            return QString("OVPSET%1:%2").arg(mChannel).arg(mVoltage).toLatin1();
         }
 
     private:
-        double   mValue;
+        double   mVoltage;
+    };
+
+    /**
+     * OVPSET:<X>?
+     * Function Description: Grt OVP value
+     * Example: OVPSET1?
+     */
+    class GetOverVoltageProtectionValue : public IProtocol {
+    public:
+        GetOverVoltageProtectionValue(TChannel channel) {
+            mChannel = channel;
+        }
+
+        QByteArray requestQuery() const override {
+            return QString("OVPSET%1?").arg(mChannel).toLatin1();
+        }
+
+        int responseDataSize() const override {
+            return 5;
+        };
     };
 }
 

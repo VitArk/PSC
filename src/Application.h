@@ -42,10 +42,10 @@ private slots:
     void slotSerialPortOpened();
     void slotSerialPortClosed();
 
-    void slotVoltageChanged(TChannel channel, double value);
-    void slotCurrentChanged(TChannel channel, double value);
-
     void slotWorkingCycle();
+    void slotOutputStatus(DeviceStatus status);
+    void slotOutputProtectionChanged(TOutputProtection protection);
+
 };
 
 

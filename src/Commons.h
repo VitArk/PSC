@@ -18,15 +18,24 @@ enum MemoryKey {
     M5 = 5,
 } typedef TMemoryKey;
 
-enum OutputMode {
+enum OutputConnectionMethod {
     Independent = 0,
     Serial = 1,
     Parallel = 2,
-} typedef TOutputMode;
+} typedef TOutputConnectionMethod;
 
-enum OutputStatus {
+enum OutputStabilizingMode {
     ConstantCurrent = 0,
-    ConstantVoltage = 1
-} typedef TOutputStatus;
+    ConstantVoltage = 1,
+} typedef TOutputStabilizingMode;
+
+enum OutputProtection {
+    OutputProtectionAllDisabled = 0,
+    OutputProtectionAllEnabled = 1,
+    OverVoltageProtectionOnly = 2,
+    OverCurrentProtectionOnly = 3,
+
+} typedef TOutputProtection;
+
 
 #endif //POWER_SUPPLY_CONTROLLER_COMMONS_H

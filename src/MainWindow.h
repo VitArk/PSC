@@ -17,37 +17,42 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-signals:
-    void onIndependentMode();
-    void onSerialMode();
-    void onParallelMode();
+    void showOutputConnectionMethod(OutputConnectionMethod method);
+    void showOutputProtectionMode(OutputProtection protection);
+    void showOutputStabilizingMode(TOutputStabilizingMode channel1, TOutputStabilizingMode channel2);
+    void showOutputSwitchStatus(bool state);
 
-    void onOverVoltageProtection(bool enabled);
-    void onOverCurrentProtection(bool enabled);
+signals:
+    void onOutputConnectionMethodChanged(TOutputConnectionMethod method);
+    void onOutputProtectionChanged(TOutputProtection protection);
     void onOverVoltageProtectionChanged(TChannel channel, double value);
     void onOverCurrentProtectionChanged(TChannel channel, double value);
-
-    void onMemoryKey(TMemoryKey key);
-
+    void onMemoryKeyChanged(TMemoryKey key);
     void onVoltageChanged(TChannel channel, double value);
     void onCurrentChanged(TChannel channel, double value);
+    void onOutputSwitchChanged(bool state);
 
-    void onConnectionChanged(QString serialPortName, int baudRate);
+    void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
 
 public slots:
     void slotSerialPortOpened();
     void slotSerialPortClosed();
 
     void slotEnableMemoryKey(TMemoryKey key);
-    void slotDisplayVoltage(TChannel channel, double value);
-    void slotDisplayCurrent(TChannel channel, double value);
-    void slotUpdateOutputStatus(TOutputStatus channel1, TOutputStatus channel2, bool outputOn);
+    void slotDisplayOutputVoltage(TChannel channel, double voltage);
+    void slotDisplayOutputCurrent(TChannel channel, double current);
+    void slotDisplaySetVoltage(TChannel channel, double voltage);
+    void slotDisplaySetCurrent(TChannel channel, double current);
+
+    void slotDisplayOverVoltageProtectionValue(TChannel channel, double voltage);
+    void slotDisplayOverCurrentProtectionValue(TChannel channel, double current);
+
     void slotDisplayDeviceInfo(const QString &deviceInfo);
 
 private slots:
-    void slotIndependentMode();
-    void slotSerialMode();
-    void slotParallelMode();
+    void slotOutputConnectionMethodChanged();
+    void slotOutputProtectionChanged();
+
     void slotMemoryKeyChanged(bool toggle);
 
     void slotDialControlChanged();
@@ -56,7 +61,8 @@ private slots:
     void slotControlValueChangedDebounced(double value);
     void slotOverProtectionChanged(double value);
 
-    void slotConnectionToggled(bool toggled);
+    // Serial port
+    void slotSerialPortConnectionToggled(bool toggled);
 
 private:
     enum {
@@ -75,12 +81,8 @@ private:
     QLabel *mStatusBarDeviceInfo;
 
 private:
-    void showIndependentOutputConfiguration();
-    void showSerialOutputConfiguration();
-    void showParallelOutputConfiguration();
-
-    void setEnableChannel(TChannel ch, bool enable);
-    void showOutputMode(OutputMode mode);
+    void enableChannel(TChannel ch, bool enable);
+    void enableOperationPanel(bool enable);
 
     void openSvg(const QString &resource);
 
@@ -92,6 +94,10 @@ private:
     int chosenBaudRates(int defaultValue = 9600) const;
 
     void resetStatusBarText();
+    void clearControlFocus();
+
+    static QString currentFormat(double value) ;
+    static QString voltageFormat(double value) ;
 };
 
 #endif // MAINWINDOW_H
