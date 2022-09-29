@@ -21,7 +21,6 @@ class Communication : public QObject {
 public:
     explicit Communication(QObject *parent = nullptr);
     ~Communication() override = default;
-    static QStringList availableSerialPorts();
 
 public slots:
     void openSerialPort(const QString &name, int baudRate);
@@ -36,8 +35,8 @@ public slots:
     void getOutputCurrent(TChannel channel);
     void getOutputVoltage(TChannel channel);
     void setOutputSwitch(bool ON);
-    void enableBeep(bool enable);
-    void isBeepEnabled();
+    void enableBuzzer(bool enable);
+    void isBuzzerEnabled();
     void getDeviceStatus();
     void getDeviceInfo();
     void recallSetting(TMemoryKey key);
@@ -54,14 +53,14 @@ public slots:
 signals:
     void onSerialPortOpened();
     void onSerialPortClosed();
-    void onSerialPortError(const QString &error);
+    void onSerialPortErrorOccurred(QString error);
 
     void onOperationPanelLocked(bool locked);
     void onSetCurrent(TChannel channel, double current);
     void onSetVoltage(TChannel channel, double voltage);
     void onOutputCurrent(TChannel channel, double current);
     void onOutputVoltage(TChannel channel, double voltage);
-    void onBeepEnabled(bool enabled);
+    void onBuzzerEnabled(bool enabled);
     void onDeviceStatus(DeviceStatus status);
     void onDeviceInfo(const QString &info);
     void onRecalledSetting(TMemoryKey key);
@@ -70,6 +69,7 @@ signals:
 
 private slots:
     void slotSerialReadData();
+    void slotSerialErrorOccurred(QSerialPort::SerialPortError error);
     void slotProcessRequestQueue();
 
 private:
@@ -80,7 +80,7 @@ private:
 private:
     QSerialPort                  mSerialPort;
     QQueue<Protocol::IProtocol*> mRequestQueue;
-    QTimer                       mRequestQueueTimer;
+    QTimer                       mQueueTimer;
     QTime                        mRequestNextTime;
 };
 

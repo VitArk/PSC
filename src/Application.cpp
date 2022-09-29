@@ -30,13 +30,21 @@ Application::~Application() {
 
 void Application::slotAppRun() {
     connect(mMainWindow, &MainWindow::onSerialPortSettingsChanged, mCommunication, &Communication::openSerialPort);
-    connect(mCommunication, &Communication::onSerialPortOpened, mMainWindow, &MainWindow::slotSerialPortOpened);
-    connect(mCommunication, &Communication::onSerialPortClosed, mMainWindow, &MainWindow::slotSerialPortClosed);
+    connect(mCommunication, &Communication::onSerialPortErrorOccurred, mMainWindow, &MainWindow::slotSerialPortErrorOccurred);
     connect(mCommunication, &Communication::onSerialPortOpened, this, &Application::slotSerialPortOpened);
     connect(mCommunication, &Communication::onSerialPortClosed, this, &Application::slotSerialPortClosed);
 
     connect(mCommunication, &Communication::onDeviceInfo, mMainWindow, &MainWindow::slotDisplayDeviceInfo);
 
+    // Lock operation panel
+    connect(mMainWindow, &MainWindow::onLockOperationPanelChanged, mCommunication, &Communication::lockOperationPanel);
+    connect(mCommunication, &Communication::onOperationPanelLocked, mMainWindow, &MainWindow::slotLockOperationPanel);
+
+    // Buzzer
+    connect(mMainWindow, &MainWindow::onBuzzerChanged, mCommunication, &Communication::enableBuzzer);
+    connect(mCommunication, &Communication::onBuzzerEnabled, mMainWindow, &MainWindow::slotEnableBuzzer);
+
+    // Memory / Presets
     connect(mCommunication, &Communication::onRecalledSetting, mMainWindow, &MainWindow::slotEnableMemoryKey);
     connect(mMainWindow, &MainWindow::onMemoryKeyChanged, mCommunication, &Communication::recallSetting);
 
@@ -47,11 +55,6 @@ void Application::slotAppRun() {
     connect(mCommunication, &Communication::onOverVoltageProtectionValue, mMainWindow, &MainWindow::slotDisplayOverVoltageProtectionValue);
     connect(mMainWindow, &MainWindow::onOverCurrentProtectionChanged, mCommunication, &Communication::setOverCurrentProtectionValue);
     connect(mMainWindow, &MainWindow::onOverVoltageProtectionChanged, mCommunication, &Communication::setOverVoltageProtectionValue);
-
-    //    connect(mMainWindow, &MainWindow::onOverVoltageProtectionChanged, this, [=]() {
-//        mCommunication->setOverVoltageProtectionValue(Channel1, 12.44);
-//        qDebug() << "onOverVoltageProtectionChanged";
-//    });
 
     connect(mCommunication, &Communication::onSetCurrent, mMainWindow, &MainWindow::slotDisplaySetCurrent);
     connect(mCommunication, &Communication::onOutputCurrent, mMainWindow, &MainWindow::slotDisplayOutputCurrent);
@@ -68,6 +71,8 @@ void Application::slotAppRun() {
 }
 
 void Application::slotSerialPortOpened() {
+    mMainWindow->slotSerialPortOpened();
+
     mCommunication->getDeviceInfo();
     mCommunication->getOverCurrentProtectionValue(Channel1);
     mCommunication->getOverCurrentProtectionValue(Channel2);
@@ -79,11 +84,14 @@ void Application::slotSerialPortOpened() {
 
 void Application::slotSerialPortClosed() {
     mWorkingTimer.stop();
+    mMainWindow->slotSerialPortClosed();
 }
 
 void Application::slotWorkingCycle() {
     mCommunication->getDeviceStatus();
     mCommunication->getActiveSetting();
+    mCommunication->isOperationPanelLocked();
+    mCommunication->isBuzzerEnabled();
 }
 
 void Application::slotOutputStatus(DeviceStatus status) {
@@ -114,16 +122,18 @@ void Application::slotOutputStatus(DeviceStatus status) {
         mCommunication->getOverCurrentProtectionValue(Channel2);
     }
 
-    mMainWindow->showOutputStabilizingMode(status.stabilizingMode(Channel1), status.stabilizingMode(Channel2));
-    mMainWindow->showOutputSwitchStatus(status.outputSwitchStatus());
-    mMainWindow->showOutputProtectionMode(status.outputProtectionMode());
-    mMainWindow->showOutputConnectionMethod(status.outputConnectionMethod());
+    mMainWindow->slotShowOutputStabilizingMode(status.stabilizingMode(Channel1), status.stabilizingMode(Channel2));
+    mMainWindow->slotShowOutputSwitchStatus(status.outputSwitchStatus());
+    mMainWindow->slotShowOutputProtectionMode(status.outputProtectionMode());
+    mMainWindow->slotShowOutputConnectionMethod(status.outputConnectionMethod());
 }
 
 void Application::slotOutputProtectionChanged(TOutputProtection protection) {
     mCommunication->enableOverVoltageProtection(protection == OverVoltageProtectionOnly || protection == OutputProtectionAllEnabled);
     mCommunication->enableOverCurrentProtection(protection == OverCurrentProtectionOnly || protection == OutputProtectionAllEnabled);
 }
+
+
 
 
 

@@ -15,12 +15,13 @@ Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setStopBits(QSerialPort::OneStop);
     mSerialPort.setFlowControl(QSerialPort::NoFlowControl);
 
-
-    mRequestQueueTimer.setTimerType(Qt::PreciseTimer);
-    mRequestQueueTimer.setInterval(1);
+    mQueueTimer.setInterval(1);
+    mQueueTimer.setTimerType(Qt::PreciseTimer);
 
     connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::slotSerialReadData);
-    connect(&mRequestQueueTimer, &QTimer::timeout, this, &Communication::slotProcessRequestQueue);
+    connect(&mSerialPort, &QSerialPort::errorOccurred, this, &Communication::slotSerialErrorOccurred);
+
+    connect(&mQueueTimer, &QTimer::timeout, this, &Communication::slotProcessRequestQueue);
 }
 
 void Communication::openSerialPort(const QString &name, int baudRate) {
@@ -31,34 +32,35 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
 
     if (mSerialPort.open(QIODevice::ReadWrite)) {
         mSerialPort.clear();
-        mRequestQueueTimer.start();
+        mRequestQueue.clear();
+        mQueueTimer.start();
         emit onSerialPortOpened();
     } else {
-        emit onSerialPortError(mSerialPort.errorString());
+        emit onSerialPortErrorOccurred(mSerialPort.errorString());
     }
 }
 
 void Communication::closeSerialPort() {
     if (mSerialPort.isOpen()) {
         mSerialPort.close();
-        mRequestQueueTimer.stop();
+        mQueueTimer.stop();
         emit onSerialPortClosed();
     }
 }
 
-QStringList Communication::availableSerialPorts() {
-    QStringList serialPorts;
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-        serialPorts << info.portName();
-    }
+void Communication::slotSerialErrorOccurred(QSerialPort::SerialPortError error) {
+    if (error != QSerialPort::NoError) {
+        QString errorString = mSerialPort.errorString();
+        closeSerialPort();
+        mSerialPort.clearError();
 
-    return serialPorts;
+        emit onSerialPortErrorOccurred(errorString);
+    }
 }
 
 void Communication::slotProcessRequestQueue() {
     serialSendRequest();
 }
-
 
 void Communication::slotSerialReadData() {
     if (mRequestQueue.isEmpty()) {
@@ -70,9 +72,7 @@ void Communication::slotSerialReadData() {
     if (mSerialPort.bytesAvailable() >= request->responseDataSize()) {
         QByteArray buff(mSerialPort.read(request->responseDataSize()));
         dispatchData(*request, buff);
-
-        delete request;
-        mRequestQueue.dequeue();
+        delete mRequestQueue.dequeue();
 
         serialSendRequest(true); // here we are able to send request (process queue) immediately
     }
@@ -100,7 +100,7 @@ void Communication::dispatchData(const Protocol::IProtocol &request, const QByte
     } else if (typeid(request) == typeid(Protocol::IsOperationPanelLocked)) {
         emit onOperationPanelLocked(bool(data.toInt()));
     } else if (typeid(request) == typeid(Protocol::IsBuzzerEnabled)) {
-        emit onBeepEnabled(bool(data.toInt()));
+        emit onBuzzerEnabled(bool(data.toInt()));
     }
 }
 
@@ -115,17 +115,20 @@ void Communication::serialSendRequest(bool ignoreDelay) {
 
     auto request = mRequestQueue.head();
     mSerialPort.write(request->requestQuery());
+    mSerialPort.flush();
     mRequestNextTime = QTime::currentTime().addMSecs(DELAY_BETWEEN_REQUEST_MS);
 
-    mSerialPort.flush();
-
     if (request->responseDataSize() == 0) { // not expect response, remove
-        mRequestQueue.dequeue();
+        delete mRequestQueue.dequeue();
     }
 }
 
 void Communication::enqueueRequest(Protocol::IProtocol *request) {
-    mRequestQueue.enqueue(request);
+    if (mSerialPort.isOpen()) {
+        mRequestQueue.enqueue(request);
+    } else {
+        delete request;
+    }
 }
 
 void Communication::lockOperationPanel(bool lock) {
@@ -164,11 +167,11 @@ void Communication::setOutputSwitch(bool ON) {
     enqueueRequest(new Protocol::SetOutputSwitch(ON));
 }
 
-void Communication::enableBeep(bool enable) {
+void Communication::enableBuzzer(bool enable) {
     enqueueRequest(new Protocol::EnableBuzzer(enable));
 }
 
-void Communication::isBeepEnabled() {
+void Communication::isBuzzerEnabled() {
     enqueueRequest(new Protocol::IsBuzzerEnabled());
 }
 
@@ -219,7 +222,4 @@ void Communication::setOverVoltageProtectionValue(TChannel channel, double volta
 void Communication::getOverVoltageProtectionValue(TChannel channel) {
     enqueueRequest(new Protocol::GetOverVoltageProtectionValue(channel));
 }
-
-
-
 

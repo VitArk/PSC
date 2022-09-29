@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QMessageBox>
 #include <QSvgRenderer>
 #include <QTextCharFormat>
 #include <QGraphicsSvgItem>
@@ -25,9 +26,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
     mStatusBarDeviceInfo = new QLabel(this);
-    QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 120);
+    QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 40);
+    mStatusBarDeviceLock = new QLabel(this);
+    QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceLock, 120);
     mStatusBarConnectionStatus = new QLabel(this);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarConnectionStatus);
+
+    connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::slotEnableReadonlyMode);
+
+    connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onLockOperationPanelChanged);
+    connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onBuzzerChanged);
+    connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
 
     connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
     connect(ui->rdoBtnOutParallel, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
@@ -70,16 +79,77 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->spinCh1OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
     connect(ui->spinCh2OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
 
-    //slotControlValueChanged(); // ???
 
-    createSerialPortMenu();
-    createBaudRatesMenu();
+    createSerialPortMenu(); // todo refactor?
+    createBaudRatesMenu(); // todo refactor?
 
     slotSerialPortClosed();
 }
 
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+bool MainWindow::acceptEnable() const {
+    return mIsSerialConnected && !ui->actionReadonlyMode->isChecked();
+}
+
+void MainWindow::slotSerialPortOpened() {
+    mIsSerialConnected = true;
+    mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(chosenSerialPort()).arg(chosenBaudRates()));
+
+    enableControls(true);
+}
+
+void MainWindow::slotSerialPortErrorOccurred(QString error) {
+    QMessageBox::warning(this, tr("Serial Port Error Occurred"),error, QMessageBox::Close);
+}
+
+void MainWindow::slotSerialPortClosed() {
+    mIsSerialConnected = false;
+
+    mStatusBarConnectionStatus->setText(tr("No Connection"));
+    mStatusBarDeviceInfo->setText(tr("N/A"));
+    mStatusBarDeviceLock->setText(tr("N/A"));
+
+    slotShowOutputConnectionMethod(Independent);
+    enableControls(false);
+
+    slotDisplayOutputVoltage(Channel1, V0);
+    slotDisplayOutputVoltage(Channel2, V0);
+    slotDisplayOutputCurrent(Channel1, A0);
+    slotDisplayOutputCurrent(Channel2, A0);
+
+    slotDisplayOverVoltageProtectionValue(Channel1, V0);
+    slotDisplayOverVoltageProtectionValue(Channel2, V0);
+    slotDisplayOverCurrentProtectionValue(Channel1, A0);
+    slotDisplayOverCurrentProtectionValue(Channel2, A0);
+}
+
+void MainWindow::enableControls(bool enable) {
+    if (enable && !acceptEnable()) {
+        return;
+    }
+
+    enableChannel(Channel1, enable);
+    enableChannel(Channel2, enable);
+
+    ui->groupBoxOperation->setEnabled(enable);
+    ui->actionLockDevice->setEnabled(enable);
+    ui->actionBuzzer->setEnabled(enable);
+}
+
+void MainWindow::slotEnableReadonlyMode(bool enable) {
+    ui->actionReadonlyMode->setChecked(enable);
+    enableControls(!enable);
+}
+
+void MainWindow::slotDisplayDeviceInfo(const QString &deviceInfo) {
+    mStatusBarDeviceInfo->setText(deviceInfo);
+}
+
+void MainWindow::slotEnableBuzzer(bool enabled) {
+    ui->actionBuzzer->setChecked(enabled);
 }
 
 void MainWindow::slotOutputConnectionMethodChanged() {
@@ -93,7 +163,7 @@ void MainWindow::slotOutputConnectionMethodChanged() {
     emit onOutputConnectionMethodChanged(outputMethod);
 }
 
-void MainWindow::showOutputConnectionMethod(OutputConnectionMethod method) {
+void MainWindow::slotShowOutputConnectionMethod(OutputConnectionMethod method) {
     QString resourceName;
     QString labelText;
     switch (method) {
@@ -135,7 +205,7 @@ void MainWindow::slotOutputProtectionChanged() {
     emit onOutputProtectionChanged(protection);
 }
 
-void MainWindow::showOutputProtectionMode(OutputProtection protection) {
+void MainWindow::slotShowOutputProtectionMode(OutputProtection protection) {
     switch (protection) {
         case OutputProtectionAllDisabled:
             ui->btnOVP->setChecked(false);
@@ -156,7 +226,7 @@ void MainWindow::showOutputProtectionMode(OutputProtection protection) {
     }
 }
 
-void MainWindow::showOutputStabilizingMode(TOutputStabilizingMode channel1, TOutputStabilizingMode channel2) {
+void MainWindow::slotShowOutputStabilizingMode(TOutputStabilizingMode channel1, TOutputStabilizingMode channel2) {
     if (channel1 == ConstantCurrent) {
         highlight(HighlightRed, ui->lblCh1CC);
         highlight(HighlightNone, ui->lblCh1CV);
@@ -174,7 +244,7 @@ void MainWindow::showOutputStabilizingMode(TOutputStabilizingMode channel1, TOut
     }
 }
 
-void MainWindow::showOutputSwitchStatus(bool state) {
+void MainWindow::slotShowOutputSwitchStatus(bool state) {
     if (state) {
         ui->btnOutput->setChecked(true);
         ui->btnOutput->setStyleSheet("background-color: rgb(0, 210, 0)");
@@ -188,6 +258,10 @@ void MainWindow::showOutputSwitchStatus(bool state) {
 
 
 void MainWindow::enableChannel(TChannel ch, bool enable) {
+    if (enable && !acceptEnable()) {
+        return;
+    }
+
     if (ch == Channel1) {
         ui->lblCh1->setEnabled(enable);
         ui->groupBoxCh1->setEnabled(enable);
@@ -195,10 +269,6 @@ void MainWindow::enableChannel(TChannel ch, bool enable) {
         ui->lblCh2->setEnabled(enable);
         ui->groupBoxCh2->setEnabled(enable);
     }
-}
-
-void MainWindow::enableOperationPanel(bool enable) {
-    ui->groupBoxOperation->setEnabled(enable);
 }
 
 void MainWindow::slotEnableMemoryKey(TMemoryKey key) {
@@ -224,22 +294,6 @@ void MainWindow::slotMemoryKeyChanged(bool toggle) {
     }
 }
 
-void MainWindow::openSvg(const QString &resource) {
-    QGraphicsScene *s = ui->graphicsView->scene();
-    QScopedPointer<QGraphicsSvgItem> svgItem(new QGraphicsSvgItem(resource));
-    if (!svgItem->renderer()->isValid())
-        return;
-
-    s->clear();
-    ui->graphicsView->resetTransform();
-
-    auto item = svgItem.take();
-    item->setFlags(QGraphicsItem::ItemClipsToShape);
-    item->setCacheMode(QGraphicsItem::NoCache);
-    item->setZValue(0);
-    s->addItem(item);
-}
-
 void MainWindow::slotDialControlChanged() {
     ui->spinCh1V->setValue(ui->dialCh1V->value() / vDialCorrection);
     ui->spinCh2V->setValue(ui->dialCh2V->value() / vDialCorrection);
@@ -248,10 +302,10 @@ void MainWindow::slotDialControlChanged() {
 }
 
 void MainWindow::slotSpinControlChanged() {
-    ui->dialCh1V->setValue(ui->spinCh1V->value() * vDialCorrection);
-    ui->dialCh2V->setValue(ui->spinCh2V->value() * vDialCorrection);
-    ui->dialCh1A->setValue(ui->spinCh1A->value() * aDialCorrection);
-    ui->dialCh2A->setValue(ui->spinCh2A->value() * aDialCorrection);
+    ui->dialCh1V->setValue(int(ui->spinCh1V->value() * vDialCorrection));
+    ui->dialCh2V->setValue(int(ui->spinCh2V->value() * vDialCorrection));
+    ui->dialCh1A->setValue(int(ui->spinCh1A->value() * aDialCorrection));
+    ui->dialCh2A->setValue(int(ui->spinCh2A->value() * aDialCorrection));
     slotControlValueChanged();
 }
 
@@ -299,12 +353,12 @@ void MainWindow::slotDisplaySetVoltage(TChannel channel, double voltage) {
         if (ui->spinCh1V->hasFocus() || ui->dialCh1V->hasFocus())
             return;
         ui->spinCh1V->setValue(voltage);
-        ui->dialCh1V->setValue(ui->spinCh1V->value() * vDialCorrection);
+        ui->dialCh1V->setValue(int(ui->spinCh1V->value() * vDialCorrection));
     } else {
         if (ui->spinCh2V->hasFocus() || ui->dialCh2V->hasFocus())
             return;
         ui->spinCh2V->setValue(voltage);
-        ui->dialCh2V->setValue(ui->spinCh2V->value() * vDialCorrection);
+        ui->dialCh2V->setValue(int(ui->spinCh2V->value() * vDialCorrection));
     }
 }
 
@@ -313,15 +367,14 @@ void MainWindow::slotDisplaySetCurrent(TChannel channel, double current) {
         if (ui->spinCh1A->hasFocus() || ui->dialCh1A->hasFocus())
             return;
         ui->spinCh1A->setValue(current);
-        ui->dialCh1A->setValue(ui->spinCh1A->value() * aDialCorrection);
+        ui->dialCh1A->setValue(int(ui->spinCh1A->value() * aDialCorrection));
     } else {
         if (ui->spinCh2A->hasFocus() || ui->dialCh2A->hasFocus())
             return;
         ui->spinCh2A->setValue(current);
-        ui->dialCh2A->setValue(ui->spinCh2A->value() * aDialCorrection);
+        ui->dialCh2A->setValue(int(ui->spinCh2A->value() * aDialCorrection));
     }
 }
-
 
 void MainWindow::slotDisplayOverCurrentProtectionValue(TChannel channel, double current) {
     if (channel == Channel1) {
@@ -339,39 +392,22 @@ void MainWindow::slotDisplayOverVoltageProtectionValue(TChannel channel, double 
     }
 }
 
-
-QString MainWindow::currentFormat(double value) {
-    return QString::asprintf("%01.03f", value);
-}
-
-QString MainWindow::voltageFormat(double value) {
-    return QString::asprintf("%02.02f", value);
-}
-
-
 void MainWindow::slotOverProtectionChanged() {
-    qDebug() << "slotOverProtectionChanged";
-
     if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Channel1, ui->spinCh1OVP->value());
     else if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Channel1, ui->spinCh2OVP->value());
     else if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Channel2, ui->spinCh1OCP->value());
     else if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Channel2, ui->spinCh2OCP->value());
 }
 
-void MainWindow::highlight(MainWindow::THighlight color, QLabel *label) {
-    switch (color) {
-        case HighlightRed:
-            label->setStyleSheet("background-color: rgb(210, 0, 0)");
-            break;
-        case HighlightGreen:
-            label->setStyleSheet("background-color: rgb(0, 210, 0)");
-            break;
-        default:
-            label->setStyleSheet("");
-            break;
+void MainWindow::slotLockOperationPanel(bool lock) {
+    if (lock) {
+        mStatusBarDeviceLock->setText(tr("Device Panel: Lock"));
+        ui->actionLockDevice->setText(tr("Unlock Device Panel"));
+    } else {
+        mStatusBarDeviceLock->setText(tr("Device Panel: Unlocked"));
+        ui->actionLockDevice->setText(tr("Lock Device Panel"));
     }
 }
-
 
 int MainWindow::chosenBaudRates(int defaultValue) const {
     foreach(auto item, ui->menuBaudRate->actions()) {
@@ -391,11 +427,9 @@ QString MainWindow::chosenSerialPort() const {
     return "";
 }
 
-
 void MainWindow::slotSerialPortConnectionToggled(bool toggled) {
-    if (!toggled) {
+    if (!toggled)
         return;
-    }
 
     emit onSerialPortSettingsChanged(chosenSerialPort(), chosenBaudRates());
 }
@@ -436,50 +470,41 @@ void MainWindow::createBaudRatesMenu(int defaultValue) {
     }
 }
 
-void MainWindow::slotSerialPortOpened() {
-    mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(chosenSerialPort()).arg(chosenBaudRates()));
-    enableOperationPanel(true);
+QString MainWindow::currentFormat(double value) {
+    return QString::asprintf("%01.03f", value);
 }
 
-void MainWindow::slotSerialPortClosed() {
-    resetStatusBarText();
-    showOutputConnectionMethod(Independent);
-
-    enableChannel(Channel1, false);
-    enableChannel(Channel2, false);
-    enableOperationPanel(false);
-
-    slotDisplayOutputVoltage(Channel1, V0);
-    slotDisplayOutputVoltage(Channel2, V0);
-    slotDisplayOutputCurrent(Channel1, A0);
-    slotDisplayOutputCurrent(Channel2, A0);
-
-    slotDisplayOverVoltageProtectionValue(Channel1, V0);
-    slotDisplayOverVoltageProtectionValue(Channel2, V0);
-    slotDisplayOverCurrentProtectionValue(Channel1, A0);
-    slotDisplayOverCurrentProtectionValue(Channel2, A0);
+QString MainWindow::voltageFormat(double value) {
+    return QString::asprintf("%02.02f", value);
 }
 
-void MainWindow::resetStatusBarText() {
-    mStatusBarConnectionStatus->setText(tr("No Connection"));
-    mStatusBarDeviceInfo->setText(tr("N/A"));
+void MainWindow::highlight(MainWindow::THighlight color, QLabel *label) {
+    switch (color) {
+        case HighlightRed:
+            label->setStyleSheet("background-color: rgb(210, 0, 0)");
+            break;
+        case HighlightGreen:
+            label->setStyleSheet("background-color: rgb(0, 210, 0)");
+            break;
+        default:
+            label->setStyleSheet("");
+            break;
+    }
 }
 
-void MainWindow::slotDisplayDeviceInfo(const QString &deviceInfo) {
-    mStatusBarDeviceInfo->setText(deviceInfo);
+void MainWindow::openSvg(const QString &resource) {
+    QGraphicsScene *s = ui->graphicsView->scene();
+    QScopedPointer<QGraphicsSvgItem> svgItem(new QGraphicsSvgItem(resource));
+    if (!svgItem->renderer()->isValid())
+        return;
+
+    s->clear();
+    ui->graphicsView->resetTransform();
+
+    auto item = svgItem.take();
+    item->setFlags(QGraphicsItem::ItemClipsToShape);
+    item->setCacheMode(QGraphicsItem::NoCache);
+    item->setZValue(0);
+    s->addItem(item);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

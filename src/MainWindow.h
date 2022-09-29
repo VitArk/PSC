@@ -17,11 +17,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-    void showOutputConnectionMethod(OutputConnectionMethod method);
-    void showOutputProtectionMode(OutputProtection protection);
-    void showOutputStabilizingMode(TOutputStabilizingMode channel1, TOutputStabilizingMode channel2);
-    void showOutputSwitchStatus(bool state);
-
 signals:
     void onOutputConnectionMethodChanged(TOutputConnectionMethod method);
     void onOutputProtectionChanged(TOutputProtection protection);
@@ -33,10 +28,18 @@ signals:
     void onOutputSwitchChanged(bool state);
 
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
+    void onLockOperationPanelChanged(bool lock);
+    void onBuzzerChanged(bool lock);
 
 public slots:
     void slotSerialPortOpened();
     void slotSerialPortClosed();
+    void slotSerialPortErrorOccurred(QString error);
+
+    void slotShowOutputConnectionMethod(OutputConnectionMethod method);
+    void slotShowOutputProtectionMode(OutputProtection protection);
+    void slotShowOutputStabilizingMode(TOutputStabilizingMode channel1, TOutputStabilizingMode channel2);
+    void slotShowOutputSwitchStatus(bool state);
 
     void slotEnableMemoryKey(TMemoryKey key);
     void slotDisplayOutputVoltage(TChannel channel, double voltage);
@@ -48,6 +51,8 @@ public slots:
     void slotDisplayOverCurrentProtectionValue(TChannel channel, double current);
 
     void slotDisplayDeviceInfo(const QString &deviceInfo);
+    void slotLockOperationPanel(bool lock);
+    void slotEnableBuzzer(bool enabled);
 
 private slots:
     void slotOutputConnectionMethodChanged();
@@ -60,6 +65,7 @@ private slots:
     void slotControlValueChanged();
     void slotControlValueChangedDebounced(double value);
     void slotOverProtectionChanged();
+    void slotEnableReadonlyMode(bool enable);
 
     // Serial port
     void slotSerialPortConnectionToggled(bool toggled);
@@ -79,22 +85,23 @@ private:
 
     QLabel *mStatusBarConnectionStatus;
     QLabel *mStatusBarDeviceInfo;
+    QLabel *mStatusBarDeviceLock;
+
+    bool mIsSerialConnected = false;
 
 private:
+    bool acceptEnable() const;
+    void enableControls(bool enable);
     void enableChannel(TChannel ch, bool enable);
-    void enableOperationPanel(bool enable);
 
     void openSvg(const QString &resource);
-
-    void highlight(THighlight color, QLabel *label);
 
     void createSerialPortMenu();
     void createBaudRatesMenu(int defaultValue = 9600);
     QString chosenSerialPort() const;
     int chosenBaudRates(int defaultValue = 9600) const;
 
-    void resetStatusBarText();
-
+    static void highlight(THighlight color, QLabel *label);
     static QString currentFormat(double value) ;
     static QString voltageFormat(double value) ;
 };

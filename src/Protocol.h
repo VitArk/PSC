@@ -205,8 +205,8 @@ namespace Protocol {
 
     /**
     * BEEP<Boolean>
-    * Function Description: Turn on/off enableBeep
-    * Example: BEEP1 Turn on enableBeep
+    * Function Description: Turn on/off enableBuzzer
+    * Example: BEEP1 Turn on enableBuzzer
     */
     class EnableBuzzer : public IProtocol {
     public:

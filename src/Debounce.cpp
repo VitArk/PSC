@@ -4,7 +4,7 @@
 
 #include "Debounce.h"
 
-const int debounceTimeoutMs = 500;
+const int debounceTimeoutMs = 250;
 
 Debounce::Debounce(QObject *parent) :
         QObject(parent) {
