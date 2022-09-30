@@ -30,6 +30,7 @@ Application::~Application() {
 
 void Application::slotAppRun() {
     connect(mMainWindow, &MainWindow::onSerialPortSettingsChanged, mCommunication, &Communication::openSerialPort);
+    connect(mMainWindow, &MainWindow::onSerialPortDoClose, mCommunication, &Communication::closeSerialPort);
     connect(mCommunication, &Communication::onSerialPortErrorOccurred, mMainWindow, &MainWindow::slotSerialPortErrorOccurred);
     connect(mCommunication, &Communication::onSerialPortOpened, this, &Application::slotSerialPortOpened);
     connect(mCommunication, &Communication::onSerialPortClosed, this, &Application::slotSerialPortClosed);

@@ -1144,6 +1144,8 @@
     </widget>
     <addaction name="menuPort"/>
     <addaction name="menuBaudRate"/>
+    <addaction name="separator"/>
+    <addaction name="actionDisconnect"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -1189,6 +1191,14 @@
    </property>
    <property name="text">
     <string>Enable Beep</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Disconnect</string>
    </property>
   </action>
  </widget>

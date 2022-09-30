@@ -18,6 +18,9 @@ public:
     ~MainWindow() override;
 
 signals:
+    void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
+    void onSerialPortDoClose();
+
     void onOutputConnectionMethodChanged(TOutputConnectionMethod method);
     void onOutputProtectionChanged(TOutputProtection protection);
     void onOverVoltageProtectionChanged(TChannel channel, double value);
@@ -26,8 +29,6 @@ signals:
     void onVoltageChanged(TChannel channel, double value);
     void onCurrentChanged(TChannel channel, double value);
     void onOutputSwitchChanged(bool state);
-
-    void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
     void onLockOperationPanelChanged(bool lock);
     void onBuzzerChanged(bool lock);
 
@@ -40,8 +41,8 @@ public slots:
     void slotShowOutputProtectionMode(OutputProtection protection);
     void slotShowOutputStabilizingMode(TOutputStabilizingMode channel1, TOutputStabilizingMode channel2);
     void slotShowOutputSwitchStatus(bool state);
-
     void slotEnableMemoryKey(TMemoryKey key);
+
     void slotDisplayOutputVoltage(TChannel channel, double voltage);
     void slotDisplayOutputCurrent(TChannel channel, double current);
     void slotDisplaySetVoltage(TChannel channel, double voltage);
@@ -69,6 +70,7 @@ private slots:
 
     // Serial port
     void slotSerialPortConnectionToggled(bool toggled);
+    void slotCreateSerialPortMenuItems();
 
 private:
     enum {
@@ -96,7 +98,7 @@ private:
 
     void openSvg(const QString &resource);
 
-    void createSerialPortMenu();
+
     void createBaudRatesMenu(int defaultValue = 9600);
     QString chosenSerialPort() const;
     int chosenBaudRates(int defaultValue = 9600) const;

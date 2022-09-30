@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarConnectionStatus);
 
     connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::slotEnableReadonlyMode);
-
+    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::onSerialPortDoClose);
     connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onLockOperationPanelChanged);
     connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onBuzzerChanged);
     connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
@@ -79,8 +79,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->spinCh1OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
     connect(ui->spinCh2OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
 
+    connect(ui->menuPort, &QMenu::aboutToShow, this, &MainWindow::slotCreateSerialPortMenuItems);
 
-    createSerialPortMenu(); // todo refactor?
     createBaudRatesMenu(); // todo refactor?
 
     slotSerialPortClosed();
@@ -98,6 +98,7 @@ void MainWindow::slotSerialPortOpened() {
     mIsSerialConnected = true;
     mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(chosenSerialPort()).arg(chosenBaudRates()));
 
+    ui->actionDisconnect->setEnabled(true);
     enableControls(true);
 }
 
@@ -108,6 +109,7 @@ void MainWindow::slotSerialPortErrorOccurred(QString error) {
 void MainWindow::slotSerialPortClosed() {
     mIsSerialConnected = false;
 
+    ui->actionDisconnect->setEnabled(false);
     mStatusBarConnectionStatus->setText(tr("No Connection"));
     mStatusBarDeviceInfo->setText(tr("N/A"));
     mStatusBarDeviceLock->setText(tr("N/A"));
@@ -434,15 +436,32 @@ void MainWindow::slotSerialPortConnectionToggled(bool toggled) {
     emit onSerialPortSettingsChanged(chosenSerialPort(), chosenBaudRates());
 }
 
-void MainWindow::createSerialPortMenu() {
+void MainWindow::slotCreateSerialPortMenuItems() {
+    QString opeportName = "";
+    foreach (auto a, ui->menuPort->actions()) {
+        if (a->isChecked() && mIsSerialConnected) {
+            opeportName = a->text();
+        }
+        a->deleteLater();
+    }
+
+    ui->menuPort->clear();
     ui->menuPort->addAction(tr("Serial ports"))->setEnabled(false);
     auto availableSerialPortsGroup = new QActionGroup(this);
     availableSerialPortsGroup->setExclusive(true);
 
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        if (info.isNull())
+            continue;
+
+#if not defined(Q_OS_WIN)
+        if ( !info.portName().startsWith("cu."))
+            continue;
+#endif
+
         auto action = new QAction(info.portName(), this);
         action->setCheckable(true);
-
+        action->setChecked(opeportName == info.portName());
         availableSerialPortsGroup->addAction(action);
         ui->menuPort->addAction(action);
 
