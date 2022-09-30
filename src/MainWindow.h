@@ -5,6 +5,7 @@
 #include <QLabel>
 #include "Commons.h"
 #include "Debounce.h"
+#include "Settings.h"
 
 namespace Ui {
 class MainWindow;
@@ -16,6 +17,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
+
+    void autoOpenSerialPort();
 
 signals:
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
@@ -33,7 +36,7 @@ signals:
     void onBuzzerChanged(bool lock);
 
 public slots:
-    void slotSerialPortOpened();
+    void slotSerialPortOpened(const QString& serialPortName, int baudRate);
     void slotSerialPortClosed();
     void slotSerialPortErrorOccurred(QString error);
 
@@ -80,6 +83,8 @@ private:
     } typedef THighlight;
 
     Ui::MainWindow *ui;
+    Settings mSettings;
+
     Debounce mDebouncedCh1V;
     Debounce mDebouncedCh1A;
     Debounce mDebouncedCh2V;
@@ -95,17 +100,14 @@ private:
     bool acceptEnable() const;
     void enableControls(bool enable);
     void enableChannel(TChannel ch, bool enable);
-
     void openSvg(const QString &resource);
-
-
-    void createBaudRatesMenu(int defaultValue = 9600);
+    void createBaudRatesMenu();
     QString chosenSerialPort() const;
     int chosenBaudRates(int defaultValue = 9600) const;
 
     static void highlight(THighlight color, QLabel *label);
-    static QString currentFormat(double value) ;
-    static QString voltageFormat(double value) ;
+    static QString currentFormat(double value);
+    static QString voltageFormat(double value);
 };
 
 #endif // MAINWINDOW_H

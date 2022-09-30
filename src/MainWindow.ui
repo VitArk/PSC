@@ -26,7 +26,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Power Supply Controller for UTP300xC Series Programmable DC Power supplies</string>
+   <string>Power Supply Management for UNI-T UTP3000C Series of Programmable DC Power Supplies</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">

@@ -10,36 +10,25 @@
 #include "Commons.h"
 #include "Communication.h"
 #include "MainWindow.h"
-
-#if defined(App)
-#undef App
-#endif
-#define App (Application::i())
+#include "Settings.h"
 
 class Application : public QApplication {
     Q_DISABLE_COPY(Application)
-
-Q_OBJECT
+    Q_OBJECT
 public:
     explicit Application(int &argc, char **argv, int = ApplicationFlags);
-
     ~Application() override;
 
-    static Application *i() { return inst; }
-
-public slots:
-
-
 private:
-    static Application *inst;
     Communication *mCommunication;
     MainWindow *mMainWindow;
     QTimer     mWorkingTimer;
+    Settings   mSettings;
 
 private slots:
     void slotAppRun();
 
-    void slotSerialPortOpened();
+    void slotSerialPortOpened(const QString &name, int baudRate);
     void slotSerialPortClosed();
 
     void slotWorkingCycle();

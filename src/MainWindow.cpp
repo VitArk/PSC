@@ -17,6 +17,7 @@ const double A0 = 0.000;
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow) {
+
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     setFixedSize(maximumSize());
@@ -81,8 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->menuPort, &QMenu::aboutToShow, this, &MainWindow::slotCreateSerialPortMenuItems);
 
-    createBaudRatesMenu(); // todo refactor?
-
+    createBaudRatesMenu();
     slotSerialPortClosed();
 }
 
@@ -94,9 +94,9 @@ bool MainWindow::acceptEnable() const {
     return mIsSerialConnected && !ui->actionReadonlyMode->isChecked();
 }
 
-void MainWindow::slotSerialPortOpened() {
+void MainWindow::slotSerialPortOpened(const QString &serialPortName, int baudRate) {
     mIsSerialConnected = true;
-    mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(chosenSerialPort()).arg(chosenBaudRates()));
+    mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(serialPortName).arg(baudRate));
 
     ui->actionDisconnect->setEnabled(true);
     enableControls(true);
@@ -411,6 +411,23 @@ void MainWindow::slotLockOperationPanel(bool lock) {
     }
 }
 
+void MainWindow::autoOpenSerialPort() {
+    int baudRate = mSettings.serialPortBaudRate();
+    QString portName = mSettings.serialPortName();
+    if (portName.isEmpty()) {
+        return;
+    }
+
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        if (info.isNull())
+            continue;
+        if (portName == info.portName()) {
+            emit onSerialPortSettingsChanged(portName, baudRate);
+            break;
+        }
+    }
+}
+
 int MainWindow::chosenBaudRates(int defaultValue) const {
     foreach(auto item, ui->menuBaudRate->actions()) {
         if (item->isChecked()) {
@@ -433,15 +450,20 @@ void MainWindow::slotSerialPortConnectionToggled(bool toggled) {
     if (!toggled)
         return;
 
-    emit onSerialPortSettingsChanged(chosenSerialPort(), chosenBaudRates());
+    QString portName = chosenSerialPort();
+    if (portName.isEmpty()) {
+        return;
+    }
+    mSettings.setSerialPortName(portName);
+
+    int baudRate = chosenBaudRates();
+    mSettings.setSerialPortBaudRate(baudRate);
+
+    emit onSerialPortSettingsChanged(portName, baudRate);
 }
 
 void MainWindow::slotCreateSerialPortMenuItems() {
-    QString opeportName = "";
     foreach (auto a, ui->menuPort->actions()) {
-        if (a->isChecked() && mIsSerialConnected) {
-            opeportName = a->text();
-        }
         a->deleteLater();
     }
 
@@ -449,6 +471,11 @@ void MainWindow::slotCreateSerialPortMenuItems() {
     ui->menuPort->addAction(tr("Serial ports"))->setEnabled(false);
     auto availableSerialPortsGroup = new QActionGroup(this);
     availableSerialPortsGroup->setExclusive(true);
+
+    QString portName = "";
+    if (mIsSerialConnected) {
+        portName = mSettings.serialPortName();
+    }
 
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         if (info.isNull())
@@ -461,7 +488,7 @@ void MainWindow::slotCreateSerialPortMenuItems() {
 
         auto action = new QAction(info.portName(), this);
         action->setCheckable(true);
-        action->setChecked(opeportName == info.portName());
+        action->setChecked(portName == info.portName());
         availableSerialPortsGroup->addAction(action);
         ui->menuPort->addAction(action);
 
@@ -469,11 +496,12 @@ void MainWindow::slotCreateSerialPortMenuItems() {
     }
 }
 
-void MainWindow::createBaudRatesMenu(int defaultValue) {
+void MainWindow::createBaudRatesMenu() {
     ui->menuBaudRate->addAction(tr("Baud Rate"))->setEnabled(false);
     auto baudRatesGroup = new QActionGroup(this);
     baudRatesGroup->setExclusive(true);
 
+    int defaultValue = mSettings.serialPortBaudRate();
     foreach (auto baud, QSerialPortInfo::standardBaudRates()) {
         if (baud < 9600 || baud > 115200) {
             continue;
@@ -526,4 +554,5 @@ void MainWindow::openSvg(const QString &resource) {
     item->setZValue(0);
     s->addItem(item);
 }
+
 

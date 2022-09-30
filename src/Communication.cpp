@@ -18,7 +18,7 @@ Communication::Communication(QObject *parent) : QObject(parent){
     mQueueTimer.setInterval(1);
     mQueueTimer.setTimerType(Qt::PreciseTimer);
 
-    connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::slotSerialReadData);
+    connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::slotSerialReadData, Qt::QueuedConnection);
     connect(&mSerialPort, &QSerialPort::errorOccurred, this, &Communication::slotSerialErrorOccurred);
 
     connect(&mQueueTimer, &QTimer::timeout, this, &Communication::slotProcessRequestQueue);
@@ -26,7 +26,6 @@ Communication::Communication(QObject *parent) : QObject(parent){
 
 void Communication::openSerialPort(const QString &name, int baudRate) {
     closeSerialPort();
-
     mSerialPort.setPortName(name);
     mSerialPort.setBaudRate(baudRate);
 
@@ -34,7 +33,7 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
         mSerialPort.clear();
         mRequestQueue.clear();
         mQueueTimer.start();
-        emit onSerialPortOpened();
+        emit onSerialPortOpened(name, baudRate);
     } else {
         emit onSerialPortErrorOccurred(mSerialPort.errorString());
     }

@@ -51,7 +51,7 @@ public slots:
     void getOverVoltageProtectionValue(TChannel channel);
 
 signals:
-    void onSerialPortOpened();
+    void onSerialPortOpened(QString serialPortName, int baudRate);
     void onSerialPortClosed();
     void onSerialPortErrorOccurred(QString error);
 

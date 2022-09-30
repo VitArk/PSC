@@ -6,15 +6,7 @@
 #include <QTimer>
 #include <QDebug>
 
-Application *Application::inst = nullptr;
-
 Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
-    Q_ASSERT(!inst); // only one instance should be for app.
-    inst = this;
-
-    QApplication::setApplicationName("PSC");
-    QApplication::setApplicationVersion("1.0");
-
     mCommunication = new Communication(this);
     mMainWindow = new MainWindow();
 
@@ -69,10 +61,11 @@ void Application::slotAppRun() {
     connect(mMainWindow, &MainWindow::onCurrentChanged, mCommunication, &Communication::setCurrent);
 
     mMainWindow->show();
+    mMainWindow->autoOpenSerialPort();
 }
 
-void Application::slotSerialPortOpened() {
-    mMainWindow->slotSerialPortOpened();
+void Application::slotSerialPortOpened(const QString &name, int baudRate) {
+    mMainWindow->slotSerialPortOpened(name, baudRate);
 
     mCommunication->getDeviceInfo();
     mCommunication->getOverCurrentProtectionValue(Channel1);
