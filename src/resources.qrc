@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="serial-mode">assets/mode-serial.svg</file>
+        <file alias="parallel-mode">assets/mode-parallel.svg</file>
+        <file alias="independent-mode">assets/mode-independent.svg</file>
+    </qresource>
+</RCC>
