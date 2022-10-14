@@ -7,7 +7,7 @@
 
 #include <QObject>
 #include <QDebug>
-#include "Commons.h"
+#include "devices/Commons.h"
 
 class DeviceStatus {
 public:

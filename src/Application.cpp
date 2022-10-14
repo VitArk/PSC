@@ -24,10 +24,11 @@ void Application::slotAppRun() {
     connect(mMainWindow, &MainWindow::onSerialPortSettingsChanged, mCommunication, &Communication::openSerialPort);
     connect(mMainWindow, &MainWindow::onSerialPortDoClose, mCommunication, &Communication::closeSerialPort);
     connect(mCommunication, &Communication::onSerialPortErrorOccurred, mMainWindow, &MainWindow::slotSerialPortErrorOccurred);
-    connect(mCommunication, &Communication::onSerialPortOpened, this, &Application::slotSerialPortOpened);
+    connect(mCommunication, &Communication::onSerialPortOpened, mMainWindow, &MainWindow::slotSerialPortOpened);
     connect(mCommunication, &Communication::onSerialPortClosed, this, &Application::slotSerialPortClosed);
+    connect(mCommunication, &Communication::onSerialPortReady, this, &Application::slotStartWorking);
 
-    connect(mCommunication, &Communication::onDeviceInfo, mMainWindow, &MainWindow::slotDisplayDeviceInfo);
+    connect(mCommunication, &Communication::onDeviceInfo, mMainWindow, &MainWindow::slotDisplayDeviceID);
 
     // Lock operation panel
     connect(mMainWindow, &MainWindow::onLockOperationPanelChanged, mCommunication, &Communication::lockOperationPanel);
@@ -38,10 +39,10 @@ void Application::slotAppRun() {
     connect(mCommunication, &Communication::onBuzzerEnabled, mMainWindow, &MainWindow::slotEnableBuzzer);
 
     // Memory / Presets
-    connect(mCommunication, &Communication::onRecalledSetting, mMainWindow, &MainWindow::slotEnableMemoryKey);
-    connect(mMainWindow, &MainWindow::onMemoryKeyChanged, mCommunication, &Communication::recallSetting);
+    connect(mCommunication, &Communication::onApplySettings, mMainWindow, &MainWindow::slotEnableMemoryKey);
+    connect(mMainWindow, &MainWindow::onMemoryKeyChanged, mCommunication, &Communication::applySettings);
 
-    connect(mMainWindow, &MainWindow::onOutputSwitchChanged, mCommunication, &Communication::setOutputSwitch);
+    connect(mMainWindow, &MainWindow::onOutputSwitchChanged, mCommunication, &Communication::setEnableOutputSwitch);
     connect(mMainWindow, &MainWindow::onOutputConnectionMethodChanged, mCommunication,&Communication::changeOutputConnectionMethod);
     connect(mMainWindow, &MainWindow::onOutputProtectionChanged, this, &Application::slotOutputProtectionChanged);
     connect(mCommunication, &Communication::onOverCurrentProtectionValue, mMainWindow, &MainWindow::slotDisplayOverCurrentProtectionValue);
@@ -64,10 +65,10 @@ void Application::slotAppRun() {
     mMainWindow->autoOpenSerialPort();
 }
 
-void Application::slotSerialPortOpened(const QString &name, int baudRate) {
-    mMainWindow->slotSerialPortOpened(name, baudRate);
+void Application::slotStartWorking(DeviceInfo info) {
+    mMainWindow->slotSerialConnectionReady(info);
 
-    mCommunication->getDeviceInfo();
+//    mCommunication->getDeviceID();
     mCommunication->getOverCurrentProtectionValue(Channel1);
     mCommunication->getOverCurrentProtectionValue(Channel2);
     mCommunication->getOverVoltageProtectionValue(Channel1);
@@ -83,7 +84,7 @@ void Application::slotSerialPortClosed() {
 
 void Application::slotWorkingCycle() {
     mCommunication->getDeviceStatus();
-    mCommunication->getActiveSetting();
+    mCommunication->getActiveSettings();
     mCommunication->isOperationPanelLocked();
     mCommunication->isBuzzerEnabled();
 }

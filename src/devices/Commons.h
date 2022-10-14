@@ -5,6 +5,14 @@
 #ifndef POWER_SUPPLY_CONTROLLER_COMMONS_H
 #define POWER_SUPPLY_CONTROLLER_COMMONS_H
 
+struct DeviceInfo{
+    QString name;
+    QString ID;
+    QString description;
+    double maxChannelCurrent;
+    double maxChannelVoltage;
+};
+
 enum Channel {
     Channel1 = 1,
     Channel2 = 2,

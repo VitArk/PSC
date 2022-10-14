@@ -100,20 +100,24 @@ bool MainWindow::acceptEnable() const {
 void MainWindow::slotSerialPortOpened(const QString &serialPortName, int baudRate) {
     mIsSerialConnected = true;
     mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(serialPortName).arg(baudRate));
-
     ui->actionDisconnect->setEnabled(true);
-    enableControls(true);
 }
 
 void MainWindow::slotSerialPortErrorOccurred(QString error) {
     QMessageBox::warning(this, tr("Serial Port Error Occurred"),error, QMessageBox::Close);
 }
 
+void MainWindow::slotSerialConnectionReady(DeviceInfo info) {
+    slotDisplayDeviceID(info.name);
+    setControlLimits(info);
+    enableControls(true);
+}
+
 void MainWindow::slotSerialPortClosed() {
     mIsSerialConnected = false;
 
     ui->actionDisconnect->setEnabled(false);
-    mStatusBarConnectionStatus->setText(tr("No Connection"));
+    mStatusBarConnectionStatus->setText(tr("Disconnected"));
     mStatusBarDeviceInfo->setText(tr("N/A"));
     mStatusBarDeviceLock->setText(tr("N/A"));
 
@@ -144,13 +148,29 @@ void MainWindow::enableControls(bool enable) {
     ui->actionBuzzer->setEnabled(enable);
 }
 
+void MainWindow::setControlLimits(const DeviceInfo &info) {
+    ui->dialCh1V->setMaximum(int(info.maxChannelVoltage * vDialCorrection));
+    ui->dialCh2V->setMaximum(int(info.maxChannelVoltage * vDialCorrection));
+    ui->spinCh1V->setMaximum(info.maxChannelVoltage);
+    ui->spinCh2V->setMaximum(info.maxChannelVoltage);
+    ui->spinCh1OVP->setMaximum(info.maxChannelVoltage);
+    ui->spinCh2OVP->setMaximum(info.maxChannelVoltage);
+
+    ui->dialCh1A->setMaximum(int(info.maxChannelCurrent * aDialCorrection));
+    ui->dialCh2A->setMaximum(int(info.maxChannelCurrent * aDialCorrection));
+    ui->spinCh1A->setMaximum(info.maxChannelCurrent);
+    ui->spinCh2A->setMaximum(info.maxChannelCurrent);
+    ui->spinCh1OCP->setMaximum(info.maxChannelCurrent);
+    ui->spinCh2OCP->setMaximum(info.maxChannelCurrent);
+}
+
 void MainWindow::slotEnableReadonlyMode(bool enable) {
     ui->actionReadonlyMode->setChecked(enable);
     enableControls(!enable);
 }
 
-void MainWindow::slotDisplayDeviceInfo(const QString &deviceInfo) {
-    mStatusBarDeviceInfo->setText(deviceInfo);
+void MainWindow::slotDisplayDeviceID(const QString &deviceID) {
+    mStatusBarDeviceInfo->setText(deviceID);
 }
 
 void MainWindow::slotEnableBuzzer(bool enabled) {
@@ -260,7 +280,6 @@ void MainWindow::slotShowOutputSwitchStatus(bool state) {
         ui->btnOutput->setText(tr("OUTPUT OFF"));
     }
 }
-
 
 void MainWindow::enableChannel(TChannel ch, bool enable) {
     if (enable && !acceptEnable()) {
@@ -406,11 +425,11 @@ void MainWindow::slotOverProtectionChanged() {
 
 void MainWindow::slotLockOperationPanel(bool lock) {
     if (lock) {
-        mStatusBarDeviceLock->setText(tr("Device Panel: Lock"));
-        ui->actionLockDevice->setText(tr("Unlock Device Panel"));
+        mStatusBarDeviceLock->setText(tr("Device Controls: Lock"));
+        ui->actionLockDevice->setText(tr("Unlock Device Controls"));
     } else {
-        mStatusBarDeviceLock->setText(tr("Device Panel: Unlocked"));
-        ui->actionLockDevice->setText(tr("Lock Device Panel"));
+        mStatusBarDeviceLock->setText(tr("Device Controls: Unlocked"));
+        ui->actionLockDevice->setText(tr("Lock Device Controls"));
     }
 }
 
@@ -557,5 +576,8 @@ void MainWindow::openSvg(const QString &resource) {
     item->setZValue(0);
     s->addItem(item);
 }
+
+
+
 
 

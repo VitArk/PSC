@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
-#include "Commons.h"
+#include "devices/Commons.h"
 #include "Debounce.h"
 #include "Settings.h"
 
@@ -39,6 +39,7 @@ public slots:
     void slotSerialPortOpened(const QString& serialPortName, int baudRate);
     void slotSerialPortClosed();
     void slotSerialPortErrorOccurred(QString error);
+    void slotSerialConnectionReady(DeviceInfo info);
 
     void slotShowOutputConnectionMethod(OutputConnectionMethod method);
     void slotShowOutputProtectionMode(OutputProtection protection);
@@ -54,7 +55,7 @@ public slots:
     void slotDisplayOverVoltageProtectionValue(TChannel channel, double voltage);
     void slotDisplayOverCurrentProtectionValue(TChannel channel, double current);
 
-    void slotDisplayDeviceInfo(const QString &deviceInfo);
+    void slotDisplayDeviceID(const QString &deviceID);
     void slotLockOperationPanel(bool lock);
     void slotEnableBuzzer(bool enabled);
 
@@ -99,6 +100,7 @@ private:
 private:
     bool acceptEnable() const;
     void enableControls(bool enable);
+    void setControlLimits(const DeviceInfo &info);
     void enableChannel(TChannel ch, bool enable);
     void openSvg(const QString &resource);
     void createBaudRatesMenu();

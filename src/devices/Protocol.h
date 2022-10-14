@@ -9,12 +9,12 @@
 #include "Commons.h"
 
 namespace Protocol {
-    class IProtocol {
+    class IRequest {
     public:
-        TChannel channel() const { return mChannel;}
-        virtual QByteArray requestQuery() const = 0;
-        virtual int responseDataSize() const { return 0; }
-        virtual ~IProtocol() = default;
+        virtual TChannel channel() const { return mChannel;}
+        virtual QByteArray query() const = 0;
+        virtual int answerLength() const { return 0; }
+        virtual ~IRequest() = default;
     protected:
         TChannel mChannel;
     };
@@ -27,13 +27,13 @@ namespace Protocol {
      * Example:LOCK0
      * Unlock power supply operation panel
      */
-    class LockOperationPanel : public IProtocol {
+    class LockOperationPanel : public IRequest {
     public:
         LockOperationPanel(bool lock) {
             mLock = lock;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QByteArray("LOCK").append(QByteArray::number((int)mLock));
         }
     private:
@@ -46,13 +46,13 @@ namespace Protocol {
      * Example: LOCK?
      * Response: 0 | 1
      */
-    class IsOperationPanelLocked : public IProtocol {
+    class IsOperationPanelLocked : public IRequest {
     public:
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return "LOCK?";
         }
 
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 1;
         };
     };
@@ -64,14 +64,14 @@ namespace Protocol {
      * Example: ISET1:2.225
      * Set current value as 2.225A
      */
-    class SetCurrent : public IProtocol {
+    class SetCurrent : public IRequest {
     public:
         SetCurrent(TChannel channel, double current) {
             mChannel = channel;
             mCurrent = current;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("ISET%1:%2").arg(mChannel).arg(mCurrent).toLatin1();
         }
 
@@ -85,17 +85,17 @@ namespace Protocol {
      * Example: ISET1?
      * Returns current value
      */
-    class GetCurrent : public IProtocol {
+    class GetCurrent : public IRequest {
     public:
         GetCurrent(TChannel channel) {
             mChannel = channel;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("ISET%1?").arg(mChannel).toLatin1();
         }
 
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 5;
         };
     };
@@ -106,14 +106,14 @@ namespace Protocol {
      * Example: VSET1:20.50
      * Set voltage value for channel 1 as 20.50V
      */
-    class SetVoltage : public IProtocol {
+    class SetVoltage : public IRequest {
     public:
         SetVoltage(TChannel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("VSET%1:%2").arg(mChannel).arg(mVoltage).toLatin1();
         }
 
@@ -127,76 +127,76 @@ namespace Protocol {
      * Example: VSET1?
      * Returns voltage value
      */
-    class GetVoltage : public IProtocol {
+    class GetVoltage : public IRequest {
     public:
         GetVoltage(TChannel channel) {
             mChannel = channel;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("VSET%1?").arg(mChannel).toLatin1();
         }
 
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 5;
         };
     };
 
     /**
      * IOUT<X>?
-     * Function Description: Read current setOutputSwitch value
+     * Function Description: Read current setEnableOutputSwitch value
      * Example: IOUT1?
      * Read the set current value
      */
-    class GetOutputCurrent : public IProtocol {
+    class GetOutputCurrent : public IRequest {
     public:
         GetOutputCurrent(TChannel channel) {
             mChannel = channel;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("IOUT%1?").arg(mChannel).toLatin1();
         }
 
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 5;
         };
     };
 
     /**
     * VOUT<X>?
-    * Function Description: Read voltage setOutputSwitch value
+    * Function Description: Read voltage setEnableOutputSwitch value
     * Example: VOUT1?
     * Read the set voltage value
     */
-    class GetOutputVoltage : public IProtocol {
+    class GetOutputVoltage : public IRequest {
     public:
         GetOutputVoltage(TChannel channel) {
             mChannel = channel;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("VOUT%1?").arg(mChannel).toLatin1();
         }
 
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 5;
         };
     };
 
     /**
     * OUT<Boolean>
-    * Function Description: Turn on/off power supply setOutputSwitch
+    * Function Description: Turn on/off power supply setEnableOutputSwitch
     * Boolean: 0 off; 1 on
-    * Example: OUT1 Turn on power supply setOutputSwitch
+    * Example: OUT1 Turn on power supply setEnableOutputSwitch
     */
-    class SetOutputSwitch : public IProtocol {
+    class EnableOutputSwitch : public IRequest {
     public:
-        SetOutputSwitch(bool state) {
+        EnableOutputSwitch(bool state) {
             mState = state;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("OUT%1").arg((int)mState).toLatin1();
         }
     private:
@@ -208,13 +208,13 @@ namespace Protocol {
     * Function Description: Turn on/off enableBuzzer
     * Example: BEEP1 Turn on enableBuzzer
     */
-    class EnableBuzzer : public IProtocol {
+    class EnableBuzzer : public IRequest {
     public:
         EnableBuzzer(bool state) {
             mState = state;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("BEEP%1").arg((int)mState).toLatin1();
         }
     private:
@@ -227,19 +227,19 @@ namespace Protocol {
      * Example: BEEP?
      * Response: 1 | 0
      */
-    class IsBuzzerEnabled : public IProtocol {
+    class IsBuzzerEnabled : public IRequest {
     public:
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return "BEEP?";
         }
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 1;
         };
     };
 
     /**
      * STATUS?
-     * Function Description: Read power supply setOutputSwitch status
+     * Function Description: Read power supply setEnableOutputSwitch status
      * Contents 8 bits in the following format:
      *  Bit     Item            Description
      *  0       CH1             0=CC mode, 1=CV mode
@@ -248,17 +248,17 @@ namespace Protocol {
      *  3       ParallelMode    0=Off, 1=On
      *  4       OVP             0=Off, 1=On
      *  5       OCP             0=Off, 1=On
-     *  6       setOutputSwitch 0=Off, 1=On
+     *  6       setEnableOutputSwitch 0=Off, 1=On
      *  7       N/A             N/A
      *
      *  ** if bits (2=0 and 3=0) -- Independent method.
      */
-    class GetOutputStatus : public IProtocol {
+    class GetDeviceStatus : public IRequest {
     public:
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return "STATUS?";
         }
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 1;
         };
     };
@@ -269,13 +269,13 @@ namespace Protocol {
      * Example: *IDN?
      * Contents UNI-T P33XC V2.0 (manufacturer, model name)
      */
-    class GetDeviceInfo : public IProtocol {
+    class GetDeviceID : public IRequest {
     public:
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return "*IDN?";
         }
 
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 9;
         };
     };
@@ -284,13 +284,13 @@ namespace Protocol {
      * RCL<NR1>
      * Function Description:Storage recall by pressing keys from M1-M5
      */
-    class RecallSetting : public IProtocol {
+    class ApplySettings : public IRequest {
     public:
-        RecallSetting(TMemoryKey key) {
+        ApplySettings(TMemoryKey key) {
             mKey = key;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("RCL%1").arg(mKey).toLatin1();
         }
     private:
@@ -301,12 +301,12 @@ namespace Protocol {
      * RCL?
      * Function Description:Read current/active setting number (keys from M1-M5)
      */
-    class GetRecalledSetting : public IProtocol {
+    class GetActiveSettings : public IRequest {
     public:
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return "RCL?";
         }
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 1;
         };
     };
@@ -316,13 +316,13 @@ namespace Protocol {
      * Function Description: Storage setting
      * Example: SAV1 Stores the panel setting in memory number 1
      */
-    class SaveSetting : public IProtocol {
+    class SaveSettings : public IRequest {
     public:
-        SaveSetting(TMemoryKey key) {
+        SaveSettings(TMemoryKey key) {
             mKey = key;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("SAV%1").arg(mKey).toLatin1();
         }
     private:
@@ -331,17 +331,17 @@ namespace Protocol {
 
     /**
      * TRACK<NR1>
-     * Function Description: Set series & parallel setOutputSwitch
-     * NR1: 0=independent output; 1=series output; 2=parallel setOutputSwitch
+     * Function Description: Set series & parallel setEnableOutputSwitch
+     * NR1: 0=independent output; 1=series output; 2=parallel setEnableOutputSwitch
      * Example: TRACK1
      */
-    class OutputConnectionMethod : public IProtocol {
+    class ChangeOutputConnectionMethod : public IRequest {
     public:
-        OutputConnectionMethod(TOutputConnectionMethod mode) {
+        ChangeOutputConnectionMethod(TOutputConnectionMethod mode) {
             mMode = mode;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("TRACK%1").arg(mMode).toLatin1();
         }
     private:
@@ -354,13 +354,13 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OCP1 Turn on OCP
      */
-    class EnableOverCurrentProtection : public IProtocol {
+    class EnableOverCurrentProtection : public IRequest {
     public:
         EnableOverCurrentProtection(bool state) {
             mState = state;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("OCP%1").arg((int)mState).toLatin1();
         }
     private:
@@ -374,13 +374,13 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OVP1 Turn on OVP
      */
-    class EnableOverVoltageProtection : public IProtocol {
+    class EnableOverVoltageProtection : public IRequest {
     public:
         EnableOverVoltageProtection(bool state) {
             mState = state;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("OVP%1").arg((int)mState).toLatin1();
         }
     private:
@@ -392,14 +392,14 @@ namespace Protocol {
     * Function Description: Set OCP value
     * Example: OCPSET1: 5.100
     */
-    class SetOverCurrentProtectionValue : public IProtocol {
+    class SetOverCurrentProtectionValue : public IRequest {
     public:
         SetOverCurrentProtectionValue(TChannel channel, double value) {
             mChannel = channel;
             mValue = value;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("OCPSET%1:%2").arg(mChannel).arg(mValue).toLatin1();
         }
 
@@ -412,17 +412,17 @@ namespace Protocol {
     * Function Description: Get OCP value
     * Example: OCPSET1?
     */
-    class GetOverCurrentProtectionValue : public IProtocol {
+    class GetOverCurrentProtectionValue : public IRequest {
     public:
         GetOverCurrentProtectionValue(TChannel channel) {
             mChannel = channel;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("OCPSET%1?").arg(mChannel).toLatin1();
         }
 
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 5;
         };
     };
@@ -432,14 +432,14 @@ namespace Protocol {
      * Function Description: Set OVP value
      * Example: OVPSET1:31.00
      */
-    class SetOverVoltageProtectionValue : public IProtocol {
+    class SetOverVoltageProtectionValue : public IRequest {
     public:
         SetOverVoltageProtectionValue(TChannel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("OVPSET%1:%2").arg(mChannel).arg(mVoltage).toLatin1();
         }
 
@@ -452,17 +452,17 @@ namespace Protocol {
      * Function Description: Grt OVP value
      * Example: OVPSET1?
      */
-    class GetOverVoltageProtectionValue : public IProtocol {
+    class GetOverVoltageProtectionValue : public IRequest {
     public:
         GetOverVoltageProtectionValue(TChannel channel) {
             mChannel = channel;
         }
 
-        QByteArray requestQuery() const override {
+        QByteArray query() const override {
             return QString("OVPSET%1?").arg(mChannel).toLatin1();
         }
 
-        int responseDataSize() const override {
+        int answerLength() const override {
             return 5;
         };
     };

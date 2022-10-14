@@ -46,7 +46,7 @@ bool DeviceStatus::outputSwitchStatus() const {
 }
 
 QByteArray DeviceStatus::data() const {
-    return QByteArray(1, mData);
+    return {1, mData};
 }
 
 QDebug operator<<(QDebug debug, const DeviceStatus &c) {

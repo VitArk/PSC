@@ -7,7 +7,7 @@
 
 #include <QObject>
 #include <QApplication>
-#include "Commons.h"
+#include "devices/Commons.h"
 #include "Communication.h"
 #include "MainWindow.h"
 #include "Settings.h"
@@ -28,7 +28,7 @@ private:
 private slots:
     void slotAppRun();
 
-    void slotSerialPortOpened(const QString &name, int baudRate);
+    void slotStartWorking(DeviceInfo info);
     void slotSerialPortClosed();
 
     void slotWorkingCycle();

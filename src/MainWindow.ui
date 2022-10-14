@@ -345,7 +345,7 @@
        <item>
         <widget class="QGroupBox" name="groupBoxCh2SetProtection">
          <property name="title">
-          <string>Protection</string>
+          <string>Output Protection</string>
          </property>
          <layout class="QFormLayout" name="formLayout_4">
           <item row="0" column="0">
@@ -1024,7 +1024,7 @@
        <item>
         <widget class="QGroupBox" name="groupBoxCh1SetProtection">
          <property name="title">
-          <string>Protection</string>
+          <string>Output Protection</string>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
           <item row="0" column="0">
