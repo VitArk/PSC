@@ -9,6 +9,8 @@
 #include <QGraphicsSvgItem>
 #include <QSerialPortInfo>
 
+#include "Application.h"
+
 const double vDialCorrection = 100.0;
 const double aDialCorrection = 1000.0;
 const double V0= 00.00;
@@ -21,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     setFixedSize(maximumSize());
+    setWindowTitle(tr("Power Supply Management v%1").arg(Application::applicationVersion()));
 
     ui->graphicsView->setScene(new QGraphicsScene(this));
     ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
