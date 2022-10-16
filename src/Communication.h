@@ -74,14 +74,14 @@ private slots:
     void slotProcessRequestQueue();
 
 private:
-    void serialSendRequest(bool ignoreDelay = false);
-    void dispatchData(const Protocol::IRequest &request, const QByteArray &data);
-    void enqueueRequest(Protocol::IRequest *request);
+    void serialSendMessage(bool ignoreDelay = false);
+    void dispatchData(const Protocol::IMessage &message, const QByteArray &data);
+    void enqueueMessage(Protocol::IMessage *message);
     void createDeviceProtocol(const QByteArray &data);
 
 private:
     QSerialPort                  mSerialPort;
-    QQueue<Protocol::IRequest*>  mRequestQueue;
+    QQueue<Protocol::IMessage*>  mMessageQueue;
     QTimer                       mQueueTimer;
     QTime                        mRequestNextTime;
     Protocol::Device*            mDeviceProtocol = nullptr;

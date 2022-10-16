@@ -3,5 +3,7 @@
         <file alias="serial-mode">assets/mode-serial.svg</file>
         <file alias="parallel-mode">assets/mode-parallel.svg</file>
         <file alias="independent-mode">assets/mode-independent.svg</file>
+        <file alias="power-supply-512">assets/power-supply_512.png</file>
+        <file alias="power-supply-64">assets/power-supply_64.png</file>
     </qresource>
 </RCC>

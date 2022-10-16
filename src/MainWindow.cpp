@@ -84,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->spinCh2OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
 
     connect(ui->menuPort, &QMenu::aboutToShow, this, &MainWindow::slotCreateSerialPortMenuItems);
+    connect(ui->menuHelp, &QMenu::triggered, this, &MainWindow::slotShowAboutBox);
 
     createBaudRatesMenu();
     slotSerialPortClosed();
@@ -575,6 +576,25 @@ void MainWindow::openSvg(const QString &resource) {
     item->setCacheMode(QGraphicsItem::NoCache);
     item->setZValue(0);
     s->addItem(item);
+}
+
+void MainWindow::slotShowAboutBox() {
+    QPixmap icon;
+    icon.load(":power-supply-64");
+    QMessageBox aboutBox(
+            QMessageBox::NoIcon,
+            tr("About PS Management"),
+            trUtf8("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p><p>GUI application for remote control of Programmable Power Supply.</p><p>Supported devices: <ul><li>UNI-T UTP3303C</li><li>UNI-T UTP3305C</li></ul></p><p>This is a free software distributed under MIT license.</p><p>Visit official <a href=\"https://github.com/vitark/PS-Management\">GitHub</a> page for more details.</p> <p>Ⓒ 2021-2022 VitArk</p>").arg(Application::applicationVersion()),
+            QMessageBox::Ok
+    );
+    aboutBox.setIconPixmap(icon);
+    QList<QLabel *> labels = aboutBox.findChildren<QLabel *>();
+    for (int i = 0; i < labels.count(); i++) {
+        QLabel *lab = labels.at(i);
+        lab->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    }
+    aboutBox.setTextFormat(Qt::RichText);
+    aboutBox.exec();
 }
 
 

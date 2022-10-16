@@ -9,12 +9,12 @@
 #include "Commons.h"
 
 namespace Protocol {
-    class IRequest {
+    class IMessage {
     public:
         virtual TChannel channel() const { return mChannel;}
         virtual QByteArray query() const = 0;
         virtual int answerLength() const { return 0; }
-        virtual ~IRequest() = default;
+        virtual ~IMessage() = default;
     protected:
         TChannel mChannel;
     };
@@ -27,7 +27,7 @@ namespace Protocol {
      * Example:LOCK0
      * Unlock power supply operation panel
      */
-    class LockOperationPanel : public IRequest {
+    class LockOperationPanel : public IMessage {
     public:
         LockOperationPanel(bool lock) {
             mLock = lock;
@@ -46,7 +46,7 @@ namespace Protocol {
      * Example: LOCK?
      * Response: 0 | 1
      */
-    class IsOperationPanelLocked : public IRequest {
+    class IsOperationPanelLocked : public IMessage {
     public:
         QByteArray query() const override {
             return "LOCK?";
@@ -64,7 +64,7 @@ namespace Protocol {
      * Example: ISET1:2.225
      * Set current value as 2.225A
      */
-    class SetCurrent : public IRequest {
+    class SetCurrent : public IMessage {
     public:
         SetCurrent(TChannel channel, double current) {
             mChannel = channel;
@@ -85,7 +85,7 @@ namespace Protocol {
      * Example: ISET1?
      * Returns current value
      */
-    class GetCurrent : public IRequest {
+    class GetCurrent : public IMessage {
     public:
         GetCurrent(TChannel channel) {
             mChannel = channel;
@@ -106,7 +106,7 @@ namespace Protocol {
      * Example: VSET1:20.50
      * Set voltage value for channel 1 as 20.50V
      */
-    class SetVoltage : public IRequest {
+    class SetVoltage : public IMessage {
     public:
         SetVoltage(TChannel channel, double voltage) {
             mChannel = channel;
@@ -127,7 +127,7 @@ namespace Protocol {
      * Example: VSET1?
      * Returns voltage value
      */
-    class GetVoltage : public IRequest {
+    class GetVoltage : public IMessage {
     public:
         GetVoltage(TChannel channel) {
             mChannel = channel;
@@ -148,7 +148,7 @@ namespace Protocol {
      * Example: IOUT1?
      * Read the set current value
      */
-    class GetOutputCurrent : public IRequest {
+    class GetOutputCurrent : public IMessage {
     public:
         GetOutputCurrent(TChannel channel) {
             mChannel = channel;
@@ -169,7 +169,7 @@ namespace Protocol {
     * Example: VOUT1?
     * Read the set voltage value
     */
-    class GetOutputVoltage : public IRequest {
+    class GetOutputVoltage : public IMessage {
     public:
         GetOutputVoltage(TChannel channel) {
             mChannel = channel;
@@ -190,7 +190,7 @@ namespace Protocol {
     * Boolean: 0 off; 1 on
     * Example: OUT1 Turn on power supply setEnableOutputSwitch
     */
-    class EnableOutputSwitch : public IRequest {
+    class EnableOutputSwitch : public IMessage {
     public:
         EnableOutputSwitch(bool state) {
             mState = state;
@@ -208,7 +208,7 @@ namespace Protocol {
     * Function Description: Turn on/off enableBuzzer
     * Example: BEEP1 Turn on enableBuzzer
     */
-    class EnableBuzzer : public IRequest {
+    class EnableBuzzer : public IMessage {
     public:
         EnableBuzzer(bool state) {
             mState = state;
@@ -227,7 +227,7 @@ namespace Protocol {
      * Example: BEEP?
      * Response: 1 | 0
      */
-    class IsBuzzerEnabled : public IRequest {
+    class IsBuzzerEnabled : public IMessage {
     public:
         QByteArray query() const override {
             return "BEEP?";
@@ -253,7 +253,7 @@ namespace Protocol {
      *
      *  ** if bits (2=0 and 3=0) -- Independent method.
      */
-    class GetDeviceStatus : public IRequest {
+    class GetDeviceStatus : public IMessage {
     public:
         QByteArray query() const override {
             return "STATUS?";
@@ -269,7 +269,7 @@ namespace Protocol {
      * Example: *IDN?
      * Contents UNI-T P33XC V2.0 (manufacturer, model name)
      */
-    class GetDeviceID : public IRequest {
+    class GetDeviceID : public IMessage {
     public:
         QByteArray query() const override {
             return "*IDN?";
@@ -284,7 +284,7 @@ namespace Protocol {
      * RCL<NR1>
      * Function Description:Storage recall by pressing keys from M1-M5
      */
-    class ApplySettings : public IRequest {
+    class ApplySettings : public IMessage {
     public:
         ApplySettings(TMemoryKey key) {
             mKey = key;
@@ -301,7 +301,7 @@ namespace Protocol {
      * RCL?
      * Function Description:Read current/active setting number (keys from M1-M5)
      */
-    class GetActiveSettings : public IRequest {
+    class GetActiveSettings : public IMessage {
     public:
         QByteArray query() const override {
             return "RCL?";
@@ -316,7 +316,7 @@ namespace Protocol {
      * Function Description: Storage setting
      * Example: SAV1 Stores the panel setting in memory number 1
      */
-    class SaveSettings : public IRequest {
+    class SaveSettings : public IMessage {
     public:
         SaveSettings(TMemoryKey key) {
             mKey = key;
@@ -335,7 +335,7 @@ namespace Protocol {
      * NR1: 0=independent output; 1=series output; 2=parallel setEnableOutputSwitch
      * Example: TRACK1
      */
-    class ChangeOutputConnectionMethod : public IRequest {
+    class ChangeOutputConnectionMethod : public IMessage {
     public:
         ChangeOutputConnectionMethod(TOutputConnectionMethod mode) {
             mMode = mode;
@@ -354,7 +354,7 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OCP1 Turn on OCP
      */
-    class EnableOverCurrentProtection : public IRequest {
+    class EnableOverCurrentProtection : public IMessage {
     public:
         EnableOverCurrentProtection(bool state) {
             mState = state;
@@ -374,7 +374,7 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OVP1 Turn on OVP
      */
-    class EnableOverVoltageProtection : public IRequest {
+    class EnableOverVoltageProtection : public IMessage {
     public:
         EnableOverVoltageProtection(bool state) {
             mState = state;
@@ -392,7 +392,7 @@ namespace Protocol {
     * Function Description: Set OCP value
     * Example: OCPSET1: 5.100
     */
-    class SetOverCurrentProtectionValue : public IRequest {
+    class SetOverCurrentProtectionValue : public IMessage {
     public:
         SetOverCurrentProtectionValue(TChannel channel, double value) {
             mChannel = channel;
@@ -412,7 +412,7 @@ namespace Protocol {
     * Function Description: Get OCP value
     * Example: OCPSET1?
     */
-    class GetOverCurrentProtectionValue : public IRequest {
+    class GetOverCurrentProtectionValue : public IMessage {
     public:
         GetOverCurrentProtectionValue(TChannel channel) {
             mChannel = channel;
@@ -432,7 +432,7 @@ namespace Protocol {
      * Function Description: Set OVP value
      * Example: OVPSET1:31.00
      */
-    class SetOverVoltageProtectionValue : public IRequest {
+    class SetOverVoltageProtectionValue : public IMessage {
     public:
         SetOverVoltageProtectionValue(TChannel channel, double voltage) {
             mChannel = channel;
@@ -452,7 +452,7 @@ namespace Protocol {
      * Function Description: Grt OVP value
      * Example: OVPSET1?
      */
-    class GetOverVoltageProtectionValue : public IRequest {
+    class GetOverVoltageProtectionValue : public IMessage {
     public:
         GetOverVoltageProtectionValue(TChannel channel) {
             mChannel = channel;

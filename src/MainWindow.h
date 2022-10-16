@@ -76,6 +76,8 @@ private slots:
     void slotSerialPortConnectionToggled(bool toggled);
     void slotCreateSerialPortMenuItems();
 
+    void slotShowAboutBox();
+
 private:
     enum {
         HighlightNone = 0,

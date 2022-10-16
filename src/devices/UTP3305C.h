@@ -17,6 +17,10 @@ namespace Protocol {
             return "P3305C%**";
         };
 
+        bool checkID(QString id) const override {
+            return id.contains("3305C");
+        }
+
         QString description() const override {
             return QString("%1 Programmable DC Power Supply").arg(name());
         }

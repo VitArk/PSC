@@ -33,73 +33,73 @@ namespace Protocol {
             };
         }
 
-        virtual IRequest* createRequestLockOperationPanel(bool lock) {
+        virtual IMessage* createRequestLockOperationPanel(bool lock) {
             return new LockOperationPanel(lock);
         }
-        virtual IRequest* createRequestIsOperationPanelLocked() {
+        virtual IMessage* createRequestIsOperationPanelLocked() {
             return new IsOperationPanelLocked();
         }
-        virtual IRequest* createRequestSetCurrent(TChannel channel, double value) {
+        virtual IMessage* createRequestSetCurrent(TChannel channel, double value) {
             return new SetCurrent(channel, value);
         }
-        virtual IRequest* createRequestGetCurrent(TChannel channel) {
+        virtual IMessage* createRequestGetCurrent(TChannel channel) {
             return new GetCurrent(channel);
         }
-        virtual IRequest* createRequestSetVoltage(TChannel channel, double value) {
+        virtual IMessage* createRequestSetVoltage(TChannel channel, double value) {
             return new SetVoltage(channel, value);
         }
-        virtual IRequest* createRequestGetVoltage(TChannel channel) {
+        virtual IMessage* createRequestGetVoltage(TChannel channel) {
             return new GetVoltage(channel);
         }
-        virtual IRequest* createRequestGetOutputCurrent(TChannel channel) {
+        virtual IMessage* createRequestGetOutputCurrent(TChannel channel) {
             return new GetOutputCurrent(channel);
         }
-        virtual IRequest* createRequestGetOutputVoltage(TChannel channel) {
+        virtual IMessage* createRequestGetOutputVoltage(TChannel channel) {
             return new GetOutputVoltage(channel);
         }
-        virtual IRequest* createRequestEnableOutputSwitch(bool enable) {
+        virtual IMessage* createRequestEnableOutputSwitch(bool enable) {
             return new EnableOutputSwitch(enable);
         }
-        virtual IRequest* createRequestEnableBuzzer(bool enable) {
+        virtual IMessage* createRequestEnableBuzzer(bool enable) {
             return new EnableBuzzer(enable);
         }
-        virtual IRequest* createRequestIsBuzzerEnabled() {
+        virtual IMessage* createRequestIsBuzzerEnabled() {
             return new IsBuzzerEnabled();
         }
-        virtual IRequest* createRequestGetDeviceStatus() {
+        virtual IMessage* createRequestGetDeviceStatus() {
             return new GetDeviceStatus();
         }
-        virtual IRequest* createRequestGetDeviceID() {
+        virtual IMessage* createRequestGetDeviceID() {
             return new GetDeviceID();
         }
-        virtual IRequest* createRequestApplySettings(TMemoryKey key) {
+        virtual IMessage* createRequestApplySettings(TMemoryKey key) {
             return new ApplySettings(key);
         }
-        virtual IRequest* createRequestGetActiveSettings() {
+        virtual IMessage* createRequestGetActiveSettings() {
             return new GetActiveSettings();
         }
-        virtual IRequest* createRequestSaveSettings(TMemoryKey key) {
+        virtual IMessage* createRequestSaveSettings(TMemoryKey key) {
             return new SaveSettings(key);
         }
-        virtual IRequest* createRequestChangeOutputConnectionMethod(TOutputConnectionMethod method) {
+        virtual IMessage* createRequestChangeOutputConnectionMethod(TOutputConnectionMethod method) {
             return new ChangeOutputConnectionMethod(method);
         }
-        virtual IRequest* createRequestEnableOverCurrentProtection(bool enable) {
+        virtual IMessage* createRequestEnableOverCurrentProtection(bool enable) {
             return new EnableOverCurrentProtection(enable);
         }
-        virtual IRequest* createRequestEnableOverVoltageProtection(bool enable) {
+        virtual IMessage* createRequestEnableOverVoltageProtection(bool enable) {
             return new EnableOverVoltageProtection(enable);
         }
-        virtual IRequest* createRequestSetOverCurrentProtectionValue(TChannel channel, double current) {
+        virtual IMessage* createRequestSetOverCurrentProtectionValue(TChannel channel, double current) {
             return new SetOverCurrentProtectionValue(channel, current);
         }
-        virtual IRequest* createRequestGetOverCurrentProtectionValue(TChannel channel) {
+        virtual IMessage* createRequestGetOverCurrentProtectionValue(TChannel channel) {
             return new GetOverCurrentProtectionValue(channel);
         }
-        virtual IRequest* createRequestSetOverVoltageProtectionValue(TChannel channel, double voltage) {
+        virtual IMessage* createRequestSetOverVoltageProtectionValue(TChannel channel, double voltage) {
             return new SetOverVoltageProtectionValue(channel, voltage);
         }
-        virtual IRequest* createRequestGetOverVoltageProtectionValue(TChannel channel) {
+        virtual IMessage* createRequestGetOverVoltageProtectionValue(TChannel channel) {
             return new GetOverVoltageProtectionValue(channel);
         }
     };
