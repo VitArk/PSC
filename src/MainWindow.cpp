@@ -33,8 +33,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 40);
     mStatusBarDeviceLock = new QLabel(this);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceLock, 120);
+    mStatusDebug = new QLabel(this);
+    QMainWindow::statusBar()->addPermanentWidget(mStatusDebug, 120);
     mStatusBarConnectionStatus = new QLabel(this);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarConnectionStatus);
+
 
     connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::slotEnableReadonlyMode);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::onSerialPortDoClose);
@@ -108,10 +111,17 @@ void MainWindow::slotSerialPortErrorOccurred(QString error) {
     QMessageBox::warning(this, tr("Serial Port Error Occurred"),error, QMessageBox::Close);
 }
 
-void MainWindow::slotSerialConnectionReady(DeviceInfo info) {
+void MainWindow::slotDeviceReady(DeviceInfo info) {
     slotDisplayDeviceID(info.name);
     setControlLimits(info);
     enableControls(true);
+}
+
+void MainWindow::slotUnknownDevice(QString deviceID) {
+    QMessageBox::warning(this, tr("Unknown Device"),
+                         tr("Unknown Device (ID: %1)").arg(deviceID),
+                         QMessageBox::Close
+    );
 }
 
 void MainWindow::slotSerialPortClosed() {
@@ -596,6 +606,7 @@ void MainWindow::slotShowAboutBox() {
     aboutBox.setTextFormat(Qt::RichText);
     aboutBox.exec();
 }
+
 
 
 

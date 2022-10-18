@@ -8,7 +8,7 @@
 #include <QTimer>
 #include <QDebug>
 
-#define DELAY_BETWEEN_REQUEST_MS 40
+#define DELAY_BETWEEN_REQUEST_MS 50
 
 Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setDataBits(QSerialPort::Data8);
@@ -50,8 +50,11 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
 
 void Communication::closeSerialPort() {
     mQueueTimer.stop();
-    while (!mMessageQueue.isEmpty()){
-        delete mMessageQueue.dequeue();
+    while (!mRequestQueue.isEmpty()){
+        delete mRequestQueue.dequeue();
+    }
+    while (!mResponseQueue.isEmpty()){
+        delete mResponseQueue.dequeue();
     }
 
     delete mDeviceProtocol, mDeviceProtocol = nullptr;
@@ -72,69 +75,12 @@ void Communication::slotSerialErrorOccurred(QSerialPort::SerialPortError error) 
     }
 }
 
-
-
 void Communication::slotProcessRequestQueue() {
-    serialSendMessage();
+    processRequestQueue();
 }
 
-void Communication::slotSerialReadData() {
-    if (mMessageQueue.isEmpty()) {
-        mSerialPort.clear();
-        return;
-    }
-
-    auto request = mMessageQueue.head();
-    if (mSerialPort.bytesAvailable() >= request->answerLength()) {
-        QByteArray buff(mSerialPort.read(request->answerLength()));
-        dispatchData(*request, buff);
-        delete mMessageQueue.dequeue();
-
-        serialSendMessage(true); // here we are able to send request (process queue) immediately
-    }
-}
-
-void Communication::dispatchData(const Protocol::IMessage &message, const QByteArray &data) {
-    if (typeid(message) == typeid(Protocol::GetDeviceStatus)) {
-        emit onDeviceStatus(DeviceStatus(data.at(0)));
-    } else if (typeid(message) == typeid(Protocol::GetOutputCurrent)) {
-        emit onOutputCurrent(message.channel(), data.toDouble());
-    } else if (typeid(message) == typeid(Protocol::GetOutputVoltage)) {
-        emit onOutputVoltage(message.channel(), data.toDouble());
-    } else if (typeid(message) == typeid(Protocol::GetCurrent)) {
-        emit onSetCurrent(message.channel(), data.toDouble());
-    } else if (typeid(message) == typeid(Protocol::GetVoltage)) {
-        emit onSetVoltage(message.channel(), data.toDouble());
-    } else if (typeid(message) == typeid(Protocol::GetOverCurrentProtectionValue)) {
-        emit onOverCurrentProtectionValue(message.channel(), data.toDouble());
-    } else if (typeid(message) == typeid(Protocol::GetOverVoltageProtectionValue)) {
-        emit onOverVoltageProtectionValue(message.channel(), data.toDouble());
-    } else if (typeid(message) == typeid(Protocol::GetActiveSettings)) {
-        emit onApplySettings(TMemoryKey(data.toInt()));
-    } else if (typeid(message) == typeid(Protocol::IsOperationPanelLocked)) {
-        emit onOperationPanelLocked(bool(data.toInt()));
-    } else if (typeid(message) == typeid(Protocol::IsBuzzerEnabled)) {
-        emit onBuzzerEnabled(bool(data.toInt()));
-    } else if (typeid(message) == typeid(Protocol::GetDeviceID)) {
-        if (mDeviceProtocol != nullptr) {
-            emit onDeviceInfo(data);
-        } else {
-            createDeviceProtocol(data);
-        }
-    }
-}
-
-void Communication::createDeviceProtocol(const QByteArray &data) {
-    mDeviceProtocol = Protocol::Factory::create(data);
-    if (mDeviceProtocol != nullptr) {
-        emit onSerialPortReady(mDeviceProtocol->info());
-    } else {
-        emit onUnknownDevice(data);
-    }
-}
-
-void Communication::serialSendMessage(bool ignoreDelay) {
-    if (mMessageQueue.isEmpty()) {
+void Communication::processRequestQueue(bool ignoreDelay) {
+    if (mRequestQueue.isEmpty()) {
         return;
     }
 
@@ -142,19 +88,84 @@ void Communication::serialSendMessage(bool ignoreDelay) {
         return;
     }
 
-    auto request = mMessageQueue.head();
-    mSerialPort.write(request->query());
+    auto pMessage = mRequestQueue.dequeue();
+    mSerialPort.write(pMessage->query());
+    qDebug() << "serial write" << pMessage->query() << "exp resp" << bool(pMessage->answerLength());
     mSerialPort.flush();
     mRequestNextTime = QTime::currentTime().addMSecs(DELAY_BETWEEN_REQUEST_MS);
 
-    if (request->answerLength() == 0) { // not expect response, remove
-        delete mMessageQueue.dequeue();
+    // if response is not expected just remove the message, otherwise move the message into response queue.
+    if (pMessage->answerLength() == 0) {
+        delete pMessage;
+    } else {
+        mResponseQueue.enqueue(pMessage);
+    }
+}
+
+void Communication::slotSerialReadData() {
+    if (mResponseQueue.isEmpty()) {
+        mSerialPort.clear();
+        return;
+    }
+
+    auto pMessage = mResponseQueue.head();
+    if (mSerialPort.bytesAvailable() >= pMessage->answerLength()) {
+        QByteArray buff(mSerialPort.read(pMessage->answerLength()));
+        dispatchData(*pMessage, buff);
+        delete mResponseQueue.dequeue();
+
+        processRequestQueue(true); // here we are able to send pMessage (process queue) immediately
+    }
+}
+
+void Communication::dispatchData(const Protocol::IMessage &message, const QByteArray &data) {
+    //qDebug() << "resp data" << data;
+    bool ok = true;
+    if (typeid(message) == typeid(Protocol::GetDeviceStatus)) {
+        emit onDeviceStatus(DeviceStatus(data.at(0)));
+    } else if (typeid(message) == typeid(Protocol::GetOutputCurrent)) {
+        emit onOutputCurrent(message.channel(), data.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::GetOutputVoltage)) {
+        emit onOutputVoltage(message.channel(), data.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::GetCurrent)) {
+        emit onSetCurrent(message.channel(), data.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::GetVoltage)) {
+        emit onSetVoltage(message.channel(), data.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::GetOverCurrentProtectionValue)) {
+        emit onOverCurrentProtectionValue(message.channel(), data.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::GetOverVoltageProtectionValue)) {
+        emit onOverVoltageProtectionValue(message.channel(), data.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::GetActiveSettings)) {
+        emit onApplySettings(TMemoryKey(data.toInt(&ok)));
+    } else if (typeid(message) == typeid(Protocol::IsOperationPanelLocked)) {
+        emit onOperationPanelLocked(bool(data.toInt(&ok)));
+    } else if (typeid(message) == typeid(Protocol::IsBuzzerEnabled)) {
+        emit onBuzzerEnabled(bool(data.toInt(&ok)));
+    } else if (typeid(message) == typeid(Protocol::GetDeviceID)) {
+        if (mDeviceProtocol != nullptr) {
+            emit onDeviceInfo(data);
+        } else {
+            createDeviceProtocol(data);
+        }
+    } else {
+        qDebug() << "Unknown response (message)" << data;
+    }
+
+    qDebug() << "resp data" << data << "is error detected" << !ok;
+}
+
+void Communication::createDeviceProtocol(const QByteArray &data) {
+    mDeviceProtocol = Protocol::Factory::create(data);
+    if (mDeviceProtocol != nullptr) {
+        emit onDeviceReady(mDeviceProtocol->info());
+    } else {
+        emit onUnknownDevice(data);
     }
 }
 
 void Communication::enqueueMessage(Protocol::IMessage *message) {
     if (mSerialPort.isOpen()) {
-        mMessageQueue.enqueue(message);
+        mRequestQueue.enqueue(message);
     } else {
         delete message;
     }

@@ -28,6 +28,10 @@ namespace Protocol {
         double maxChannelVoltage() const override {
             return 30.00; // Volts
         }
+
+        int activeChannels() const override {
+            return 2;
+        }
     };
 }
 

@@ -7,7 +7,7 @@
 
 #include <QString>
 #include "Commons.h"
-#include "Protocol.h"
+#include "Messages.h"
 
 namespace Protocol {
     class Device {
@@ -18,6 +18,7 @@ namespace Protocol {
         virtual QString description() const = 0;
         virtual double maxChannelCurrent() const = 0;
         virtual double maxChannelVoltage() const = 0;
+        virtual int activeChannels() const = 0;
 
         virtual bool checkID(QString id) const {
             return id == this->id();
@@ -30,6 +31,7 @@ namespace Protocol {
                 .description = description(),
                 .maxChannelCurrent = maxChannelCurrent(),
                 .maxChannelVoltage = maxChannelVoltage(),
+                .activeChannels = activeChannels(),
             };
         }
 

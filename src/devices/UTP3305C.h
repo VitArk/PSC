@@ -17,10 +17,6 @@ namespace Protocol {
             return "P3305C%**";
         };
 
-        bool checkID(QString id) const override {
-            return id.contains("3305C");
-        }
-
         QString description() const override {
             return QString("%1 Programmable DC Power Supply").arg(name());
         }
@@ -32,6 +28,10 @@ namespace Protocol {
         double maxChannelVoltage() const override {
             return 31.00; // Volts
         };
+
+        int activeChannels() const override {
+            return 2;
+        }
     };
 }
 #endif //PSM_UTP3305C_H

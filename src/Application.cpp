@@ -26,7 +26,8 @@ void Application::slotAppRun() {
     connect(mCommunication, &Communication::onSerialPortErrorOccurred, mMainWindow, &MainWindow::slotSerialPortErrorOccurred);
     connect(mCommunication, &Communication::onSerialPortOpened, mMainWindow, &MainWindow::slotSerialPortOpened);
     connect(mCommunication, &Communication::onSerialPortClosed, this, &Application::slotSerialPortClosed);
-    connect(mCommunication, &Communication::onSerialPortReady, this, &Application::slotStartWorking);
+    connect(mCommunication, &Communication::onDeviceReady, this, &Application::slotStartWorking);
+    connect(mCommunication, &Communication::onUnknownDevice, mMainWindow, &MainWindow::slotUnknownDevice);
 
     connect(mCommunication, &Communication::onDeviceInfo, mMainWindow, &MainWindow::slotDisplayDeviceID);
 
@@ -66,7 +67,7 @@ void Application::slotAppRun() {
 }
 
 void Application::slotStartWorking(DeviceInfo info) {
-    mMainWindow->slotSerialConnectionReady(info);
+    mMainWindow->slotDeviceReady(info);
 
 //    mCommunication->getDeviceID();
     mCommunication->getOverCurrentProtectionValue(Channel1);

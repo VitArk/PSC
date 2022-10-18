@@ -14,7 +14,6 @@ namespace Protocol {
     public:
         static Device *create(const QString& deviceID) {
             Device *device = nullptr;
-            qDebug() << deviceID;
             if (UTP3305C().checkID(deviceID)) {
                 return new UTP3305C();
             }

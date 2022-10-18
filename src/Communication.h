@@ -25,7 +25,7 @@ signals:
     void onSerialPortOpened(QString serialPortName, int baudRate);
     void onSerialPortClosed();
     void onSerialPortErrorOccurred(QString error);
-    void onSerialPortReady(DeviceInfo info);
+    void onDeviceReady(DeviceInfo info);
     void onUnknownDevice(QString deviceID);
 
     void onOperationPanelLocked(bool locked);
@@ -74,14 +74,15 @@ private slots:
     void slotProcessRequestQueue();
 
 private:
-    void serialSendMessage(bool ignoreDelay = false);
+    void processRequestQueue(bool ignoreDelay = false);
     void dispatchData(const Protocol::IMessage &message, const QByteArray &data);
     void enqueueMessage(Protocol::IMessage *message);
     void createDeviceProtocol(const QByteArray &data);
 
 private:
     QSerialPort                  mSerialPort;
-    QQueue<Protocol::IMessage*>  mMessageQueue;
+    QQueue<Protocol::IMessage*>  mRequestQueue;
+    QQueue<Protocol::IMessage*>  mResponseQueue;
     QTimer                       mQueueTimer;
     QTime                        mRequestNextTime;
     Protocol::Device*            mDeviceProtocol = nullptr;

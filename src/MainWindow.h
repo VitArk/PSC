@@ -39,7 +39,8 @@ public slots:
     void slotSerialPortOpened(const QString& serialPortName, int baudRate);
     void slotSerialPortClosed();
     void slotSerialPortErrorOccurred(QString error);
-    void slotSerialConnectionReady(DeviceInfo info);
+    void slotDeviceReady(DeviceInfo info);
+    void slotUnknownDevice(QString deviceID);
 
     void slotShowOutputConnectionMethod(OutputConnectionMethod method);
     void slotShowOutputProtectionMode(OutputProtection protection);
@@ -96,6 +97,7 @@ private:
     QLabel *mStatusBarConnectionStatus;
     QLabel *mStatusBarDeviceInfo;
     QLabel *mStatusBarDeviceLock;
+    QLabel *mStatusDebug;
 
     bool mIsSerialConnected = false;
 

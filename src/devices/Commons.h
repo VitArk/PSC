@@ -11,6 +11,7 @@ struct DeviceInfo{
     QString description;
     double maxChannelCurrent;
     double maxChannelVoltage;
+    int activeChannels;
 };
 
 enum Channel {
