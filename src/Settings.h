@@ -18,6 +18,8 @@ public:
     QString serialPortName() const;
     void setSerialPortName(QString name);
 
+    bool isDebugModeEnabled() const;
+    void setDebugModeEnabled(bool enabled);
 private:
     QSettings mSettings;
 

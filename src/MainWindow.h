@@ -6,6 +6,7 @@
 #include "devices/Commons.h"
 #include "Debounce.h"
 #include "Settings.h"
+#include "DebugInfo.h"
 
 namespace Ui {
 class MainWindow;
@@ -23,6 +24,7 @@ public:
 signals:
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
     void onSerialPortDoClose();
+    void onEnableDebugMode(bool enable);
 
     void onOutputConnectionMethodChanged(TOutputConnectionMethod method);
     void onOutputProtectionChanged(TOutputProtection protection);
@@ -41,6 +43,7 @@ public slots:
     void slotSerialPortErrorOccurred(QString error);
     void slotDeviceReady(DeviceInfo info);
     void slotUnknownDevice(QString deviceID);
+    void slotShowDebugInfo(DebugInfo info);
 
     void slotShowOutputConnectionMethod(OutputConnectionMethod method);
     void slotShowOutputProtectionMode(OutputProtection protection);
@@ -72,6 +75,7 @@ private slots:
     void slotControlValueChangedDebounced(double value);
     void slotOverProtectionChanged();
     void slotEnableReadonlyMode(bool enable);
+    void slotEnableDebugMode(bool enable);
 
     // Serial port
     void slotSerialPortConnectionToggled(bool toggled);

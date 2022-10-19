@@ -1127,6 +1127,7 @@
     <addaction name="separator"/>
     <addaction name="actionBuzzer"/>
     <addaction name="separator"/>
+    <addaction name="actionDebugMode"/>
    </widget>
    <widget class="QMenu" name="menuConnection">
     <property name="title">
@@ -1199,6 +1200,14 @@
    </property>
    <property name="text">
     <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionDebugMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Debug Mode</string>
    </property>
   </action>
  </widget>

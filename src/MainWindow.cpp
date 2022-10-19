@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onLockOperationPanelChanged);
     connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onBuzzerChanged);
     connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
+    connect(ui->actionDebugMode, &QAction::triggered, this, &MainWindow::slotEnableDebugMode);
 
     connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
     connect(ui->rdoBtnOutParallel, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
@@ -80,7 +81,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&mDebouncedCh2V, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
     connect(&mDebouncedCh2A, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
 
-
     connect(ui->spinCh1OVP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
     connect(ui->spinCh2OVP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
     connect(ui->spinCh1OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
@@ -105,6 +105,8 @@ void MainWindow::slotSerialPortOpened(const QString &serialPortName, int baudRat
     mIsSerialConnected = true;
     mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(serialPortName).arg(baudRate));
     ui->actionDisconnect->setEnabled(true);
+
+    slotEnableDebugMode(mSettings.isDebugModeEnabled());
 }
 
 void MainWindow::slotSerialPortErrorOccurred(QString error) {
@@ -122,6 +124,13 @@ void MainWindow::slotUnknownDevice(QString deviceID) {
                          tr("Unknown Device (ID: %1)").arg(deviceID),
                          QMessageBox::Close
     );
+}
+
+void MainWindow::slotShowDebugInfo(DebugInfo info) {
+    mStatusDebug->setText(tr("Q:%1 E:%2 D:%3")
+                                  .arg(info.queueSize)
+                                  .arg(info.errorCount)
+                                  .arg(info.currentRequestDelay));
 }
 
 void MainWindow::slotSerialPortClosed() {
@@ -178,6 +187,12 @@ void MainWindow::setControlLimits(const DeviceInfo &info) {
 void MainWindow::slotEnableReadonlyMode(bool enable) {
     ui->actionReadonlyMode->setChecked(enable);
     enableControls(!enable);
+}
+
+void MainWindow::slotEnableDebugMode(bool enable) {
+    ui->actionDebugMode->setChecked(enable);
+    mSettings.setDebugModeEnabled(enable);
+    emit onEnableDebugMode(enable);
 }
 
 void MainWindow::slotDisplayDeviceID(const QString &deviceID) {

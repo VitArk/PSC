@@ -15,6 +15,9 @@
 #include "devices/Commons.h"
 #include "devices/Device.h"
 #include "DeviceStatus.h"
+#include "DebugInfo.h"
+
+#define DELAY_BETWEEN_REQUESTS_MS 50
 
 class Communication : public QObject {
     Q_OBJECT
@@ -27,6 +30,7 @@ signals:
     void onSerialPortErrorOccurred(QString error);
     void onDeviceReady(DeviceInfo info);
     void onUnknownDevice(QString deviceID);
+    void onDebugInfoReady(DebugInfo info);
 
     void onOperationPanelLocked(bool locked);
     void onSetCurrent(TChannel channel, double current);
@@ -43,6 +47,7 @@ signals:
 public slots:
     void openSerialPort(const QString &name, int baudRate);
     void closeSerialPort();
+    void enableDebugMode(bool enable);
 
     void lockOperationPanel(bool lock);
     void isOperationPanelLocked();
@@ -72,6 +77,7 @@ private slots:
     void slotSerialReadData();
     void slotSerialErrorOccurred(QSerialPort::SerialPortError error);
     void slotProcessRequestQueue();
+    void slotCollectDebugInfo();
 
 private:
     void processRequestQueue(bool ignoreDelay = false);
@@ -87,7 +93,9 @@ private:
     QTime                        mRequestNextTime;
     Protocol::Device*            mDeviceProtocol = nullptr;
 
-
+    QTimer                       mDebugTimer;
+    int                          mErrorCount = 0;
+    int                          mDelayBetweenRequests = DELAY_BETWEEN_REQUESTS_MS;
 };
 
 

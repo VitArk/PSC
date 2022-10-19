@@ -29,3 +29,11 @@ QString Settings::serialPortName() const {
 void Settings::setSerialPortName(QString name) {
     setValue("serial-port/name", name);
 }
+
+bool Settings::isDebugModeEnabled() const {
+    return mSettings.value("debug-mode/enabled").toBool();
+}
+
+void Settings::setDebugModeEnabled(bool enabled) {
+    setValue("debug-mode/enabled", enabled);
+}

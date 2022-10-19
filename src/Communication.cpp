@@ -8,7 +8,7 @@
 #include <QTimer>
 #include <QDebug>
 
-#define DELAY_BETWEEN_REQUEST_MS 50
+#define COLLECT_DEBUG_INFO_MS 500
 
 Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setDataBits(QSerialPort::Data8);
@@ -23,7 +23,7 @@ Communication::Communication(QObject *parent) : QObject(parent){
     connect(&mSerialPort, &QSerialPort::errorOccurred, this, &Communication::slotSerialErrorOccurred);
 
     connect(&mQueueTimer, &QTimer::timeout, this, &Communication::slotProcessRequestQueue);
-
+    connect(&mDebugTimer, &QTimer::timeout, this, &Communication::slotCollectDebugInfo);
 }
 
 Communication::~Communication() {
@@ -92,7 +92,7 @@ void Communication::processRequestQueue(bool ignoreDelay) {
     mSerialPort.write(pMessage->query());
     qDebug() << "serial write" << pMessage->query() << "exp resp" << bool(pMessage->answerLength());
     mSerialPort.flush();
-    mRequestNextTime = QTime::currentTime().addMSecs(DELAY_BETWEEN_REQUEST_MS);
+    mRequestNextTime = QTime::currentTime().addMSecs(DELAY_BETWEEN_REQUESTS_MS);
 
     // if response is not expected just remove the message, otherwise move the message into response queue.
     if (pMessage->answerLength() == 0) {
@@ -151,6 +151,9 @@ void Communication::dispatchData(const Protocol::IMessage &message, const QByteA
         qDebug() << "Unknown response (message)" << data;
     }
 
+    if (!ok) {
+        ++mErrorCount;
+    }
     qDebug() << "resp data" << data << "is error detected" << !ok;
 }
 
@@ -169,6 +172,22 @@ void Communication::enqueueMessage(Protocol::IMessage *message) {
     } else {
         delete message;
     }
+}
+
+void Communication::enableDebugMode(bool enable) {
+    if (enable) {
+        mDebugTimer.start(COLLECT_DEBUG_INFO_MS);
+    } else {
+        mDebugTimer.stop();
+    }
+}
+
+void Communication::slotCollectDebugInfo() {
+    emit onDebugInfoReady(DebugInfo{
+        .queueSize = mResponseQueue.length(),
+        .errorCount = mErrorCount,
+        .currentRequestDelay = mDelayBetweenRequests,
+    });
 }
 
 void Communication::lockOperationPanel(bool lock) {
@@ -262,6 +281,9 @@ void Communication::setOverVoltageProtectionValue(TChannel channel, double volta
 void Communication::getOverVoltageProtectionValue(TChannel channel) {
     enqueueMessage(mDeviceProtocol->createRequestGetOverVoltageProtectionValue(channel));
 }
+
+
+
 
 
 
