@@ -36,73 +36,73 @@ namespace Protocol {
         }
 
         virtual IMessage* createRequestLockOperationPanel(bool lock) {
-            return new LockOperationPanel(lock);
+            return new MessageLockOperationPanel(lock);
         }
         virtual IMessage* createRequestIsOperationPanelLocked() {
-            return new IsOperationPanelLocked();
+            return new MessageIsOperationPanelLocked();
         }
         virtual IMessage* createRequestSetCurrent(TChannel channel, double value) {
-            return new SetCurrent(channel, value);
+            return new MessageSetCurrent(channel, value);
         }
         virtual IMessage* createRequestGetCurrent(TChannel channel) {
-            return new GetCurrent(channel);
+            return new MessageGetCurrent(channel);
         }
         virtual IMessage* createRequestSetVoltage(TChannel channel, double value) {
-            return new SetVoltage(channel, value);
+            return new MessageSetVoltage(channel, value);
         }
         virtual IMessage* createRequestGetVoltage(TChannel channel) {
-            return new GetVoltage(channel);
+            return new MessageGetVoltage(channel);
         }
         virtual IMessage* createRequestGetOutputCurrent(TChannel channel) {
-            return new GetOutputCurrent(channel);
+            return new MessageGetOutputCurrent(channel);
         }
         virtual IMessage* createRequestGetOutputVoltage(TChannel channel) {
-            return new GetOutputVoltage(channel);
+            return new MessageGetOutputVoltage(channel);
         }
         virtual IMessage* createRequestEnableOutputSwitch(bool enable) {
-            return new EnableOutputSwitch(enable);
+            return new MessageEnableOutputSwitch(enable);
         }
         virtual IMessage* createRequestEnableBuzzer(bool enable) {
-            return new EnableBuzzer(enable);
+            return new MessageEnableBuzzer(enable);
         }
         virtual IMessage* createRequestIsBuzzerEnabled() {
-            return new IsBuzzerEnabled();
+            return new MessageIsBuzzerEnabled();
         }
         virtual IMessage* createRequestGetDeviceStatus() {
-            return new GetDeviceStatus();
+            return new MessageGetDeviceStatus();
         }
         virtual IMessage* createRequestGetDeviceID() {
-            return new GetDeviceID();
+            return new MessageGetDeviceID();
         }
         virtual IMessage* createRequestSetPreset(TMemoryKey key) {
-            return new SetPreset(key);
+            return new MessageSetPreset(key);
         }
         virtual IMessage* createRequestGetPreset() {
-            return new GetPreset();
+            return new MessageGetPreset();
         }
         virtual IMessage* createRequestSavePreset(TMemoryKey key) {
-            return new SavePreset(key);
+            return new MessageSavePreset(key);
         }
         virtual IMessage* createRequestChangeOutputConnectionMethod(TOutputConnectionMethod method) {
-            return new ChangeOutputConnectionMethod(method);
+            return new MessageChangeOutputConnectionMethod(method);
         }
         virtual IMessage* createRequestEnableOverCurrentProtection(bool enable) {
-            return new EnableOverCurrentProtection(enable);
+            return new MessageEnableOverCurrentProtection(enable);
         }
         virtual IMessage* createRequestEnableOverVoltageProtection(bool enable) {
-            return new EnableOverVoltageProtection(enable);
+            return new MessageEnableOverVoltageProtection(enable);
         }
         virtual IMessage* createRequestSetOverCurrentProtectionValue(TChannel channel, double current) {
-            return new SetOverCurrentProtectionValue(channel, current);
+            return new MessageSetOverCurrentProtectionValue(channel, current);
         }
         virtual IMessage* createRequestGetOverCurrentProtectionValue(TChannel channel) {
-            return new GetOverCurrentProtectionValue(channel);
+            return new MessageGetOverCurrentProtectionValue(channel);
         }
         virtual IMessage* createRequestSetOverVoltageProtectionValue(TChannel channel, double voltage) {
-            return new SetOverVoltageProtectionValue(channel, voltage);
+            return new MessageSetOverVoltageProtectionValue(channel, voltage);
         }
         virtual IMessage* createRequestGetOverVoltageProtectionValue(TChannel channel) {
-            return new GetOverVoltageProtectionValue(channel);
+            return new MessageGetOverVoltageProtectionValue(channel);
         }
     };
 }

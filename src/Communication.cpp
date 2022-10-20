@@ -44,7 +44,7 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
 
         mIsBusy = false;
         // Request device ID for initialize correct device protocol.
-        enqueueMessage(new Protocol::GetDeviceID()); // TODO: the request should use blocked method (waitForRead)
+        enqueueMessage(new Protocol::MessageGetDeviceID()); // TODO: the request should use blocked method (waitForRead)
     } else {
         emit onSerialPortErrorOccurred(mSerialPort.errorString());
     }
@@ -132,27 +132,27 @@ void Communication::slotResponseTimeout() {
 void Communication::dispatchData(const Protocol::IMessage &message, const QByteArray &data) {
     //qDebug() << "resp data" << data;
     bool ok = true;
-    if (typeid(message) == typeid(Protocol::GetDeviceStatus)) {
+    if (typeid(message) == typeid(Protocol::MessageGetDeviceStatus)) {
         emit onDeviceStatus(DeviceStatus(data.at(0)));
-    } else if (typeid(message) == typeid(Protocol::GetOutputCurrent)) {
+    } else if (typeid(message) == typeid(Protocol::MessageGetOutputCurrent)) {
         emit onOutputCurrent(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::GetOutputVoltage)) {
+    } else if (typeid(message) == typeid(Protocol::MessageGetOutputVoltage)) {
         emit onOutputVoltage(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::GetCurrent)) {
+    } else if (typeid(message) == typeid(Protocol::MessageGetCurrent)) {
         emit onSetCurrent(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::GetVoltage)) {
+    } else if (typeid(message) == typeid(Protocol::MessageGetVoltage)) {
         emit onSetVoltage(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::GetOverCurrentProtectionValue)) {
+    } else if (typeid(message) == typeid(Protocol::MessageGetOverCurrentProtectionValue)) {
         emit onOverCurrentProtectionValue(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::GetOverVoltageProtectionValue)) {
+    } else if (typeid(message) == typeid(Protocol::MessageGetOverVoltageProtectionValue)) {
         emit onOverVoltageProtectionValue(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::GetPreset)) {
+    } else if (typeid(message) == typeid(Protocol::MessageGetPreset)) {
         emit onActiveSettings(TMemoryKey(data.toInt(&ok)));
-    } else if (typeid(message) == typeid(Protocol::IsOperationPanelLocked)) {
+    } else if (typeid(message) == typeid(Protocol::MessageIsOperationPanelLocked)) {
         emit onOperationPanelLocked(bool(data.toInt(&ok)));
-    } else if (typeid(message) == typeid(Protocol::IsBuzzerEnabled)) {
+    } else if (typeid(message) == typeid(Protocol::MessageIsBuzzerEnabled)) {
         emit onBuzzerEnabled(bool(data.toInt(&ok)));
-    } else if (typeid(message) == typeid(Protocol::GetDeviceID)) {
+    } else if (typeid(message) == typeid(Protocol::MessageGetDeviceID)) {
         if (mDeviceProtocol != nullptr) {
             emit onDeviceInfo(data);
         } else {

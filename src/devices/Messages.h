@@ -27,13 +27,13 @@ namespace Protocol {
      * LOCK<NR2>
      * Function Description:Lock power supply operation panel
      * Example: LOCK1
-     * LockOperationPanel power supply operation panel
+     * MessageLockOperationPanel power supply operation panel
      * Example:LOCK0
      * Unlock power supply operation panel
      */
-    class LockOperationPanel : public IMessage {
+    class MessageLockOperationPanel : public IMessage {
     public:
-        LockOperationPanel(bool lock) {
+        MessageLockOperationPanel(bool lock) {
             mLock = lock;
         }
 
@@ -50,7 +50,7 @@ namespace Protocol {
      * Example: LOCK?
      * Response: 0 | 1
      */
-    class IsOperationPanelLocked : public IMessage {
+    class MessageIsOperationPanelLocked : public IMessage {
     public:
         QByteArray query() const override {
             return "LOCK?";
@@ -72,9 +72,9 @@ namespace Protocol {
      * Example: ISET1:2.225
      * Set current value as 2.225A
      */
-    class SetCurrent : public IMessage {
+    class MessageSetCurrent : public IMessage {
     public:
-        SetCurrent(TChannel channel, double current) {
+        MessageSetCurrent(TChannel channel, double current) {
             mChannel = channel;
             mCurrent = current;
         }
@@ -93,9 +93,9 @@ namespace Protocol {
      * Example: ISET1?
      * Returns current value
      */
-    class GetCurrent : public IMessage {
+    class MessageGetCurrent : public IMessage {
     public:
-        GetCurrent(TChannel channel) {
+        MessageGetCurrent(TChannel channel) {
             mChannel = channel;
         }
 
@@ -114,9 +114,9 @@ namespace Protocol {
      * Example: VSET1:20.50
      * Set voltage value for channel 1 as 20.50V
      */
-    class SetVoltage : public IMessage {
+    class MessageSetVoltage : public IMessage {
     public:
-        SetVoltage(TChannel channel, double voltage) {
+        MessageSetVoltage(TChannel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
@@ -135,9 +135,9 @@ namespace Protocol {
      * Example: VSET1?
      * Returns voltage value
      */
-    class GetVoltage : public IMessage {
+    class MessageGetVoltage : public IMessage {
     public:
-        GetVoltage(TChannel channel) {
+        MessageGetVoltage(TChannel channel) {
             mChannel = channel;
         }
 
@@ -156,9 +156,9 @@ namespace Protocol {
      * Example: IOUT1?
      * Read the set current value
      */
-    class GetOutputCurrent : public IMessage {
+    class MessageGetOutputCurrent : public IMessage {
     public:
-        GetOutputCurrent(TChannel channel) {
+        MessageGetOutputCurrent(TChannel channel) {
             mChannel = channel;
         }
 
@@ -177,9 +177,9 @@ namespace Protocol {
     * Example: VOUT1?
     * Read the set voltage value
     */
-    class GetOutputVoltage : public IMessage {
+    class MessageGetOutputVoltage : public IMessage {
     public:
-        GetOutputVoltage(TChannel channel) {
+        MessageGetOutputVoltage(TChannel channel) {
             mChannel = channel;
         }
 
@@ -198,9 +198,9 @@ namespace Protocol {
     * Boolean: 0 off; 1 on
     * Example: OUT1 Turn on power supply setEnableOutputSwitch
     */
-    class EnableOutputSwitch : public IMessage {
+    class MessageEnableOutputSwitch : public IMessage {
     public:
-        EnableOutputSwitch(bool state) {
+        MessageEnableOutputSwitch(bool state) {
             mState = state;
         }
 
@@ -216,9 +216,9 @@ namespace Protocol {
     * Function Description: Turn on/off enableBuzzer
     * Example: BEEP1 Turn on enableBuzzer
     */
-    class EnableBuzzer : public IMessage {
+    class MessageEnableBuzzer : public IMessage {
     public:
-        EnableBuzzer(bool state) {
+        MessageEnableBuzzer(bool state) {
             mState = state;
         }
 
@@ -235,7 +235,7 @@ namespace Protocol {
      * Example: BEEP?
      * Response: 1 | 0
      */
-    class IsBuzzerEnabled : public IMessage {
+    class MessageIsBuzzerEnabled : public IMessage {
     public:
         QByteArray query() const override {
             return "BEEP?";
@@ -264,7 +264,7 @@ namespace Protocol {
      *
      *  ** if bits (2=0 and 3=0) -- Independent method.
      */
-    class GetDeviceStatus : public IMessage {
+    class MessageGetDeviceStatus : public IMessage {
     public:
         QByteArray query() const override {
             return "STATUS?";
@@ -280,7 +280,7 @@ namespace Protocol {
      * Example: *IDN?
      * Contents UNI-T P33XC V2.0 (manufacturer, model name)
      */
-    class GetDeviceID : public IMessage {
+    class MessageGetDeviceID : public IMessage {
     public:
         QByteArray query() const override {
             return "*IDN?";
@@ -295,9 +295,9 @@ namespace Protocol {
      * RCL<NR1>
      * Function Description:Storage recall by pressing keys from M1-M5
      */
-    class SetPreset : public IMessage {
+    class MessageSetPreset : public IMessage {
     public:
-        SetPreset(TMemoryKey key) {
+        MessageSetPreset(TMemoryKey key) {
             mKey = key;
         }
 
@@ -312,7 +312,7 @@ namespace Protocol {
      * RCL?
      * Function Description:Read current/active setting number (keys from M1-M5)
      */
-    class GetPreset : public IMessage {
+    class MessageGetPreset : public IMessage {
     public:
         QByteArray query() const override {
             return "RCL?";
@@ -330,9 +330,9 @@ namespace Protocol {
      * Function Description: Storage setting
      * Example: SAV1 Stores the panel setting in memory number 1
      */
-    class SavePreset : public IMessage {
+    class MessageSavePreset : public IMessage {
     public:
-        SavePreset(TMemoryKey key) {
+        MessageSavePreset(TMemoryKey key) {
             mKey = key;
         }
 
@@ -349,9 +349,9 @@ namespace Protocol {
      * NR1: 0=independent output; 1=series output; 2=parallel setEnableOutputSwitch
      * Example: TRACK1
      */
-    class ChangeOutputConnectionMethod : public IMessage {
+    class MessageChangeOutputConnectionMethod : public IMessage {
     public:
-        ChangeOutputConnectionMethod(TOutputConnectionMethod mode) {
+        MessageChangeOutputConnectionMethod(TOutputConnectionMethod mode) {
             mMode = mode;
         }
 
@@ -368,9 +368,9 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OCP1 Turn on OCP
      */
-    class EnableOverCurrentProtection : public IMessage {
+    class MessageEnableOverCurrentProtection : public IMessage {
     public:
-        EnableOverCurrentProtection(bool state) {
+        MessageEnableOverCurrentProtection(bool state) {
             mState = state;
         }
 
@@ -388,9 +388,9 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OVP1 Turn on OVP
      */
-    class EnableOverVoltageProtection : public IMessage {
+    class MessageEnableOverVoltageProtection : public IMessage {
     public:
-        EnableOverVoltageProtection(bool state) {
+        MessageEnableOverVoltageProtection(bool state) {
             mState = state;
         }
 
@@ -406,9 +406,9 @@ namespace Protocol {
     * Function Description: Set OCP value
     * Example: OCPSET1: 5.100
     */
-    class SetOverCurrentProtectionValue : public IMessage {
+    class MessageSetOverCurrentProtectionValue : public IMessage {
     public:
-        SetOverCurrentProtectionValue(TChannel channel, double value) {
+        MessageSetOverCurrentProtectionValue(TChannel channel, double value) {
             mChannel = channel;
             mValue = value;
         }
@@ -426,9 +426,9 @@ namespace Protocol {
     * Function Description: Get OCP value
     * Example: OCPSET1?
     */
-    class GetOverCurrentProtectionValue : public IMessage {
+    class MessageGetOverCurrentProtectionValue : public IMessage {
     public:
-        GetOverCurrentProtectionValue(TChannel channel) {
+        MessageGetOverCurrentProtectionValue(TChannel channel) {
             mChannel = channel;
         }
 
@@ -450,9 +450,9 @@ namespace Protocol {
      * Function Description: Set OVP value
      * Example: OVPSET1:31.00
      */
-    class SetOverVoltageProtectionValue : public IMessage {
+    class MessageSetOverVoltageProtectionValue : public IMessage {
     public:
-        SetOverVoltageProtectionValue(TChannel channel, double voltage) {
+        MessageSetOverVoltageProtectionValue(TChannel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
@@ -470,9 +470,9 @@ namespace Protocol {
      * Function Description: Grt OVP value
      * Example: OVPSET1?
      */
-    class GetOverVoltageProtectionValue : public IMessage {
+    class MessageGetOverVoltageProtectionValue : public IMessage {
     public:
-        GetOverVoltageProtectionValue(TChannel channel) {
+        MessageGetOverVoltageProtectionValue(TChannel channel) {
             mChannel = channel;
         }
 
