@@ -7,10 +7,10 @@
 
 #include <QObject>
 #include <QApplication>
+#include <QQueue>
 #include "devices/Commons.h"
 #include "Communication.h"
 #include "MainWindow.h"
-#include "Settings.h"
 
 class Application : public QApplication {
     Q_DISABLE_COPY(Application)
@@ -23,7 +23,6 @@ private:
     Communication *mCommunication;
     MainWindow *mMainWindow;
     QTimer     mWorkingTimer;
-    Settings   mSettings;
 
 private slots:
     void slotAppRun();
@@ -34,7 +33,7 @@ private slots:
     void slotWorkingCycle();
     void slotOutputStatus(DeviceStatus status);
     void slotOutputProtectionChanged(TOutputProtection protection);
-
+    void slotTuneWorkingTimerInterval(const CommunicationMetrics &metrics);
 };
 
 

@@ -6,12 +6,16 @@
 #include <QTimer>
 #include <QDebug>
 
+#define WORKING_TIMER_INTERVAL_MIN 250
+#define WORKING_TIMER_INTERVAL_MAX 500
+#define WORKING_TIMER_INTERVAL_STEP 25
+
 Application::Application(int &argc, char **argv, int) : QApplication(argc, argv) {
     mCommunication = new Communication(this);
     mMainWindow = new MainWindow();
 
     mWorkingTimer.setTimerType(Qt::PreciseTimer);
-    mWorkingTimer.setInterval(250); // 150 min (9600), 250 norm.
+    mWorkingTimer.setInterval(WORKING_TIMER_INTERVAL_MIN); // 150 min (9600), 250 norm.
     connect(&mWorkingTimer, &QTimer::timeout, this, &Application::slotWorkingCycle);
 
     QTimer::singleShot(0, this, SLOT(slotAppRun()));
@@ -23,16 +27,14 @@ Application::~Application() {
 void Application::slotAppRun() {
     connect(mMainWindow, &MainWindow::onSerialPortSettingsChanged, mCommunication, &Communication::openSerialPort);
     connect(mMainWindow, &MainWindow::onSerialPortDoClose, mCommunication, &Communication::closeSerialPort);
-    connect(mMainWindow, &MainWindow::onEnableDebugMode, mCommunication, &Communication::enableDebugMode);
-    connect(mCommunication, &Communication::onDebugInfoReady, mMainWindow, &MainWindow::slotShowDebugInfo);
+    connect(mCommunication, &Communication::onMetricsReady, mMainWindow, &MainWindow::slotShowCommunicationMetrics);
+    connect(mCommunication, &Communication::onMetricsReady, this, &Application::slotTuneWorkingTimerInterval);
 
     connect(mCommunication, &Communication::onSerialPortErrorOccurred, mMainWindow, &MainWindow::slotSerialPortErrorOccurred);
     connect(mCommunication, &Communication::onSerialPortOpened, mMainWindow, &MainWindow::slotSerialPortOpened);
     connect(mCommunication, &Communication::onSerialPortClosed, this, &Application::slotSerialPortClosed);
     connect(mCommunication, &Communication::onDeviceReady, this, &Application::slotStartWorking);
     connect(mCommunication, &Communication::onUnknownDevice, mMainWindow, &MainWindow::slotUnknownDevice);
-
-    connect(mCommunication, &Communication::onDeviceInfo, mMainWindow, &MainWindow::slotDisplayDeviceID);
 
     // Lock operation panel
     connect(mMainWindow, &MainWindow::onLockOperationPanelChanged, mCommunication, &Communication::lockOperationPanel);
@@ -130,6 +132,16 @@ void Application::slotOutputStatus(DeviceStatus status) {
 void Application::slotOutputProtectionChanged(TOutputProtection protection) {
     mCommunication->enableOverVoltageProtection(protection == OverVoltageProtectionOnly || protection == OutputProtectionAllEnabled);
     mCommunication->enableOverCurrentProtection(protection == OverCurrentProtectionOnly || protection == OutputProtectionAllEnabled);
+}
+
+void Application::slotTuneWorkingTimerInterval(const CommunicationMetrics &metrics) {
+    int interval = mWorkingTimer.interval();
+    if (metrics.queueSize() > 2) {
+        interval = qMin(interval + WORKING_TIMER_INTERVAL_STEP, WORKING_TIMER_INTERVAL_MAX);
+    } else {
+        interval = qMax(interval - WORKING_TIMER_INTERVAL_STEP, WORKING_TIMER_INTERVAL_MIN);
+    }
+    mWorkingTimer.setInterval(interval);
 }
 
 

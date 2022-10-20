@@ -6,9 +6,11 @@
 #include "devices/Factory.h"
 
 #include <QTimer>
+#include <QThread>
 #include <QDebug>
 
 #define COLLECT_DEBUG_INFO_MS 500
+#define DELAY_BETWEEN_REQUESTS_MS 60
 
 Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setDataBits(QSerialPort::Data8);
@@ -16,14 +18,14 @@ Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setStopBits(QSerialPort::OneStop);
     mSerialPort.setFlowControl(QSerialPort::NoFlowControl);
 
-    mQueueTimer.setInterval(1);
-    mQueueTimer.setTimerType(Qt::PreciseTimer);
-
-    connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::slotSerialReadData, Qt::QueuedConnection);
+    connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::slotSerialReadData);
     connect(&mSerialPort, &QSerialPort::errorOccurred, this, &Communication::slotSerialErrorOccurred);
 
-    connect(&mQueueTimer, &QTimer::timeout, this, &Communication::slotProcessRequestQueue);
-    connect(&mDebugTimer, &QTimer::timeout, this, &Communication::slotCollectDebugInfo);
+    mMetricCollectorTimer.start(COLLECT_DEBUG_INFO_MS);
+    connect(&mMetricCollectorTimer, &QTimer::timeout, this, &Communication::slotCollectMetrics);
+
+    mWaitResponseTimer.setSingleShot(true);
+    connect(&mWaitResponseTimer, &QTimer::timeout, this, &Communication::slotResponseTimeout);
 }
 
 Communication::~Communication() {
@@ -38,26 +40,24 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
 
     if (mSerialPort.open(QIODevice::ReadWrite)) {
         mSerialPort.clear();
-        mQueueTimer.start();
         emit onSerialPortOpened(name, baudRate);
 
+        mIsBusy = false;
         // Request device ID for initialize correct device protocol.
-        enqueueMessage(new Protocol::GetDeviceID());
+        enqueueMessage(new Protocol::GetDeviceID()); // TODO: the request should use blocked method (waitForRead)
     } else {
         emit onSerialPortErrorOccurred(mSerialPort.errorString());
     }
 }
 
 void Communication::closeSerialPort() {
-    mQueueTimer.stop();
-    while (!mRequestQueue.isEmpty()){
-        delete mRequestQueue.dequeue();
-    }
-    while (!mResponseQueue.isEmpty()){
-        delete mResponseQueue.dequeue();
+    while (!mMessageQueue.isEmpty()){
+        delete mMessageQueue.dequeue();
     }
 
     delete mDeviceProtocol, mDeviceProtocol = nullptr;
+
+    mMetrics = CommunicationMetrics();
 
     if (mSerialPort.isOpen()) {
         mSerialPort.close();
@@ -75,48 +75,59 @@ void Communication::slotSerialErrorOccurred(QSerialPort::SerialPortError error) 
     }
 }
 
-void Communication::slotProcessRequestQueue() {
-    processRequestQueue();
-}
 
-void Communication::processRequestQueue(bool ignoreDelay) {
-    if (mRequestQueue.isEmpty()) {
+void Communication::processMessageQueue(bool clearBusyFlag) {
+    if (clearBusyFlag) {
+        mIsBusy = false;
+    }
+
+    if (mIsBusy || mMessageQueue.isEmpty()) {
         return;
     }
 
-    if (!ignoreDelay && mRequestNextTime > QTime::currentTime()) {
-        return;
-    }
-
-    auto pMessage = mRequestQueue.dequeue();
+    mIsBusy = true;
+    auto pMessage = mMessageQueue.head();
     mSerialPort.write(pMessage->query());
-    qDebug() << "serial write" << pMessage->query() << "exp resp" << bool(pMessage->answerLength());
     mSerialPort.flush();
-    mRequestNextTime = QTime::currentTime().addMSecs(DELAY_BETWEEN_REQUESTS_MS);
+    //qDebug() << "send query " << pMessage->query();
 
-    // if response is not expected just remove the message, otherwise move the message into response queue.
-    if (pMessage->answerLength() == 0) {
-        delete pMessage;
+    // if the message is command (response is not expected), just remove the message from queue
+    // and give some time for execute the action on the devise.
+    if (pMessage->isCommand()) {
+        delete mMessageQueue.dequeue();
+        QTimer::singleShot(DELAY_BETWEEN_REQUESTS_MS, this, [this] () {
+            processMessageQueue(true);
+        });
     } else {
-        mResponseQueue.enqueue(pMessage);
+        mWaitResponseTimer.start(DELAY_BETWEEN_REQUESTS_MS * 2);
     }
 }
 
 void Communication::slotSerialReadData() {
-    if (mResponseQueue.isEmpty()) {
+    if (mMessageQueue.isEmpty()) {
         mSerialPort.clear();
         return;
     }
 
-    auto pMessage = mResponseQueue.head();
+    auto pMessage = mMessageQueue.head();
     if (mSerialPort.bytesAvailable() >= pMessage->answerLength()) {
+        mWaitResponseTimer.stop();
+
         QByteArray buff(mSerialPort.read(pMessage->answerLength()));
         dispatchData(*pMessage, buff);
-        delete mResponseQueue.dequeue();
+        delete mMessageQueue.dequeue();
 
-        processRequestQueue(true); // here we are able to send pMessage (process queue) immediately
+        processMessageQueue(true);
     }
 }
+
+void Communication::slotResponseTimeout() {
+    mMetrics.responseTimeoutCount++;
+    mMessageQueue.clear();
+    mSerialPort.clear();
+    mIsBusy = false;
+}
+
 
 void Communication::dispatchData(const Protocol::IMessage &message, const QByteArray &data) {
     //qDebug() << "resp data" << data;
@@ -152,9 +163,8 @@ void Communication::dispatchData(const Protocol::IMessage &message, const QByteA
     }
 
     if (!ok) {
-        ++mErrorCount;
+        mMetrics.errorCount++;
     }
-    qDebug() << "resp data" << data << "is error detected" << !ok;
 }
 
 void Communication::createDeviceProtocol(const QByteArray &data) {
@@ -166,28 +176,32 @@ void Communication::createDeviceProtocol(const QByteArray &data) {
     }
 }
 
-void Communication::enqueueMessage(Protocol::IMessage *message) {
+bool Communication::isQueueOverflow() const {
+    return mMetrics.queueSize() > 5;
+}
+
+void Communication::enqueueMessage(Protocol::IMessage *pMessage) {
     if (mSerialPort.isOpen()) {
-        mRequestQueue.enqueue(message);
+        if (isQueueOverflow() && pMessage->allowDrop()) {
+            mMetrics.droppedCount++;
+            delete pMessage;
+            return;
+        }
+
+        if (pMessage->isQuery() || mMessageQueue.length() < 2) {
+            mMessageQueue.enqueue(pMessage);
+        } else {
+            mMessageQueue.insert(1, pMessage); // bring priority for command message.
+        }
     } else {
-        delete message;
+        delete pMessage;
     }
+    processMessageQueue(false);
 }
 
-void Communication::enableDebugMode(bool enable) {
-    if (enable) {
-        mDebugTimer.start(COLLECT_DEBUG_INFO_MS);
-    } else {
-        mDebugTimer.stop();
-    }
-}
-
-void Communication::slotCollectDebugInfo() {
-    emit onDebugInfoReady(DebugInfo{
-        .queueSize = mResponseQueue.length(),
-        .errorCount = mErrorCount,
-        .currentRequestDelay = mDelayBetweenRequests,
-    });
+void Communication::slotCollectMetrics() {
+    mMetrics.setQueueSize(mMessageQueue.length());
+    emit onMetricsReady(mMetrics);
 }
 
 void Communication::lockOperationPanel(bool lock) {
@@ -281,6 +295,8 @@ void Communication::setOverVoltageProtectionValue(TChannel channel, double volta
 void Communication::getOverVoltageProtectionValue(TChannel channel) {
     enqueueMessage(mDeviceProtocol->createRequestGetOverVoltageProtectionValue(channel));
 }
+
+
 
 
 

@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
     Application::setApplicationVersion("1.1");
 
     Application a(argc, argv);
-    a.setWindowIcon(QIcon(":power-supply-512"));
+    Application::setWindowIcon(QIcon(":power-supply-512"));
+
     return Application::exec();
 }

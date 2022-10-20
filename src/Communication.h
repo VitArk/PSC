@@ -15,9 +15,7 @@
 #include "devices/Commons.h"
 #include "devices/Device.h"
 #include "DeviceStatus.h"
-#include "DebugInfo.h"
-
-#define DELAY_BETWEEN_REQUESTS_MS 50
+#include "CommunicationMetrics.h"
 
 class Communication : public QObject {
     Q_OBJECT
@@ -30,7 +28,7 @@ signals:
     void onSerialPortErrorOccurred(QString error);
     void onDeviceReady(DeviceInfo info);
     void onUnknownDevice(QString deviceID);
-    void onDebugInfoReady(DebugInfo info);
+    void onMetricsReady(const CommunicationMetrics &info);
 
     void onOperationPanelLocked(bool locked);
     void onSetCurrent(TChannel channel, double current);
@@ -47,7 +45,6 @@ signals:
 public slots:
     void openSerialPort(const QString &name, int baudRate);
     void closeSerialPort();
-    void enableDebugMode(bool enable);
 
     void lockOperationPanel(bool lock);
     void isOperationPanelLocked();
@@ -76,26 +73,26 @@ public slots:
 private slots:
     void slotSerialReadData();
     void slotSerialErrorOccurred(QSerialPort::SerialPortError error);
-    void slotProcessRequestQueue();
-    void slotCollectDebugInfo();
+    void slotCollectMetrics();
+
+    void slotResponseTimeout();
 
 private:
-    void processRequestQueue(bool ignoreDelay = false);
+    void processMessageQueue(bool clearBusyFlag);
     void dispatchData(const Protocol::IMessage &message, const QByteArray &data);
-    void enqueueMessage(Protocol::IMessage *message);
+    void enqueueMessage(Protocol::IMessage *pMessage);
     void createDeviceProtocol(const QByteArray &data);
+    bool isQueueOverflow() const;
 
 private:
     QSerialPort                  mSerialPort;
-    QQueue<Protocol::IMessage*>  mRequestQueue;
-    QQueue<Protocol::IMessage*>  mResponseQueue;
-    QTimer                       mQueueTimer;
-    QTime                        mRequestNextTime;
-    Protocol::Device*            mDeviceProtocol = nullptr;
+    QQueue<Protocol::IMessage*>  mMessageQueue;
+    QTimer                       mWaitResponseTimer;
 
-    QTimer                       mDebugTimer;
-    int                          mErrorCount = 0;
-    int                          mDelayBetweenRequests = DELAY_BETWEEN_REQUESTS_MS;
+    Protocol::Device*            mDeviceProtocol = nullptr;
+    QTimer                       mMetricCollectorTimer;
+    CommunicationMetrics         mMetrics;
+    volatile bool                mIsBusy = false;
 };
 
 

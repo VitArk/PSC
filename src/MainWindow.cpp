@@ -29,12 +29,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
-    mStatusBarDeviceInfo = new QLabel(this);
-    QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 40);
+    mStatusBarDeviceInfo = new ClickableLabel(this);
+    connect(mStatusBarDeviceInfo, &ClickableLabel::onDoubleClick, this, &MainWindow::slotShowDeviceNameOrID);
+    QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 100);
     mStatusBarDeviceLock = new QLabel(this);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceLock, 120);
-    mStatusDebug = new QLabel(this);
-    QMainWindow::statusBar()->addPermanentWidget(mStatusDebug, 120);
+    mStatusCommunicationMetrics = new QLabel(this);
+    QMainWindow::statusBar()->addPermanentWidget(mStatusCommunicationMetrics, 80);
     mStatusBarConnectionStatus = new QLabel(this);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarConnectionStatus);
 
@@ -44,7 +45,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onLockOperationPanelChanged);
     connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onBuzzerChanged);
     connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
-    connect(ui->actionDebugMode, &QAction::triggered, this, &MainWindow::slotEnableDebugMode);
 
     connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
     connect(ui->rdoBtnOutParallel, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
@@ -105,8 +105,6 @@ void MainWindow::slotSerialPortOpened(const QString &serialPortName, int baudRat
     mIsSerialConnected = true;
     mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(serialPortName).arg(baudRate));
     ui->actionDisconnect->setEnabled(true);
-
-    slotEnableDebugMode(mSettings.isDebugModeEnabled());
 }
 
 void MainWindow::slotSerialPortErrorOccurred(QString error) {
@@ -114,7 +112,8 @@ void MainWindow::slotSerialPortErrorOccurred(QString error) {
 }
 
 void MainWindow::slotDeviceReady(DeviceInfo info) {
-    slotDisplayDeviceID(info.name);
+    mDeviceInfo = info;
+    slotShowDeviceNameOrID();
     setControlLimits(info);
     enableControls(true);
 }
@@ -126,11 +125,12 @@ void MainWindow::slotUnknownDevice(QString deviceID) {
     );
 }
 
-void MainWindow::slotShowDebugInfo(DebugInfo info) {
-    mStatusDebug->setText(tr("Q:%1 E:%2 D:%3")
-                                  .arg(info.queueSize)
+void MainWindow::slotShowCommunicationMetrics(const CommunicationMetrics &info) {
+    mStatusCommunicationMetrics->setText(tr("Q:%1 E:%2 D:%3 T:%4")
+                                  .arg(info.queueSize())
                                   .arg(info.errorCount)
-                                  .arg(info.currentRequestDelay));
+                                  .arg(info.droppedCount)
+                                  .arg(info.responseTimeoutCount));
 }
 
 void MainWindow::slotSerialPortClosed() {
@@ -187,16 +187,6 @@ void MainWindow::setControlLimits(const DeviceInfo &info) {
 void MainWindow::slotEnableReadonlyMode(bool enable) {
     ui->actionReadonlyMode->setChecked(enable);
     enableControls(!enable);
-}
-
-void MainWindow::slotEnableDebugMode(bool enable) {
-    ui->actionDebugMode->setChecked(enable);
-    mSettings.setDebugModeEnabled(enable);
-    emit onEnableDebugMode(enable);
-}
-
-void MainWindow::slotDisplayDeviceID(const QString &deviceID) {
-    mStatusBarDeviceInfo->setText(deviceID);
 }
 
 void MainWindow::slotEnableBuzzer(bool enabled) {
@@ -566,11 +556,11 @@ void MainWindow::createBaudRatesMenu() {
 }
 
 QString MainWindow::currentFormat(double value) {
-    return QString::asprintf("%01.03f", value);
+    return QString::asprintf("%05.03f", value);
 }
 
 QString MainWindow::voltageFormat(double value) {
-    return QString::asprintf("%02.02f", value);
+    return QString::asprintf("%05.02f", value);
 }
 
 void MainWindow::highlight(MainWindow::THighlight color, QLabel *label) {
@@ -622,6 +612,15 @@ void MainWindow::slotShowAboutBox() {
     aboutBox.exec();
 }
 
+void MainWindow::slotShowDeviceNameOrID() {
+    static bool showDeviceID = false;
+    if (showDeviceID) {
+        mStatusBarDeviceInfo->setText(mDeviceInfo.ID);
+    } else {
+        mStatusBarDeviceInfo->setText(mDeviceInfo.name);
+    }
+    showDeviceID = !showDeviceID;
+}
 
 
 

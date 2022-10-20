@@ -6,7 +6,8 @@
 #include "devices/Commons.h"
 #include "Debounce.h"
 #include "Settings.h"
-#include "DebugInfo.h"
+#include "CommunicationMetrics.h"
+#include "ClickableLabel.h"
 
 namespace Ui {
 class MainWindow;
@@ -24,7 +25,6 @@ public:
 signals:
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
     void onSerialPortDoClose();
-    void onEnableDebugMode(bool enable);
 
     void onOutputConnectionMethodChanged(TOutputConnectionMethod method);
     void onOutputProtectionChanged(TOutputProtection protection);
@@ -43,7 +43,7 @@ public slots:
     void slotSerialPortErrorOccurred(QString error);
     void slotDeviceReady(DeviceInfo info);
     void slotUnknownDevice(QString deviceID);
-    void slotShowDebugInfo(DebugInfo info);
+    void slotShowCommunicationMetrics(const CommunicationMetrics &info);
 
     void slotShowOutputConnectionMethod(OutputConnectionMethod method);
     void slotShowOutputProtectionMode(OutputProtection protection);
@@ -59,7 +59,6 @@ public slots:
     void slotDisplayOverVoltageProtectionValue(TChannel channel, double voltage);
     void slotDisplayOverCurrentProtectionValue(TChannel channel, double current);
 
-    void slotDisplayDeviceID(const QString &deviceID);
     void slotLockOperationPanel(bool lock);
     void slotEnableBuzzer(bool enabled);
 
@@ -75,13 +74,14 @@ private slots:
     void slotControlValueChangedDebounced(double value);
     void slotOverProtectionChanged();
     void slotEnableReadonlyMode(bool enable);
-    void slotEnableDebugMode(bool enable);
 
     // Serial port
     void slotSerialPortConnectionToggled(bool toggled);
     void slotCreateSerialPortMenuItems();
 
     void slotShowAboutBox();
+
+    void slotShowDeviceNameOrID();
 
 private:
     enum {
@@ -99,11 +99,12 @@ private:
     Debounce mDebouncedCh2A;
 
     QLabel *mStatusBarConnectionStatus;
-    QLabel *mStatusBarDeviceInfo;
+    ClickableLabel *mStatusBarDeviceInfo;
     QLabel *mStatusBarDeviceLock;
-    QLabel *mStatusDebug;
+    QLabel *mStatusCommunicationMetrics;
 
     bool mIsSerialConnected = false;
+    DeviceInfo  mDeviceInfo;
 
 private:
     bool acceptEnable() const;

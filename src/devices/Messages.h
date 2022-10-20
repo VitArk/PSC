@@ -15,6 +15,10 @@ namespace Protocol {
         virtual QByteArray query() const = 0;
         virtual int answerLength() const { return 0; }
         virtual ~IMessage() = default;
+        virtual bool isQuery() const { return answerLength() > 0; }
+        virtual bool isCommand() const { return answerLength() == 0; }
+        // messages that return true, will be dropped in case overflowing messages queue.
+        virtual bool allowDrop() const { return false; }
     protected:
         TChannel mChannel;
     };
@@ -55,6 +59,10 @@ namespace Protocol {
         int answerLength() const override {
             return 1;
         };
+
+        bool allowDrop() const override {
+            return true;
+        }
     };
 
 
@@ -235,6 +243,9 @@ namespace Protocol {
         int answerLength() const override {
             return 1;
         };
+        bool allowDrop() const override {
+            return true;
+        }
     };
 
     /**
@@ -309,6 +320,9 @@ namespace Protocol {
         int answerLength() const override {
             return 1;
         };
+        bool allowDrop() const override {
+            return true;
+        }
     };
 
     /**
@@ -425,6 +439,10 @@ namespace Protocol {
         int answerLength() const override {
             return 5;
         };
+
+        bool allowDrop() const override {
+            return true;
+        }
     };
 
     /**
@@ -465,6 +483,10 @@ namespace Protocol {
         int answerLength() const override {
             return 5;
         };
+
+        bool allowDrop() const override {
+            return true;
+        }
     };
 }
 
