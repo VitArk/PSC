@@ -42,9 +42,14 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
         mSerialPort.clear();
         emit onSerialPortOpened(name, baudRate);
 
-        mIsBusy = false;
-        // Request device ID for initialize correct device protocol.
-        enqueueMessage(new Protocol::MessageGetDeviceID()); // TODO: the request should use blocked method (waitForRead)
+        // The instance of Protocol::Factory blocks serial port (mSerialPort) QT signals.
+        auto factory = Protocol::Factory(mSerialPort);
+        mDeviceProtocol = factory.create();
+        if (mDeviceProtocol != nullptr) {
+            emit onDeviceReady(mDeviceProtocol->info());
+        } else {
+            emit onUnknownDevice(factory.errorString());
+        }
     } else {
         emit onSerialPortErrorOccurred(mSerialPort.errorString());
     }
@@ -75,7 +80,6 @@ void Communication::slotSerialErrorOccurred(QSerialPort::SerialPortError error) 
     }
 }
 
-
 void Communication::processMessageQueue(bool clearBusyFlag) {
     if (clearBusyFlag) {
         mIsBusy = false;
@@ -89,7 +93,6 @@ void Communication::processMessageQueue(bool clearBusyFlag) {
     auto pMessage = mMessageQueue.head();
     mSerialPort.write(pMessage->query());
     mSerialPort.flush();
-    //qDebug() << "send query " << pMessage->query();
 
     // if the message is command (response is not expected), just remove the message from queue
     // and give some time for execute the action on the devise.
@@ -130,7 +133,6 @@ void Communication::slotResponseTimeout() {
 
 
 void Communication::dispatchData(const Protocol::IMessage &message, const QByteArray &data) {
-    //qDebug() << "resp data" << data;
     bool ok = true;
     if (typeid(message) == typeid(Protocol::MessageGetDeviceStatus)) {
         emit onDeviceStatus(DeviceStatus(data.at(0)));
@@ -153,26 +155,13 @@ void Communication::dispatchData(const Protocol::IMessage &message, const QByteA
     } else if (typeid(message) == typeid(Protocol::MessageIsBuzzerEnabled)) {
         emit onBuzzerEnabled(bool(data.toInt(&ok)));
     } else if (typeid(message) == typeid(Protocol::MessageGetDeviceID)) {
-        if (mDeviceProtocol != nullptr) {
-            emit onDeviceInfo(data);
-        } else {
-            createDeviceProtocol(data);
-        }
+        emit onDeviceInfo(data);
     } else {
         qDebug() << "Unknown response (message)" << data;
     }
 
     if (!ok) {
         mMetrics.errorCount++;
-    }
-}
-
-void Communication::createDeviceProtocol(const QByteArray &data) {
-    mDeviceProtocol = Protocol::Factory::create(data);
-    if (mDeviceProtocol != nullptr) {
-        emit onDeviceReady(mDeviceProtocol->info());
-    } else {
-        emit onUnknownDevice(data);
     }
 }
 

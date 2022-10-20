@@ -259,7 +259,7 @@ namespace Protocol {
      *  3       ParallelMode    0=Off, 1=On
      *  4       OVP             0=Off, 1=On
      *  5       OCP             0=Off, 1=On
-     *  6       setEnableOutputSwitch 0=Off, 1=On
+     *  6       OutputSwitch    0=Off, 1=On
      *  7       N/A             N/A
      *
      *  ** if bits (2=0 and 3=0) -- Independent method.

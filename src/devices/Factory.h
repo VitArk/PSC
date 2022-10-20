@@ -5,24 +5,29 @@
 #ifndef PSM_FACTORY_H
 #define PSM_FACTORY_H
 
+#include <QByteArrayList>
+#include <QSerialPort>
+
 #include "Device.h"
 #include "UTP3303C.h"
 #include "UTP3305C.h"
 
 namespace Protocol {
-    class Factory {
+    class Factory  {
     public:
-        static Device *create(const QString& deviceID) {
-            Device *device = nullptr;
-            if (UTP3305C().checkID(deviceID)) {
-                return new UTP3305C();
-            }
-            if (UTP3303C().checkID(deviceID)) {
-                return new UTP3303C();
-            }
+        explicit Factory(QSerialPort &serialPort);
+        ~Factory();
+        Device *create();
 
-            return device;
-        }
+        QString errorString() const;
+
+    private:
+        QSerialPort &mSerialPort;
+        QByteArrayList mIdRequestQueries;
+        QString        mErrorString;
+
+    private:
+        static Device* create(const QByteArray& deviceID);
     };
 }
 

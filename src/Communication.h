@@ -81,7 +81,6 @@ private:
     void processMessageQueue(bool clearBusyFlag);
     void dispatchData(const Protocol::IMessage &message, const QByteArray &data);
     void enqueueMessage(Protocol::IMessage *pMessage);
-    void createDeviceProtocol(const QByteArray &data);
     bool isQueueOverflow() const;
 
 private:
