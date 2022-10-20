@@ -295,9 +295,9 @@ namespace Protocol {
      * RCL<NR1>
      * Function Description:Storage recall by pressing keys from M1-M5
      */
-    class ApplySettings : public IMessage {
+    class SetPreset : public IMessage {
     public:
-        ApplySettings(TMemoryKey key) {
+        SetPreset(TMemoryKey key) {
             mKey = key;
         }
 
@@ -312,7 +312,7 @@ namespace Protocol {
      * RCL?
      * Function Description:Read current/active setting number (keys from M1-M5)
      */
-    class GetActiveSettings : public IMessage {
+    class GetPreset : public IMessage {
     public:
         QByteArray query() const override {
             return "RCL?";
@@ -330,9 +330,9 @@ namespace Protocol {
      * Function Description: Storage setting
      * Example: SAV1 Stores the panel setting in memory number 1
      */
-    class SaveSettings : public IMessage {
+    class SavePreset : public IMessage {
     public:
-        SaveSettings(TMemoryKey key) {
+        SavePreset(TMemoryKey key) {
             mKey = key;
         }
 

@@ -146,8 +146,8 @@ void Communication::dispatchData(const Protocol::IMessage &message, const QByteA
         emit onOverCurrentProtectionValue(message.channel(), data.toDouble(&ok));
     } else if (typeid(message) == typeid(Protocol::GetOverVoltageProtectionValue)) {
         emit onOverVoltageProtectionValue(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::GetActiveSettings)) {
-        emit onApplySettings(TMemoryKey(data.toInt(&ok)));
+    } else if (typeid(message) == typeid(Protocol::GetPreset)) {
+        emit onActiveSettings(TMemoryKey(data.toInt(&ok)));
     } else if (typeid(message) == typeid(Protocol::IsOperationPanelLocked)) {
         emit onOperationPanelLocked(bool(data.toInt(&ok)));
     } else if (typeid(message) == typeid(Protocol::IsBuzzerEnabled)) {
@@ -256,16 +256,16 @@ void Communication::getDeviceID() {
     enqueueMessage(mDeviceProtocol->createRequestGetDeviceID());
 }
 
-void Communication::applySettings(TMemoryKey key) {
-    enqueueMessage(mDeviceProtocol->createRequestApplySettings(key));
+void Communication::setPreset(TMemoryKey key) {
+    enqueueMessage(mDeviceProtocol->createRequestSetPreset(key));
 }
 
-void Communication::getActiveSettings() {
-    enqueueMessage(mDeviceProtocol->createRequestGetActiveSettings());
+void Communication::getPreset() {
+    enqueueMessage(mDeviceProtocol->createRequestGetPreset());
 }
 
-void Communication::saveSettings(TMemoryKey key) {
-    enqueueMessage(mDeviceProtocol->createRequestSaveSettings(key));
+void Communication::savePreset(TMemoryKey key) {
+    enqueueMessage(mDeviceProtocol->createRequestSavePreset(key));
 }
 
 void Communication::changeOutputConnectionMethod(TOutputConnectionMethod method) {

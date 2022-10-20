@@ -45,8 +45,9 @@ void Application::slotAppRun() {
     connect(mCommunication, &Communication::onBuzzerEnabled, mMainWindow, &MainWindow::slotEnableBuzzer);
 
     // Memory / Presets
-    connect(mCommunication, &Communication::onApplySettings, mMainWindow, &MainWindow::slotEnableMemoryKey);
-    connect(mMainWindow, &MainWindow::onMemoryKeyChanged, mCommunication, &Communication::applySettings);
+    connect(mCommunication, &Communication::onActiveSettings, mMainWindow, &MainWindow::slotEnableMemoryKey);
+    connect(mMainWindow, &MainWindow::onPresetChanged, mCommunication, &Communication::setPreset);
+    connect(mMainWindow, &MainWindow::onPresetSave, mCommunication, &Communication::savePreset);
 
     connect(mMainWindow, &MainWindow::onOutputSwitchChanged, mCommunication, &Communication::setEnableOutputSwitch);
     connect(mMainWindow, &MainWindow::onOutputConnectionMethodChanged, mCommunication,&Communication::changeOutputConnectionMethod);
@@ -90,7 +91,7 @@ void Application::slotSerialPortClosed() {
 
 void Application::slotWorkingCycle() {
     mCommunication->getDeviceStatus();
-    mCommunication->getActiveSettings();
+    mCommunication->getPreset();
     mCommunication->isOperationPanelLocked();
     mCommunication->isBuzzerEnabled();
 }

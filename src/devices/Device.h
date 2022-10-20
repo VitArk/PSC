@@ -74,14 +74,14 @@ namespace Protocol {
         virtual IMessage* createRequestGetDeviceID() {
             return new GetDeviceID();
         }
-        virtual IMessage* createRequestApplySettings(TMemoryKey key) {
-            return new ApplySettings(key);
+        virtual IMessage* createRequestSetPreset(TMemoryKey key) {
+            return new SetPreset(key);
         }
-        virtual IMessage* createRequestGetActiveSettings() {
-            return new GetActiveSettings();
+        virtual IMessage* createRequestGetPreset() {
+            return new GetPreset();
         }
-        virtual IMessage* createRequestSaveSettings(TMemoryKey key) {
-            return new SaveSettings(key);
+        virtual IMessage* createRequestSavePreset(TMemoryKey key) {
+            return new SavePreset(key);
         }
         virtual IMessage* createRequestChangeOutputConnectionMethod(TOutputConnectionMethod method) {
             return new ChangeOutputConnectionMethod(method);

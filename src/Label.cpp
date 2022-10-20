@@ -2,13 +2,13 @@
 // Created by Vitalii Arkusha on 20.10.2022.
 //
 
-#include "ClickableLabel.h"
+#include "Label.h"
 
-ClickableLabel::ClickableLabel(QWidget* parent, Qt::WindowFlags f)
+Label::Label(QWidget* parent, Qt::WindowFlags f)
         : QLabel(parent) {
 }
 
-void ClickableLabel::mousePressEvent(QMouseEvent* event) {
+void Label::mousePressEvent(QMouseEvent* event) {
     if (mTimer.isActive()) {
         mTimer.stop();
         emit onDoubleClick();
@@ -18,7 +18,7 @@ void ClickableLabel::mousePressEvent(QMouseEvent* event) {
     }
 }
 
-void ClickableLabel::timerEvent(QTimerEvent *) {
+void Label::timerEvent(QTimerEvent *) {
     mTimer.stop();
     emit onClick();
 }

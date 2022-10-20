@@ -38,7 +38,7 @@ signals:
     void onBuzzerEnabled(bool enabled);
     void onDeviceStatus(DeviceStatus status);
     void onDeviceInfo(const QString &info);
-    void onApplySettings(TMemoryKey key);
+    void onActiveSettings(TMemoryKey key);
     void onOverCurrentProtectionValue(TChannel channel, double current);
     void onOverVoltageProtectionValue(TChannel channel, double voltage);
 
@@ -59,9 +59,9 @@ public slots:
     void isBuzzerEnabled();
     void getDeviceStatus();
     void getDeviceID();
-    void applySettings(TMemoryKey key);
-    void getActiveSettings();
-    void saveSettings(TMemoryKey key);
+    void setPreset(TMemoryKey key);
+    void getPreset();
+    void savePreset(TMemoryKey key);
     void changeOutputConnectionMethod(TOutputConnectionMethod method);
     void enableOverCurrentProtection(bool enable);
     void enableOverVoltageProtection(bool enable);

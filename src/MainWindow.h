@@ -7,7 +7,7 @@
 #include "Debounce.h"
 #include "Settings.h"
 #include "CommunicationMetrics.h"
-#include "ClickableLabel.h"
+#include "Label.h"
 
 namespace Ui {
 class MainWindow;
@@ -30,7 +30,8 @@ signals:
     void onOutputProtectionChanged(TOutputProtection protection);
     void onOverVoltageProtectionChanged(TChannel channel, double value);
     void onOverCurrentProtectionChanged(TChannel channel, double value);
-    void onMemoryKeyChanged(TMemoryKey key);
+    void onPresetChanged(TMemoryKey key);
+    void onPresetSave(TMemoryKey key);
     void onVoltageChanged(TChannel channel, double value);
     void onCurrentChanged(TChannel channel, double value);
     void onOutputSwitchChanged(bool state);
@@ -65,8 +66,8 @@ public slots:
 private slots:
     void slotOutputConnectionMethodChanged();
     void slotOutputProtectionChanged();
-
-    void slotMemoryKeyChanged(bool toggle);
+    void slotPresetKeyClicked();
+    void slotPresetSaveClicked();
 
     void slotDialControlChanged();
     void slotSpinControlChanged();
@@ -99,7 +100,7 @@ private:
     Debounce mDebouncedCh2A;
 
     QLabel *mStatusBarConnectionStatus;
-    ClickableLabel *mStatusBarDeviceInfo;
+    Label *mStatusBarDeviceInfo;
     QLabel *mStatusBarDeviceLock;
     QLabel *mStatusCommunicationMetrics;
 

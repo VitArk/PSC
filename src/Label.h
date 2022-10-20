@@ -2,18 +2,18 @@
 // Created by Vitalii Arkusha on 20.10.2022.
 //
 
-#ifndef PS_MANAGEMENT_CLICKABLELABEL_H
-#define PS_MANAGEMENT_CLICKABLELABEL_H
+#ifndef PS_MANAGEMENT_LABEL_H
+#define PS_MANAGEMENT_LABEL_H
 
 #include <QLabel>
 #include <QMoveEvent>
 #include <QBasicTimer>
 
-class ClickableLabel : public QLabel {
+class Label : public QLabel {
 Q_OBJECT
 public:
-    explicit ClickableLabel(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
-    ~ClickableLabel() = default;
+    explicit Label(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+    ~Label() = default;
 
 signals:
     void onClick();
@@ -27,4 +27,4 @@ private:
 };
 
 
-#endif //PS_MANAGEMENT_CLICKABLELABEL_H
+#endif //PS_MANAGEMENT_LABEL_H

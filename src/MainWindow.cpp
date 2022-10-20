@@ -29,8 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
-    mStatusBarDeviceInfo = new ClickableLabel(this);
-    connect(mStatusBarDeviceInfo, &ClickableLabel::onDoubleClick, this, &MainWindow::slotShowDeviceNameOrID);
+    mStatusBarDeviceInfo = new Label(this);
+    connect(mStatusBarDeviceInfo, &Label::onDoubleClick, this, &MainWindow::slotShowDeviceNameOrID);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 100);
     mStatusBarDeviceLock = new QLabel(this);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceLock, 120);
@@ -53,11 +53,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnOVP, &QPushButton::clicked, this, &MainWindow::slotOutputProtectionChanged);
     connect(ui->btnOCP, &QPushButton::clicked, this, &MainWindow::slotOutputProtectionChanged);
 
-    connect(ui->btnM1, &QPushButton::clicked, this, &MainWindow::slotMemoryKeyChanged);
-    connect(ui->btnM2, &QPushButton::clicked, this, &MainWindow::slotMemoryKeyChanged);
-    connect(ui->btnM3, &QPushButton::clicked, this, &MainWindow::slotMemoryKeyChanged);
-    connect(ui->btnM4, &QPushButton::clicked, this, &MainWindow::slotMemoryKeyChanged);
-    connect(ui->btnM5, &QPushButton::clicked, this, &MainWindow::slotMemoryKeyChanged);
+    connect(ui->btnM1, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
+    connect(ui->btnM2, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
+    connect(ui->btnM3, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
+    connect(ui->btnM4, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
+    connect(ui->btnM5, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
+    connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::slotPresetSaveClicked);
 
     connect(ui->btnOutput, &QPushButton::clicked, this, &MainWindow::onOutputSwitchChanged);
 
@@ -321,17 +322,20 @@ void MainWindow::slotEnableMemoryKey(TMemoryKey key) {
     }
 }
 
-void MainWindow::slotMemoryKeyChanged(bool toggle) {
-    if (toggle) {
-        if (sender() == ui->btnM1) emit onMemoryKeyChanged(M1);
-        else if (sender() == ui->btnM2) emit onMemoryKeyChanged(M2);
-        else if (sender() == ui->btnM3) emit onMemoryKeyChanged(M3);
-        else if (sender() == ui->btnM4) emit onMemoryKeyChanged(M4);
-        else if (sender() == ui->btnM5) emit onMemoryKeyChanged(M5);
-    } else {
-        auto senderBtn = qobject_cast<QPushButton *>(sender());
-        senderBtn->toggle();
-    }
+void MainWindow::slotPresetKeyClicked() {
+    if (sender() == ui->btnM1) emit onPresetChanged(M1);
+    else if (sender() == ui->btnM2) emit onPresetChanged(M2);
+    else if (sender() == ui->btnM3) emit onPresetChanged(M3);
+    else if (sender() == ui->btnM4) emit onPresetChanged(M4);
+    else if (sender() == ui->btnM5) emit onPresetChanged(M5);
+}
+
+void MainWindow::slotPresetSaveClicked() {
+    if (ui->btnM1->isChecked()) emit onPresetSave(M1);
+    else if (ui->btnM2->isChecked()) emit onPresetSave(M2);
+    else if (ui->btnM3->isChecked()) emit onPresetSave(M3);
+    else if (ui->btnM4->isChecked()) emit onPresetSave(M4);
+    else if (ui->btnM5->isChecked()) emit onPresetSave(M5);
 }
 
 void MainWindow::slotDialControlChanged() {
