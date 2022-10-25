@@ -1,3 +1,16 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 //
 // Created by Vitalii Arkusha on 12.09.2022.
 //
@@ -12,8 +25,8 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
-#include "devices/Commons.h"
-#include "devices/Device.h"
+#include "protocol//Commons.h"
+#include "protocol/Interface.h"
 #include "DeviceStatus.h"
 #include "CommunicationMetrics.h"
 
@@ -46,25 +59,25 @@ public slots:
     void openSerialPort(const QString &name, int baudRate);
     void closeSerialPort();
 
-    void lockOperationPanel(bool lock);
-    void isOperationPanelLocked();
+    void setLocked(bool lock);
+    void getIsLocked();
     void setCurrent(TChannel channel, double value);
-    void getCurrent(TChannel channel);
+    void getCurrentSet(TChannel channel);
     void setVoltage(TChannel channel, double value);
-    void getVoltage(TChannel channel);
-    void getOutputCurrent(TChannel channel);
-    void getOutputVoltage(TChannel channel);
+    void getVoltageSet(TChannel channel);
+    void getActualCurrent(TChannel channel);
+    void getActualVoltage(TChannel channel);
     void setEnableOutputSwitch(bool enable);
-    void enableBuzzer(bool enable);
-    void isBuzzerEnabled();
+    void setEnableBuzzer(bool enable);
+    void getIsBuzzerEnabled();
     void getDeviceStatus();
     void getDeviceID();
     void setPreset(TMemoryKey key);
     void getPreset();
     void savePreset(TMemoryKey key);
-    void changeOutputConnectionMethod(TOutputConnectionMethod method);
-    void enableOverCurrentProtection(bool enable);
-    void enableOverVoltageProtection(bool enable);
+    void setChannelTracking(TChannelTracking mode);
+    void setEnableOverCurrentProtection(bool enable);
+    void setEnableOverVoltageProtection(bool enable);
     void setOverCurrentProtectionValue(TChannel channel, double current);
     void getOverCurrentProtectionValue(TChannel channel);
     void setOverVoltageProtectionValue(TChannel channel, double voltage);
@@ -79,7 +92,7 @@ private slots:
 
 private:
     void processMessageQueue(bool clearBusyFlag);
-    void dispatchData(const Protocol::IMessage &message, const QByteArray &data);
+    void dispatchMessageReplay(const Protocol::IMessage &message, const QByteArray &reply);
     void enqueueMessage(Protocol::IMessage *pMessage);
     bool isQueueOverflow() const;
 
@@ -88,7 +101,7 @@ private:
     QQueue<Protocol::IMessage*>  mMessageQueue;
     QTimer                       mWaitResponseTimer;
 
-    Protocol::Device*            mDeviceProtocol = nullptr;
+    Protocol::Interface*         mDeviceProtocol = nullptr;
     QTimer                       mMetricCollectorTimer;
     CommunicationMetrics         mMetrics;
     volatile bool                mIsBusy = false;

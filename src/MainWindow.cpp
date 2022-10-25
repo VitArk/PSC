@@ -1,3 +1,16 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "MainWindow.h"
 #include "ui_mainwindow.h"
 
@@ -29,8 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
-    mStatusBarDeviceInfo = new Label(this);
-    connect(mStatusBarDeviceInfo, &Label::onDoubleClick, this, &MainWindow::slotShowDeviceNameOrID);
+    mStatusBarDeviceInfo = new ClickableLabel(this);
+    connect(mStatusBarDeviceInfo, &ClickableLabel::onDoubleClick, this, &MainWindow::slotShowDeviceNameOrID);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 100);
     mStatusBarDeviceLock = new QLabel(this);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceLock, 120);
@@ -120,15 +133,15 @@ void MainWindow::slotDeviceReady(DeviceInfo info) {
 }
 
 void MainWindow::slotUnknownDevice(QString deviceID) {
-    QMessageBox::warning(this, tr("Unknown Device"),
-                         tr("Unknown Device (ID: %1)").arg(deviceID),
+    QMessageBox::warning(this, tr("Unknown Interface"),
+                         tr("Unknown Interface (ID: %1)").arg(deviceID),
                          QMessageBox::Close
     );
 }
 
 void MainWindow::slotShowCommunicationMetrics(const CommunicationMetrics &info) {
     mStatusCommunicationMetrics->setText(tr("Q:%1 E:%2 D:%3 T:%4")
-                                  .arg(info.queueSize())
+                                  .arg(info.queueLength())
                                   .arg(info.errorCount)
                                   .arg(info.droppedCount)
                                   .arg(info.responseTimeoutCount));
@@ -142,7 +155,7 @@ void MainWindow::slotSerialPortClosed() {
     mStatusBarDeviceInfo->setText(tr("N/A"));
     mStatusBarDeviceLock->setText(tr("N/A"));
 
-    slotShowOutputConnectionMethod(Independent);
+    slotShowOutputTrackingMode(Independent);
     enableControls(false);
 
     slotDisplayOutputVoltage(Channel1, V0);
@@ -195,17 +208,17 @@ void MainWindow::slotEnableBuzzer(bool enabled) {
 }
 
 void MainWindow::slotOutputConnectionMethodChanged() {
-    OutputConnectionMethod outputMethod = Independent;
+    TChannelTracking channelTracking = Independent;
     if (ui->rdoBtnOutParallel->isChecked()) {
-        outputMethod = Parallel;
+        channelTracking = Parallel;
     } else if (ui->rdoBtnOutSerial->isChecked()) {
-        outputMethod = Serial;
+        channelTracking = Serial;
     }
 
-    emit onOutputConnectionMethodChanged(outputMethod);
+    emit onOutputConnectionMethodChanged(channelTracking);
 }
 
-void MainWindow::slotShowOutputConnectionMethod(OutputConnectionMethod method) {
+void MainWindow::slotShowOutputTrackingMode(TChannelTracking method) {
     QString resourceName;
     QString labelText;
     switch (method) {
@@ -268,7 +281,7 @@ void MainWindow::slotShowOutputProtectionMode(OutputProtection protection) {
     }
 }
 
-void MainWindow::slotShowOutputStabilizingMode(TOutputStabilizingMode channel1, TOutputStabilizingMode channel2) {
+void MainWindow::slotShowOutputMode(TOutputMode channel1, TOutputMode channel2) {
     if (channel1 == ConstantCurrent) {
         highlight(HighlightRed, ui->lblCh1CC);
         highlight(HighlightNone, ui->lblCh1CV);
@@ -445,11 +458,11 @@ void MainWindow::slotOverProtectionChanged() {
 
 void MainWindow::slotLockOperationPanel(bool lock) {
     if (lock) {
-        mStatusBarDeviceLock->setText(tr("Device Controls: Lock"));
-        ui->actionLockDevice->setText(tr("Unlock Device Controls"));
+        mStatusBarDeviceLock->setText(tr("Interface Controls: Lock"));
+        ui->actionLockDevice->setText(tr("Unlock Interface Controls"));
     } else {
-        mStatusBarDeviceLock->setText(tr("Device Controls: Unlocked"));
-        ui->actionLockDevice->setText(tr("Lock Device Controls"));
+        mStatusBarDeviceLock->setText(tr("Interface Controls: Unlocked"));
+        ui->actionLockDevice->setText(tr("Lock Interface Controls"));
     }
 }
 
@@ -603,7 +616,7 @@ void MainWindow::slotShowAboutBox() {
     QMessageBox aboutBox(
             QMessageBox::NoIcon,
             tr("About PS Management"),
-            trUtf8("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p><p>GUI application for remote control of Programmable Power Supply.</p><p>Supported devices: <ul><li>UNI-T UTP3303C</li><li>UNI-T UTP3305C</li></ul></p><p>This is a free software distributed under MIT license.</p><p>Visit official <a href=\"https://github.com/vitark/PS-Management\">GitHub</a> page for more details.</p> <p>Ⓒ 2021-2022 VitArk</p>").arg(Application::applicationVersion()),
+            trUtf8("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p><p>GUI application for remote control of Programmable Power Supply.</p><p>Supported protocol: <ul><li>UNI-T UTP3303C</li><li>UNI-T UTP3305C</li></ul></p><p>This is a free software distributed under MIT license.</p><p>Visit official <a href=\"https://github.com/vitark/PS-Management\">GitHub</a> page for more details.</p> <p>Ⓒ 2021-2022 VitArk</p>").arg(Application::applicationVersion()),
             QMessageBox::Ok
     );
     aboutBox.setIconPixmap(icon);

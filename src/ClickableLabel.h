@@ -12,31 +12,32 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //
-// Created by Vitalii Arkusha on 30.05.2021.
+// Created by Vitalii Arkusha on 20.10.2022.
 //
 
-#ifndef POWER_SUPPLY_CONTROLLER_CONTROLDEBOUNCE_H
-#define POWER_SUPPLY_CONTROLLER_CONTROLDEBOUNCE_H
+#ifndef PS_MANAGEMENT_CLICKABLELABEL_H
+#define PS_MANAGEMENT_CLICKABLELABEL_H
 
-#include <QObject>
-#include <QTimer>
+#include <QLabel>
+#include <QMoveEvent>
+#include <QBasicTimer>
 
-class Debounce : public QObject {
+class ClickableLabel : public QLabel {
 Q_OBJECT
 public:
-    explicit Debounce(QObject *parent = nullptr);
-    void setValue(double value);
+    explicit ClickableLabel(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+    ~ClickableLabel() = default;
 
 signals:
-    void onChangedDebounced(double value);
+    void onClick();
+    void onDoubleClick();
 
+protected:
+    void mousePressEvent(QMouseEvent* event) override;
+    void timerEvent(QTimerEvent *) override;
 private:
-    QTimer mTimer;
-    double mValue = 0.0;
-
-private slots:
-    void slotTimeout();
+    QBasicTimer mTimer;
 };
 
 
-#endif //POWER_SUPPLY_CONTROLLER_CONTROLDEBOUNCE_H
+#endif //PS_MANAGEMENT_CLICKABLELABEL_H

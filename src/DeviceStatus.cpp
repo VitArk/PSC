@@ -1,3 +1,16 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 //
 // Created by Vitalii Arkusha on 28.09.2022.
 //
@@ -17,22 +30,22 @@ DeviceStatus::DeviceStatus(char data) {
     mData = data;
 }
 
-TOutputStabilizingMode DeviceStatus::stabilizingMode(TChannel channel) const {
+TOutputMode DeviceStatus::mode(TChannel channel) const {
     if (channel == Channel1)
-        return TOutputStabilizingMode(mData & maskOutModeCh1);
+        return TOutputMode(mData & maskOutModeCh1);
     else
-        return TOutputStabilizingMode(mData & maskOutModeCh2);
+        return TOutputMode(mData & maskOutModeCh2);
 }
 
-TOutputConnectionMethod DeviceStatus::outputConnectionMethod() const {
-    TOutputConnectionMethod connMethod = Independent;
+TChannelTracking DeviceStatus::tracking() const {
+    TChannelTracking connMethod = Independent;
     connMethod = bool(mData & maskSerialOutputMethod) ? Serial : connMethod;
     connMethod = bool(mData & maskSerialParallelMethod) ? Parallel : connMethod;
 
     return connMethod;
 }
 
-TOutputProtection DeviceStatus::outputProtectionMode() const {
+TOutputProtection DeviceStatus::protection() const {
     TOutputProtection protection = OutputProtectionAllDisabled;
     protection = bool(mData & maskOverVoltageProtection) ? OverVoltageProtectionOnly : protection;
     protection = bool(mData & maskOverCurrentProtection) ? OverCurrentProtectionOnly : protection;
@@ -41,7 +54,7 @@ TOutputProtection DeviceStatus::outputProtectionMode() const {
     return protection;
 }
 
-bool DeviceStatus::outputSwitchStatus() const {
+bool DeviceStatus::outputSwitch() const {
     return bool(mData & maskOutputSwitch);
 }
 

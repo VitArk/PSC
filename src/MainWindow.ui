@@ -1188,7 +1188,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Lock/Unlock Device Panel</string>
+    <string>Lock/Unlock Interface Panel</string>
    </property>
   </action>
   <action name="actionReadonlyMode">
@@ -1196,7 +1196,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Readonly Mode</string>
+    <string>Readonly OutputMode</string>
    </property>
   </action>
   <action name="actionBuzzer">

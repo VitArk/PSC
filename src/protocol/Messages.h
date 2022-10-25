@@ -1,3 +1,16 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 //
 // Created by Vitalii Arkusha on 17.09.2022.
 //
@@ -13,10 +26,10 @@ namespace Protocol {
     public:
         virtual TChannel channel() const { return mChannel;}
         virtual QByteArray query() const = 0;
-        virtual int answerLength() const { return 0; }
+        virtual int replySize() const { return 0; }
         virtual ~IMessage() = default;
-        virtual bool isQuery() const { return answerLength() > 0; }
-        virtual bool isCommand() const { return answerLength() == 0; }
+        virtual bool isQuery() const { return replySize() > 0; }
+        virtual bool isCommand() const { return replySize() == 0; }
         // messages that return true, will be dropped in case overflowing messages queue.
         virtual bool allowDrop() const { return false; }
     protected:
@@ -27,13 +40,13 @@ namespace Protocol {
      * LOCK<NR2>
      * Function Description:Lock power supply operation panel
      * Example: LOCK1
-     * MessageLockOperationPanel power supply operation panel
+     * MessageSetLocked power supply operation panel
      * Example:LOCK0
      * Unlock power supply operation panel
      */
-    class MessageLockOperationPanel : public IMessage {
+    class MessageSetLocked : public IMessage {
     public:
-        MessageLockOperationPanel(bool lock) {
+        explicit MessageSetLocked(bool lock) {
             mLock = lock;
         }
 
@@ -50,13 +63,13 @@ namespace Protocol {
      * Example: LOCK?
      * Response: 0 | 1
      */
-    class MessageIsOperationPanelLocked : public IMessage {
+    class MessageGetIsLocked : public IMessage {
     public:
         QByteArray query() const override {
             return "LOCK?";
         }
 
-        int answerLength() const override {
+        int replySize() const override {
             return 1;
         };
 
@@ -89,13 +102,13 @@ namespace Protocol {
 
     /**
      * ISET<X>?
-     * Function Description: Read the set current value
+     * Function Description: Get current that has been set
      * Example: ISET1?
      * Returns current value
      */
-    class MessageGetCurrent : public IMessage {
+    class MessageGetCurrentSet : public IMessage {
     public:
-        MessageGetCurrent(TChannel channel) {
+        explicit MessageGetCurrentSet(TChannel channel) {
             mChannel = channel;
         }
 
@@ -103,7 +116,7 @@ namespace Protocol {
             return QString("ISET%1?").arg(mChannel).toLatin1();
         }
 
-        int answerLength() const override {
+        int replySize() const override {
             return 5;
         };
     };
@@ -116,7 +129,7 @@ namespace Protocol {
      */
     class MessageSetVoltage : public IMessage {
     public:
-        MessageSetVoltage(TChannel channel, double voltage) {
+        explicit MessageSetVoltage(TChannel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
@@ -131,13 +144,13 @@ namespace Protocol {
 
     /**
      * VSET<X>?
-     * Function Description: Read the set voltage value
+     * Function Description: Get voltage that has been set
      * Example: VSET1?
      * Returns voltage value
      */
-    class MessageGetVoltage : public IMessage {
+    class MessageGetVoltageSet : public IMessage {
     public:
-        MessageGetVoltage(TChannel channel) {
+        explicit MessageGetVoltageSet(TChannel channel) {
             mChannel = channel;
         }
 
@@ -145,7 +158,7 @@ namespace Protocol {
             return QString("VSET%1?").arg(mChannel).toLatin1();
         }
 
-        int answerLength() const override {
+        int replySize() const override {
             return 5;
         };
     };
@@ -156,9 +169,9 @@ namespace Protocol {
      * Example: IOUT1?
      * Read the set current value
      */
-    class MessageGetOutputCurrent : public IMessage {
+    class MessageGetActualCurrent : public IMessage {
     public:
-        MessageGetOutputCurrent(TChannel channel) {
+        explicit MessageGetActualCurrent(TChannel channel) {
             mChannel = channel;
         }
 
@@ -166,7 +179,7 @@ namespace Protocol {
             return QString("IOUT%1?").arg(mChannel).toLatin1();
         }
 
-        int answerLength() const override {
+        int replySize() const override {
             return 5;
         };
     };
@@ -177,9 +190,9 @@ namespace Protocol {
     * Example: VOUT1?
     * Read the set voltage value
     */
-    class MessageGetOutputVoltage : public IMessage {
+    class MessageGetActualVoltage : public IMessage {
     public:
-        MessageGetOutputVoltage(TChannel channel) {
+        explicit MessageGetActualVoltage(TChannel channel) {
             mChannel = channel;
         }
 
@@ -187,7 +200,7 @@ namespace Protocol {
             return QString("VOUT%1?").arg(mChannel).toLatin1();
         }
 
-        int answerLength() const override {
+        int replySize() const override {
             return 5;
         };
     };
@@ -198,9 +211,9 @@ namespace Protocol {
     * Boolean: 0 off; 1 on
     * Example: OUT1 Turn on power supply setEnableOutputSwitch
     */
-    class MessageEnableOutputSwitch : public IMessage {
+    class MessageSetEnableOutputSwitch : public IMessage {
     public:
-        MessageEnableOutputSwitch(bool state) {
+        explicit MessageSetEnableOutputSwitch(bool state) {
             mState = state;
         }
 
@@ -213,12 +226,12 @@ namespace Protocol {
 
     /**
     * BEEP<Boolean>
-    * Function Description: Turn on/off enableBuzzer
-    * Example: BEEP1 Turn on enableBuzzer
+    * Function Description: Turn on/off setEnableBuzzer
+    * Example: BEEP1 Turn on setEnableBuzzer
     */
-    class MessageEnableBuzzer : public IMessage {
+    class MessageSetEnableBeep : public IMessage {
     public:
-        MessageEnableBuzzer(bool state) {
+        explicit MessageSetEnableBeep(bool state) {
             mState = state;
         }
 
@@ -235,12 +248,12 @@ namespace Protocol {
      * Example: BEEP?
      * Response: 1 | 0
      */
-    class MessageIsBuzzerEnabled : public IMessage {
+    class MessageGetIsBeepEnabled : public IMessage {
     public:
         QByteArray query() const override {
             return "BEEP?";
         }
-        int answerLength() const override {
+        int replySize() const override {
             return 1;
         };
         bool allowDrop() const override {
@@ -269,7 +282,7 @@ namespace Protocol {
         QByteArray query() const override {
             return "STATUS?";
         }
-        int answerLength() const override {
+        int replySize() const override {
             return 1;
         };
     };
@@ -286,7 +299,7 @@ namespace Protocol {
             return "*IDN?";
         }
 
-        int answerLength() const override {
+        int replySize() const override {
             return 9;
         };
     };
@@ -297,7 +310,7 @@ namespace Protocol {
      */
     class MessageSetPreset : public IMessage {
     public:
-        MessageSetPreset(TMemoryKey key) {
+        explicit MessageSetPreset(TMemoryKey key) {
             mKey = key;
         }
 
@@ -317,7 +330,7 @@ namespace Protocol {
         QByteArray query() const override {
             return "RCL?";
         }
-        int answerLength() const override {
+        int replySize() const override {
             return 1;
         };
         bool allowDrop() const override {
@@ -332,7 +345,7 @@ namespace Protocol {
      */
     class MessageSavePreset : public IMessage {
     public:
-        MessageSavePreset(TMemoryKey key) {
+        explicit MessageSavePreset(TMemoryKey key) {
             mKey = key;
         }
 
@@ -345,13 +358,13 @@ namespace Protocol {
 
     /**
      * TRACK<NR1>
-     * Function Description: Set series & parallel setEnableOutputSwitch
-     * NR1: 0=independent output; 1=series output; 2=parallel setEnableOutputSwitch
+     * Function Description: Set series & parallel channels tracking
+     * NR1: 0=independent output; 1=series output; 2=parallel
      * Example: TRACK1
      */
-    class MessageChangeOutputConnectionMethod : public IMessage {
+    class MessageSetChannelTracking : public IMessage {
     public:
-        MessageChangeOutputConnectionMethod(TOutputConnectionMethod mode) {
+        explicit MessageSetChannelTracking(TChannelTracking mode) {
             mMode = mode;
         }
 
@@ -359,7 +372,7 @@ namespace Protocol {
             return QString("TRACK%1").arg(mMode).toLatin1();
         }
     private:
-        TOutputConnectionMethod mMode;
+        TChannelTracking mMode;
     };
 
     /**
@@ -368,9 +381,9 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OCP1 Turn on OCP
      */
-    class MessageEnableOverCurrentProtection : public IMessage {
+    class MessageSetEnableOverCurrentProtection : public IMessage {
     public:
-        MessageEnableOverCurrentProtection(bool state) {
+        explicit MessageSetEnableOverCurrentProtection(bool state) {
             mState = state;
         }
 
@@ -388,9 +401,9 @@ namespace Protocol {
      * Boolean: 0 OFF, 1 ON
      * Example: OVP1 Turn on OVP
      */
-    class MessageEnableOverVoltageProtection : public IMessage {
+    class MessageSetEnableOverVoltageProtection : public IMessage {
     public:
-        MessageEnableOverVoltageProtection(bool state) {
+        explicit MessageSetEnableOverVoltageProtection(bool state) {
             mState = state;
         }
 
@@ -408,7 +421,7 @@ namespace Protocol {
     */
     class MessageSetOverCurrentProtectionValue : public IMessage {
     public:
-        MessageSetOverCurrentProtectionValue(TChannel channel, double value) {
+        explicit MessageSetOverCurrentProtectionValue(TChannel channel, double value) {
             mChannel = channel;
             mValue = value;
         }
@@ -428,7 +441,7 @@ namespace Protocol {
     */
     class MessageGetOverCurrentProtectionValue : public IMessage {
     public:
-        MessageGetOverCurrentProtectionValue(TChannel channel) {
+        explicit MessageGetOverCurrentProtectionValue(TChannel channel) {
             mChannel = channel;
         }
 
@@ -436,7 +449,7 @@ namespace Protocol {
             return QString("OCPSET%1?").arg(mChannel).toLatin1();
         }
 
-        int answerLength() const override {
+        int replySize() const override {
             return 5;
         };
 
@@ -452,7 +465,7 @@ namespace Protocol {
      */
     class MessageSetOverVoltageProtectionValue : public IMessage {
     public:
-        MessageSetOverVoltageProtectionValue(TChannel channel, double voltage) {
+        explicit MessageSetOverVoltageProtectionValue(TChannel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
@@ -472,7 +485,7 @@ namespace Protocol {
      */
     class MessageGetOverVoltageProtectionValue : public IMessage {
     public:
-        MessageGetOverVoltageProtectionValue(TChannel channel) {
+        explicit MessageGetOverVoltageProtectionValue(TChannel channel) {
             mChannel = channel;
         }
 
@@ -480,7 +493,7 @@ namespace Protocol {
             return QString("OVPSET%1?").arg(mChannel).toLatin1();
         }
 
-        int answerLength() const override {
+        int replySize() const override {
             return 5;
         };
 
@@ -489,9 +502,5 @@ namespace Protocol {
         }
     };
 }
-
-
-
-
 
 #endif //PSC_PROTOCOL_H

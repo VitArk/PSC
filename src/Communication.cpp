@@ -1,9 +1,22 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 //
 // Created by Vitalii Arkusha on 12.09.2022.
 //
 
 #include "Communication.h"
-#include "devices/Factory.h"
+#include "protocol/Factory.h"
 
 #include <QTimer>
 #include <QThread>
@@ -32,7 +45,6 @@ Communication::~Communication() {
     closeSerialPort();
 }
 
-
 void Communication::openSerialPort(const QString &name, int baudRate) {
     closeSerialPort();
     mSerialPort.setPortName(name);
@@ -42,13 +54,13 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
         mSerialPort.clear();
         emit onSerialPortOpened(name, baudRate);
 
-        // The instance of Protocol::Factory blocks serial port (mSerialPort) QT signals.
-        auto factory = Protocol::Factory(mSerialPort);
-        mDeviceProtocol = factory.create();
+        // The instance of Protocol::Factory is blocking all QT signals of QSerialPort (mSerialPort) until be destroyed.
+        auto protocolFactory = Protocol::Factory(mSerialPort);
+        mDeviceProtocol = protocolFactory.create();
         if (mDeviceProtocol != nullptr) {
             emit onDeviceReady(mDeviceProtocol->info());
         } else {
-            emit onUnknownDevice(factory.errorString());
+            emit onUnknownDevice(protocolFactory.errorString());
         }
     } else {
         emit onSerialPortErrorOccurred(mSerialPort.errorString());
@@ -113,11 +125,11 @@ void Communication::slotSerialReadData() {
     }
 
     auto pMessage = mMessageQueue.head();
-    if (mSerialPort.bytesAvailable() >= pMessage->answerLength()) {
+    if (mSerialPort.bytesAvailable() >= pMessage->replySize()) {
         mWaitResponseTimer.stop();
 
-        QByteArray buff(mSerialPort.read(pMessage->answerLength()));
-        dispatchData(*pMessage, buff);
+        QByteArray reply(mSerialPort.read(pMessage->replySize()));
+        dispatchMessageReplay(*pMessage, reply);
         delete mMessageQueue.dequeue();
 
         processMessageQueue(true);
@@ -131,42 +143,8 @@ void Communication::slotResponseTimeout() {
     mIsBusy = false;
 }
 
-
-void Communication::dispatchData(const Protocol::IMessage &message, const QByteArray &data) {
-    bool ok = true;
-    if (typeid(message) == typeid(Protocol::MessageGetDeviceStatus)) {
-        emit onDeviceStatus(DeviceStatus(data.at(0)));
-    } else if (typeid(message) == typeid(Protocol::MessageGetOutputCurrent)) {
-        emit onOutputCurrent(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::MessageGetOutputVoltage)) {
-        emit onOutputVoltage(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::MessageGetCurrent)) {
-        emit onSetCurrent(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::MessageGetVoltage)) {
-        emit onSetVoltage(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::MessageGetOverCurrentProtectionValue)) {
-        emit onOverCurrentProtectionValue(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::MessageGetOverVoltageProtectionValue)) {
-        emit onOverVoltageProtectionValue(message.channel(), data.toDouble(&ok));
-    } else if (typeid(message) == typeid(Protocol::MessageGetPreset)) {
-        emit onActiveSettings(TMemoryKey(data.toInt(&ok)));
-    } else if (typeid(message) == typeid(Protocol::MessageIsOperationPanelLocked)) {
-        emit onOperationPanelLocked(bool(data.toInt(&ok)));
-    } else if (typeid(message) == typeid(Protocol::MessageIsBuzzerEnabled)) {
-        emit onBuzzerEnabled(bool(data.toInt(&ok)));
-    } else if (typeid(message) == typeid(Protocol::MessageGetDeviceID)) {
-        emit onDeviceInfo(data);
-    } else {
-        qDebug() << "Unknown response (message)" << data;
-    }
-
-    if (!ok) {
-        mMetrics.errorCount++;
-    }
-}
-
 bool Communication::isQueueOverflow() const {
-    return mMetrics.queueSize() > 5;
+    return mMetrics.queueLength() > 5;
 }
 
 void Communication::enqueueMessage(Protocol::IMessage *pMessage) {
@@ -189,108 +167,131 @@ void Communication::enqueueMessage(Protocol::IMessage *pMessage) {
 }
 
 void Communication::slotCollectMetrics() {
-    mMetrics.setQueueSize(mMessageQueue.length());
+    mMetrics.setQueueLength(mMessageQueue.length());
     emit onMetricsReady(mMetrics);
 }
 
-void Communication::lockOperationPanel(bool lock) {
-    enqueueMessage(mDeviceProtocol->createRequestLockOperationPanel(lock));
+void Communication::dispatchMessageReplay(const Protocol::IMessage &message, const QByteArray &reply) {
+    bool ok = true;
+    if (typeid(message) == typeid(Protocol::MessageGetDeviceStatus)) {
+        emit onDeviceStatus(DeviceStatus(reply.at(0)));
+    } else if (typeid(message) == typeid(Protocol::MessageGetActualCurrent)) {
+        emit onOutputCurrent(message.channel(), reply.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::MessageGetActualVoltage)) {
+        emit onOutputVoltage(message.channel(), reply.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::MessageGetCurrentSet)) {
+        emit onSetCurrent(message.channel(), reply.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::MessageGetVoltageSet)) {
+        emit onSetVoltage(message.channel(), reply.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::MessageGetOverCurrentProtectionValue)) {
+        emit onOverCurrentProtectionValue(message.channel(), reply.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::MessageGetOverVoltageProtectionValue)) {
+        emit onOverVoltageProtectionValue(message.channel(), reply.toDouble(&ok));
+    } else if (typeid(message) == typeid(Protocol::MessageGetPreset)) {
+        emit onActiveSettings(TMemoryKey(reply.toInt(&ok)));
+    } else if (typeid(message) == typeid(Protocol::MessageGetIsLocked)) {
+        emit onOperationPanelLocked(bool(reply.toInt(&ok)));
+    } else if (typeid(message) == typeid(Protocol::MessageGetIsBeepEnabled)) {
+        emit onBuzzerEnabled(bool(reply.toInt(&ok)));
+    } else if (typeid(message) == typeid(Protocol::MessageGetDeviceID)) {
+        emit onDeviceInfo(reply);
+    } else {
+        qDebug() << "Unknown message reply" << reply;
+    }
+
+    if (!ok) {
+        mMetrics.errorCount++;
+    }
 }
 
-void Communication::isOperationPanelLocked() {
-    enqueueMessage(mDeviceProtocol->createRequestIsOperationPanelLocked());
+void Communication::setLocked(bool lock) {
+    enqueueMessage(mDeviceProtocol->createMessageSetLocked(lock));
+}
+
+void Communication::getIsLocked() {
+    enqueueMessage(mDeviceProtocol->createMessageGetIsLocked());
 }
 
 void Communication::setCurrent(TChannel channel, double value) {
-    enqueueMessage(mDeviceProtocol->createRequestSetCurrent(channel, value));
+    enqueueMessage(mDeviceProtocol->createMessageSetCurrent(channel, value));
 }
 
-void Communication::getCurrent(TChannel channel) {
-    enqueueMessage(mDeviceProtocol->createRequestGetCurrent(channel));
+void Communication::getCurrentSet(TChannel channel) {
+    enqueueMessage(mDeviceProtocol->createMessageGetCurrentSet(channel));
 }
 
 void Communication::setVoltage(TChannel channel, double value) {
-    enqueueMessage(mDeviceProtocol->createRequestSetVoltage(channel, value));
+    enqueueMessage(mDeviceProtocol->createMessageSetVoltage(channel, value));
 }
 
-void Communication::getVoltage(TChannel channel) {
-    enqueueMessage(mDeviceProtocol->createRequestGetVoltage(channel));
+void Communication::getVoltageSet(TChannel channel) {
+    enqueueMessage(mDeviceProtocol->createMessageGetVoltageSet(channel));
 }
 
-void Communication::getOutputCurrent(TChannel channel) {
-    enqueueMessage(mDeviceProtocol->createRequestGetOutputCurrent(channel));
+void Communication::getActualCurrent(TChannel channel) {
+    enqueueMessage(mDeviceProtocol->createMessageGetActualCurrent(channel));
 }
 
-void Communication::getOutputVoltage(TChannel channel) {
-    enqueueMessage(mDeviceProtocol->createRequestGetOutputVoltage(channel));
+void Communication::getActualVoltage(TChannel channel) {
+    enqueueMessage(mDeviceProtocol->createMessageGetActualVoltage(channel));
 }
 
 void Communication::setEnableOutputSwitch(bool enable) {
-    enqueueMessage(mDeviceProtocol->createRequestEnableOutputSwitch(enable));
+    enqueueMessage(mDeviceProtocol->createMessageSetEnableOutputSwitch(enable));
 }
 
-void Communication::enableBuzzer(bool enable) {
-    enqueueMessage(mDeviceProtocol->createRequestEnableBuzzer(enable));
+void Communication::setEnableBuzzer(bool enable) {
+    enqueueMessage(mDeviceProtocol->createMessageSetEnableBeep(enable));
 }
 
-void Communication::isBuzzerEnabled() {
-    enqueueMessage(mDeviceProtocol->createRequestIsBuzzerEnabled());
+void Communication::getIsBuzzerEnabled() {
+    enqueueMessage(mDeviceProtocol->createMessageGetIsBeepEnabled());
 }
 
 void Communication::getDeviceStatus() {
-    enqueueMessage(mDeviceProtocol->createRequestGetDeviceStatus());
+    enqueueMessage(mDeviceProtocol->createMessageGetDeviceStatus());
 }
 
 void Communication::getDeviceID() {
-    enqueueMessage(mDeviceProtocol->createRequestGetDeviceID());
+    enqueueMessage(mDeviceProtocol->createMessageGetDeviceID());
 }
 
 void Communication::setPreset(TMemoryKey key) {
-    enqueueMessage(mDeviceProtocol->createRequestSetPreset(key));
+    enqueueMessage(mDeviceProtocol->createMessageSetPreset(key));
 }
 
 void Communication::getPreset() {
-    enqueueMessage(mDeviceProtocol->createRequestGetPreset());
+    enqueueMessage(mDeviceProtocol->createMessageGetPreset());
 }
 
 void Communication::savePreset(TMemoryKey key) {
-    enqueueMessage(mDeviceProtocol->createRequestSavePreset(key));
+    enqueueMessage(mDeviceProtocol->createMessageSavePreset(key));
 }
 
-void Communication::changeOutputConnectionMethod(TOutputConnectionMethod method) {
-    enqueueMessage(mDeviceProtocol->createRequestChangeOutputConnectionMethod(method));
+void Communication::setChannelTracking(TChannelTracking mode) {
+    enqueueMessage(mDeviceProtocol->createMessageSetChannelTracking(mode));
 }
 
-void Communication::enableOverCurrentProtection(bool enable) {
-    enqueueMessage(mDeviceProtocol->createRequestEnableOverCurrentProtection(enable));
+void Communication::setEnableOverCurrentProtection(bool enable) {
+    enqueueMessage(mDeviceProtocol->createMessageSetEnableOverCurrentProtection(enable));
 }
 
-void Communication::enableOverVoltageProtection(bool enable) {
-    enqueueMessage(mDeviceProtocol->createRequestEnableOverVoltageProtection(enable));
+void Communication::setEnableOverVoltageProtection(bool enable) {
+    enqueueMessage(mDeviceProtocol->createMessageSetEnableOverVoltageProtection(enable));
 }
 
 void Communication::setOverCurrentProtectionValue(TChannel channel, double current) {
-    enqueueMessage(mDeviceProtocol->createRequestSetOverCurrentProtectionValue(channel, current));
+    enqueueMessage(mDeviceProtocol->createMessageSetOverCurrentProtectionValue(channel, current));
 }
 
 void Communication::getOverCurrentProtectionValue(TChannel channel) {
-    enqueueMessage(mDeviceProtocol->createRequestGetOverCurrentProtectionValue(channel));
+    enqueueMessage(mDeviceProtocol->createMessageGetOverCurrentProtectionValue(channel));
 }
 
 void Communication::setOverVoltageProtectionValue(TChannel channel, double voltage) {
-    enqueueMessage(mDeviceProtocol->createRequestSetOverVoltageProtectionValue(channel, voltage));
+    enqueueMessage(mDeviceProtocol->createMessageSetOverVoltageProtectionValue(channel, voltage));
 }
 
 void Communication::getOverVoltageProtectionValue(TChannel channel) {
-    enqueueMessage(mDeviceProtocol->createRequestGetOverVoltageProtectionValue(channel));
+    enqueueMessage(mDeviceProtocol->createMessageGetOverVoltageProtectionValue(channel));
 }
-
-
-
-
-
-
-
-
-
-

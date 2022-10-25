@@ -1,13 +1,26 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QLabel>
-#include "devices/Commons.h"
+#include "protocol/Commons.h"
 #include "Debounce.h"
 #include "Settings.h"
 #include "CommunicationMetrics.h"
-#include "Label.h"
+#include "ClickableLabel.h"
 
 namespace Ui {
 class MainWindow;
@@ -26,7 +39,7 @@ signals:
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
     void onSerialPortDoClose();
 
-    void onOutputConnectionMethodChanged(TOutputConnectionMethod method);
+    void onOutputConnectionMethodChanged(TChannelTracking method);
     void onOutputProtectionChanged(TOutputProtection protection);
     void onOverVoltageProtectionChanged(TChannel channel, double value);
     void onOverCurrentProtectionChanged(TChannel channel, double value);
@@ -46,9 +59,9 @@ public slots:
     void slotUnknownDevice(QString deviceID);
     void slotShowCommunicationMetrics(const CommunicationMetrics &info);
 
-    void slotShowOutputConnectionMethod(OutputConnectionMethod method);
-    void slotShowOutputProtectionMode(OutputProtection protection);
-    void slotShowOutputStabilizingMode(TOutputStabilizingMode channel1, TOutputStabilizingMode channel2);
+    void slotShowOutputTrackingMode(TChannelTracking method);
+    void slotShowOutputProtectionMode(TOutputProtection protection);
+    void slotShowOutputMode(TOutputMode channel1, TOutputMode channel2);
     void slotShowOutputSwitchStatus(bool state);
     void slotEnableMemoryKey(TMemoryKey key);
 
@@ -100,7 +113,7 @@ private:
     Debounce mDebouncedCh2A;
 
     QLabel *mStatusBarConnectionStatus;
-    Label *mStatusBarDeviceInfo;
+    ClickableLabel *mStatusBarDeviceInfo;
     QLabel *mStatusBarDeviceLock;
     QLabel *mStatusCommunicationMetrics;
 
