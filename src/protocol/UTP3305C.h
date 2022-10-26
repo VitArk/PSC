@@ -18,15 +18,15 @@
 #ifndef PSM_UTP3305C_H
 #define PSM_UTP3305C_H
 
-#include "Interface.h"
+#include "BaseSCPI.h"
 namespace Protocol {
-    class UTP3305C : public Interface {
+    class UTP3305C : public BaseSCPI {
     public:
         QString name() const override {
             return "UNI-T UTP3305C";
         }
 
-        QString id() const override {
+        QString deviceID() const override {
             return "P3305C%**";
         };
 
@@ -42,7 +42,7 @@ namespace Protocol {
             return 31.00; // Volts
         };
 
-        int activeChannels() const override {
+        int activeChannelsCount() const override {
             return 2;
         }
     };

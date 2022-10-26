@@ -125,7 +125,7 @@ void MainWindow::slotSerialPortErrorOccurred(QString error) {
     QMessageBox::warning(this, tr("Serial Port Error Occurred"),error, QMessageBox::Close);
 }
 
-void MainWindow::slotDeviceReady(DeviceInfo info) {
+void MainWindow::slotDeviceReady(const Protocol::DeviceInfo &info) {
     mDeviceInfo = info;
     slotShowDeviceNameOrID();
     setControlLimits(info);
@@ -133,8 +133,8 @@ void MainWindow::slotDeviceReady(DeviceInfo info) {
 }
 
 void MainWindow::slotUnknownDevice(QString deviceID) {
-    QMessageBox::warning(this, tr("Unknown Interface"),
-                         tr("Unknown Interface (ID: %1)").arg(deviceID),
+    QMessageBox::warning(this, tr("Unknown Device"),
+                         tr("Unknown Device (ID: %1)").arg(deviceID),
                          QMessageBox::Close
     );
 }
@@ -155,18 +155,18 @@ void MainWindow::slotSerialPortClosed() {
     mStatusBarDeviceInfo->setText(tr("N/A"));
     mStatusBarDeviceLock->setText(tr("N/A"));
 
-    slotShowOutputTrackingMode(Independent);
+    slotShowOutputTrackingMode(Protocol::Independent);
     enableControls(false);
 
-    slotDisplayOutputVoltage(Channel1, V0);
-    slotDisplayOutputVoltage(Channel2, V0);
-    slotDisplayOutputCurrent(Channel1, A0);
-    slotDisplayOutputCurrent(Channel2, A0);
+    slotDisplayOutputVoltage(Protocol::Channel1, V0);
+    slotDisplayOutputVoltage(Protocol::Channel2, V0);
+    slotDisplayOutputCurrent(Protocol::Channel1, A0);
+    slotDisplayOutputCurrent(Protocol::Channel2, A0);
 
-    slotDisplayOverVoltageProtectionValue(Channel1, V0);
-    slotDisplayOverVoltageProtectionValue(Channel2, V0);
-    slotDisplayOverCurrentProtectionValue(Channel1, A0);
-    slotDisplayOverCurrentProtectionValue(Channel2, A0);
+    slotDisplayOverVoltageProtectionValue(Protocol::Channel1, V0);
+    slotDisplayOverVoltageProtectionValue(Protocol::Channel2, V0);
+    slotDisplayOverCurrentProtectionValue(Protocol::Channel1, A0);
+    slotDisplayOverCurrentProtectionValue(Protocol::Channel2, A0);
 }
 
 void MainWindow::enableControls(bool enable) {
@@ -174,15 +174,15 @@ void MainWindow::enableControls(bool enable) {
         return;
     }
 
-    enableChannel(Channel1, enable);
-    enableChannel(Channel2, enable);
+    enableChannel(Protocol::Channel1, enable);
+    enableChannel(Protocol::Channel2, enable);
 
     ui->groupBoxOperation->setEnabled(enable);
     ui->actionLockDevice->setEnabled(enable);
     ui->actionBuzzer->setEnabled(enable);
 }
 
-void MainWindow::setControlLimits(const DeviceInfo &info) {
+void MainWindow::setControlLimits(const Protocol::DeviceInfo &info) {
     ui->dialCh1V->setMaximum(int(info.maxChannelVoltage * vDialCorrection));
     ui->dialCh2V->setMaximum(int(info.maxChannelVoltage * vDialCorrection));
     ui->spinCh1V->setMaximum(info.maxChannelVoltage);
@@ -208,40 +208,40 @@ void MainWindow::slotEnableBuzzer(bool enabled) {
 }
 
 void MainWindow::slotOutputConnectionMethodChanged() {
-    TChannelTracking channelTracking = Independent;
+    auto channelTracking = Protocol::Independent;
     if (ui->rdoBtnOutParallel->isChecked()) {
-        channelTracking = Parallel;
+        channelTracking = Protocol::Parallel;
     } else if (ui->rdoBtnOutSerial->isChecked()) {
-        channelTracking = Serial;
+        channelTracking = Protocol::Serial;
     }
 
     emit onOutputConnectionMethodChanged(channelTracking);
 }
 
-void MainWindow::slotShowOutputTrackingMode(TChannelTracking method) {
+void MainWindow::slotShowOutputTrackingMode(Protocol::ChannelTracking method) {
     QString resourceName;
     QString labelText;
     switch (method) {
-        case Independent:
+        case Protocol::Independent:
             ui->rdoBtnOutIndependent->setChecked(true);
-            enableChannel(Channel1, true);
-            enableChannel(Channel2, true);
+            enableChannel(Protocol::Channel1, true);
+            enableChannel(Protocol::Channel2, true);
 
             resourceName = ":independent-mode";
             labelText = tr("Two independent channels U: 0-30V, I: 0-5A");
             break;
-        case Serial:
+        case Protocol::Serial:
             ui->rdoBtnOutSerial->setChecked(true);
-            enableChannel(Channel1, false);
-            enableChannel(Channel2, true);
+            enableChannel(Protocol::Channel1, false);
+            enableChannel(Protocol::Channel2, true);
 
             resourceName = ":serial-mode";
             labelText = tr("One channel U: 0-60V, I: 0-5A");
             break;
-        case Parallel:
+        case Protocol::Parallel:
             ui->rdoBtnOutParallel->setChecked(true);
-            enableChannel(Channel1, false);
-            enableChannel(Channel2, true);
+            enableChannel(Protocol::Channel1, false);
+            enableChannel(Protocol::Channel2, true);
 
             resourceName = ":parallel-mode";
             labelText = tr("One channel U: 0-30V, I: 0-10A");
@@ -252,37 +252,37 @@ void MainWindow::slotShowOutputTrackingMode(TChannelTracking method) {
 }
 
 void MainWindow::slotOutputProtectionChanged() {
-    OutputProtection protection = OutputProtectionAllDisabled;
-    protection = ui->btnOVP->isChecked() ? OverVoltageProtectionOnly : protection;
-    protection = ui->btnOCP->isChecked() ? OverCurrentProtectionOnly : protection;
-    protection = ui->btnOCP->isChecked() && ui->btnOVP->isChecked() ? OutputProtectionAllEnabled : protection;
+    auto protection = Protocol::OutputProtectionAllDisabled;
+    protection = ui->btnOVP->isChecked() ? Protocol::OverVoltageProtectionOnly : protection;
+    protection = ui->btnOCP->isChecked() ? Protocol::OverCurrentProtectionOnly : protection;
+    protection = ui->btnOCP->isChecked() && ui->btnOVP->isChecked() ? Protocol::OutputProtectionAllEnabled : protection;
 
     emit onOutputProtectionChanged(protection);
 }
 
-void MainWindow::slotShowOutputProtectionMode(OutputProtection protection) {
+void MainWindow::slotShowOutputProtectionMode(Protocol::OutputProtection protection) {
     switch (protection) {
-        case OutputProtectionAllDisabled:
+        case Protocol::OutputProtectionAllDisabled:
             ui->btnOVP->setChecked(false);
             ui->btnOCP->setChecked(false);
             break;
-        case OutputProtectionAllEnabled:
+        case Protocol::OutputProtectionAllEnabled:
             ui->btnOVP->setChecked(true);
             ui->btnOCP->setChecked(true);
             break;
-        case OverVoltageProtectionOnly:
+        case Protocol::OverVoltageProtectionOnly:
             ui->btnOVP->setChecked(true);
             ui->btnOCP->setChecked(false);
             break;
-        case OverCurrentProtectionOnly:
+        case Protocol::OverCurrentProtectionOnly:
             ui->btnOVP->setChecked(false);
             ui->btnOCP->setChecked(true);
             break;
     }
 }
 
-void MainWindow::slotShowOutputMode(TOutputMode channel1, TOutputMode channel2) {
-    if (channel1 == ConstantCurrent) {
+void MainWindow::slotShowOutputMode(Protocol::OutputMode channel1, Protocol::OutputMode channel2) {
+    if (channel1 == Protocol::ConstantCurrent) {
         highlight(HighlightRed, ui->lblCh1CC);
         highlight(HighlightNone, ui->lblCh1CV);
     } else {
@@ -290,7 +290,7 @@ void MainWindow::slotShowOutputMode(TOutputMode channel1, TOutputMode channel2) 
         highlight(HighlightGreen, ui->lblCh1CV);
     }
 
-    if (channel2 == ConstantCurrent) {
+    if (channel2 == Protocol::ConstantCurrent) {
         highlight(HighlightRed, ui->lblCh2CC);
         highlight(HighlightNone, ui->lblCh2CV);
     } else {
@@ -311,12 +311,12 @@ void MainWindow::slotShowOutputSwitchStatus(bool state) {
     }
 }
 
-void MainWindow::enableChannel(TChannel ch, bool enable) {
+void MainWindow::enableChannel(Protocol::Channel ch, bool enable) {
     if (enable && !acceptEnable()) {
         return;
     }
 
-    if (ch == Channel1) {
+    if (ch == Protocol::Channel1) {
         ui->lblCh1->setEnabled(enable);
         ui->groupBoxCh1->setEnabled(enable);
     } else {
@@ -325,30 +325,30 @@ void MainWindow::enableChannel(TChannel ch, bool enable) {
     }
 }
 
-void MainWindow::slotEnableMemoryKey(TMemoryKey key) {
+void MainWindow::slotEnableMemoryKey(Protocol::MemoryKey key) {
     switch (key) {
-        case M1: ui->btnM1->setChecked(true); break;
-        case M2: ui->btnM2->setChecked(true); break;
-        case M3: ui->btnM3->setChecked(true); break;
-        case M4: ui->btnM4->setChecked(true); break;
-        case M5: ui->btnM5->setChecked(true); break;
+        case Protocol::Memory1: ui->btnM1->setChecked(true); break;
+        case Protocol::Memory2: ui->btnM2->setChecked(true); break;
+        case Protocol::Memory3: ui->btnM3->setChecked(true); break;
+        case Protocol::Memory4: ui->btnM4->setChecked(true); break;
+        case Protocol::Memory5: ui->btnM5->setChecked(true); break;
     }
 }
 
 void MainWindow::slotPresetKeyClicked() {
-    if (sender() == ui->btnM1) emit onPresetChanged(M1);
-    else if (sender() == ui->btnM2) emit onPresetChanged(M2);
-    else if (sender() == ui->btnM3) emit onPresetChanged(M3);
-    else if (sender() == ui->btnM4) emit onPresetChanged(M4);
-    else if (sender() == ui->btnM5) emit onPresetChanged(M5);
+    if (sender() == ui->btnM1) emit onPresetChanged(Protocol::Memory1);
+    else if (sender() == ui->btnM2) emit onPresetChanged(Protocol::Memory2);
+    else if (sender() == ui->btnM3) emit onPresetChanged(Protocol::Memory3);
+    else if (sender() == ui->btnM4) emit onPresetChanged(Protocol::Memory4);
+    else if (sender() == ui->btnM5) emit onPresetChanged(Protocol::Memory5);
 }
 
 void MainWindow::slotPresetSaveClicked() {
-    if (ui->btnM1->isChecked()) emit onPresetSave(M1);
-    else if (ui->btnM2->isChecked()) emit onPresetSave(M2);
-    else if (ui->btnM3->isChecked()) emit onPresetSave(M3);
-    else if (ui->btnM4->isChecked()) emit onPresetSave(M4);
-    else if (ui->btnM5->isChecked()) emit onPresetSave(M5);
+    if (ui->btnM1->isChecked()) emit onPresetSave(Protocol::Memory1);
+    else if (ui->btnM2->isChecked()) emit onPresetSave(Protocol::Memory2);
+    else if (ui->btnM3->isChecked()) emit onPresetSave(Protocol::Memory3);
+    else if (ui->btnM4->isChecked()) emit onPresetSave(Protocol::Memory4);
+    else if (ui->btnM5->isChecked()) emit onPresetSave(Protocol::Memory5);
 }
 
 void MainWindow::slotDialControlChanged() {
@@ -374,10 +374,10 @@ void MainWindow::slotControlValueChanged() {
 }
 
 void MainWindow::slotControlValueChangedDebounced(double value) {
-    if (sender() == &mDebouncedCh1V) emit onVoltageChanged(Channel1, value);
-    else if (sender() == &mDebouncedCh1A) emit onCurrentChanged(Channel1, value);
-    else if (sender() == &mDebouncedCh2V) emit onVoltageChanged(Channel2, value);
-    else if (sender() == &mDebouncedCh2A) emit onCurrentChanged(Channel2, value);
+    if (sender() == &mDebouncedCh1V) emit onVoltageChanged(Protocol::Channel1, value);
+    else if (sender() == &mDebouncedCh1A) emit onCurrentChanged(Protocol::Channel1, value);
+    else if (sender() == &mDebouncedCh2V) emit onVoltageChanged(Protocol::Channel2, value);
+    else if (sender() == &mDebouncedCh2A) emit onCurrentChanged(Protocol::Channel2, value);
 
     ui->spinCh1A->clearFocus();
     ui->spinCh1V->clearFocus();
@@ -389,24 +389,24 @@ void MainWindow::slotControlValueChangedDebounced(double value) {
     ui->dialCh2V->clearFocus();
 }
 
-void MainWindow::slotDisplayOutputVoltage(TChannel channel, double voltage) {
-    if (channel == Channel1) {
+void MainWindow::slotDisplayOutputVoltage(Protocol::Channel channel, double voltage) {
+    if (channel == Protocol::Channel1) {
         ui->lcdCh1V->display(voltageFormat(voltage));
     } else {
         ui->lcdCh2V->display(voltageFormat(voltage));
     }
 }
 
-void MainWindow::slotDisplayOutputCurrent(TChannel channel, double current) {
-    if (channel == Channel1) {
+void MainWindow::slotDisplayOutputCurrent(Protocol::Channel channel, double current) {
+    if (channel == Protocol::Channel1) {
         ui->lcdCh1A->display(currentFormat(current));
     } else {
         ui->lcdCh2A->display(currentFormat(current));
     }
 }
 
-void MainWindow::slotDisplaySetVoltage(TChannel channel, double voltage) {
-    if (channel == Channel1) {
+void MainWindow::slotDisplaySetVoltage(Protocol::Channel channel, double voltage) {
+    if (channel == Protocol::Channel1) {
         if (ui->spinCh1V->hasFocus() || ui->dialCh1V->hasFocus())
             return;
         ui->spinCh1V->setValue(voltage);
@@ -419,8 +419,8 @@ void MainWindow::slotDisplaySetVoltage(TChannel channel, double voltage) {
     }
 }
 
-void MainWindow::slotDisplaySetCurrent(TChannel channel, double current) {
-    if (channel == Channel1) {
+void MainWindow::slotDisplaySetCurrent(Protocol::Channel channel, double current) {
+    if (channel == Protocol::Channel1) {
         if (ui->spinCh1A->hasFocus() || ui->dialCh1A->hasFocus())
             return;
         ui->spinCh1A->setValue(current);
@@ -433,16 +433,16 @@ void MainWindow::slotDisplaySetCurrent(TChannel channel, double current) {
     }
 }
 
-void MainWindow::slotDisplayOverCurrentProtectionValue(TChannel channel, double current) {
-    if (channel == Channel1) {
+void MainWindow::slotDisplayOverCurrentProtectionValue(Protocol::Channel channel, double current) {
+    if (channel == Protocol::Channel1) {
         ui->spinCh1OCP->setValue(current);
     } else {
         ui->spinCh2OCP->setValue(current);
     }
 }
 
-void MainWindow::slotDisplayOverVoltageProtectionValue(TChannel channel, double voltage) {
-    if (channel == Channel1) {
+void MainWindow::slotDisplayOverVoltageProtectionValue(Protocol::Channel channel, double voltage) {
+    if (channel == Protocol::Channel1) {
         ui->spinCh1OVP->setValue(voltage);
     } else {
         ui->spinCh2OVP->setValue(voltage);
@@ -450,19 +450,19 @@ void MainWindow::slotDisplayOverVoltageProtectionValue(TChannel channel, double 
 }
 
 void MainWindow::slotOverProtectionChanged() {
-    if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Channel1, ui->spinCh1OVP->value());
-    else if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Channel1, ui->spinCh2OVP->value());
-    else if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Channel2, ui->spinCh1OCP->value());
-    else if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Channel2, ui->spinCh2OCP->value());
+    if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Protocol::Channel1, ui->spinCh1OVP->value());
+    else if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Protocol::Channel1, ui->spinCh2OVP->value());
+    else if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Protocol::Channel2, ui->spinCh1OCP->value());
+    else if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Protocol::Channel2, ui->spinCh2OCP->value());
 }
 
 void MainWindow::slotLockOperationPanel(bool lock) {
     if (lock) {
-        mStatusBarDeviceLock->setText(tr("Interface Controls: Lock"));
-        ui->actionLockDevice->setText(tr("Unlock Interface Controls"));
+        mStatusBarDeviceLock->setText(tr("Device Controls: Lock"));
+        ui->actionLockDevice->setText(tr("Unlock Device Controls"));
     } else {
-        mStatusBarDeviceLock->setText(tr("Interface Controls: Unlocked"));
-        ui->actionLockDevice->setText(tr("Lock Interface Controls"));
+        mStatusBarDeviceLock->setText(tr("Device Controls: Unlocked"));
+        ui->actionLockDevice->setText(tr("Lock Device Controls"));
     }
 }
 
@@ -638,8 +638,3 @@ void MainWindow::slotShowDeviceNameOrID() {
     }
     showDeviceID = !showDeviceID;
 }
-
-
-
-
-

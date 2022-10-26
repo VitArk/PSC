@@ -24,16 +24,16 @@
 namespace Protocol {
     class IMessage {
     public:
-        virtual TChannel channel() const { return mChannel;}
+        virtual ~IMessage() = default;
+
+        virtual Channel channel() const { return mChannel;}
         virtual QByteArray query() const = 0;
         virtual int replySize() const { return 0; }
-        virtual ~IMessage() = default;
-        virtual bool isQuery() const { return replySize() > 0; }
-        virtual bool isCommand() const { return replySize() == 0; }
+        virtual bool isCommandWithReply() const { return replySize() > 0; }
         // messages that return true, will be dropped in case overflowing messages queue.
-        virtual bool allowDrop() const { return false; }
+        virtual bool allowToDrop() const { return false; }
     protected:
-        TChannel mChannel;
+        Channel mChannel = Channel1;
     };
 
     /**
@@ -73,7 +73,7 @@ namespace Protocol {
             return 1;
         };
 
-        bool allowDrop() const override {
+        bool allowToDrop() const override {
             return true;
         }
     };
@@ -87,7 +87,7 @@ namespace Protocol {
      */
     class MessageSetCurrent : public IMessage {
     public:
-        MessageSetCurrent(TChannel channel, double current) {
+        MessageSetCurrent(Channel channel, double current) {
             mChannel = channel;
             mCurrent = current;
         }
@@ -108,7 +108,7 @@ namespace Protocol {
      */
     class MessageGetCurrentSet : public IMessage {
     public:
-        explicit MessageGetCurrentSet(TChannel channel) {
+        explicit MessageGetCurrentSet(Channel channel) {
             mChannel = channel;
         }
 
@@ -129,7 +129,7 @@ namespace Protocol {
      */
     class MessageSetVoltage : public IMessage {
     public:
-        explicit MessageSetVoltage(TChannel channel, double voltage) {
+        explicit MessageSetVoltage(Channel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
@@ -150,7 +150,7 @@ namespace Protocol {
      */
     class MessageGetVoltageSet : public IMessage {
     public:
-        explicit MessageGetVoltageSet(TChannel channel) {
+        explicit MessageGetVoltageSet(Channel channel) {
             mChannel = channel;
         }
 
@@ -171,7 +171,7 @@ namespace Protocol {
      */
     class MessageGetActualCurrent : public IMessage {
     public:
-        explicit MessageGetActualCurrent(TChannel channel) {
+        explicit MessageGetActualCurrent(Channel channel) {
             mChannel = channel;
         }
 
@@ -192,7 +192,7 @@ namespace Protocol {
     */
     class MessageGetActualVoltage : public IMessage {
     public:
-        explicit MessageGetActualVoltage(TChannel channel) {
+        explicit MessageGetActualVoltage(Channel channel) {
             mChannel = channel;
         }
 
@@ -256,7 +256,7 @@ namespace Protocol {
         int replySize() const override {
             return 1;
         };
-        bool allowDrop() const override {
+        bool allowToDrop() const override {
             return true;
         }
     };
@@ -272,7 +272,7 @@ namespace Protocol {
      *  3       ParallelMode    0=Off, 1=On
      *  4       OVP             0=Off, 1=On
      *  5       OCP             0=Off, 1=On
-     *  6       OutputSwitch    0=Off, 1=On
+     *  6       outputSwitch    0=Off, 1=On
      *  7       N/A             N/A
      *
      *  ** if bits (2=0 and 3=0) -- Independent method.
@@ -306,11 +306,11 @@ namespace Protocol {
 
     /**
      * RCL<NR1>
-     * Function Description:Storage recall by pressing keys from M1-M5
+     * Function Description:Storage recall by pressing keys from Memory1-Memory5
      */
     class MessageSetPreset : public IMessage {
     public:
-        explicit MessageSetPreset(TMemoryKey key) {
+        explicit MessageSetPreset(MemoryKey key) {
             mKey = key;
         }
 
@@ -318,12 +318,12 @@ namespace Protocol {
             return QString("RCL%1").arg(mKey).toLatin1();
         }
     private:
-        TMemoryKey mKey;
+        MemoryKey mKey;
     };
 
     /**
      * RCL?
-     * Function Description:Read current/active setting number (keys from M1-M5)
+     * Function Description:Read current/active setting number (keys from Memory1-Memory5)
      */
     class MessageGetPreset : public IMessage {
     public:
@@ -333,7 +333,7 @@ namespace Protocol {
         int replySize() const override {
             return 1;
         };
-        bool allowDrop() const override {
+        bool allowToDrop() const override {
             return true;
         }
     };
@@ -345,7 +345,7 @@ namespace Protocol {
      */
     class MessageSavePreset : public IMessage {
     public:
-        explicit MessageSavePreset(TMemoryKey key) {
+        explicit MessageSavePreset(MemoryKey key) {
             mKey = key;
         }
 
@@ -353,7 +353,7 @@ namespace Protocol {
             return QString("SAV%1").arg(mKey).toLatin1();
         }
     private:
-        TMemoryKey mKey;
+        MemoryKey mKey;
     };
 
     /**
@@ -364,7 +364,7 @@ namespace Protocol {
      */
     class MessageSetChannelTracking : public IMessage {
     public:
-        explicit MessageSetChannelTracking(TChannelTracking mode) {
+        explicit MessageSetChannelTracking(ChannelTracking mode) {
             mMode = mode;
         }
 
@@ -372,7 +372,7 @@ namespace Protocol {
             return QString("TRACK%1").arg(mMode).toLatin1();
         }
     private:
-        TChannelTracking mMode;
+        ChannelTracking mMode;
     };
 
     /**
@@ -421,7 +421,7 @@ namespace Protocol {
     */
     class MessageSetOverCurrentProtectionValue : public IMessage {
     public:
-        explicit MessageSetOverCurrentProtectionValue(TChannel channel, double value) {
+        explicit MessageSetOverCurrentProtectionValue(Channel channel, double value) {
             mChannel = channel;
             mValue = value;
         }
@@ -441,7 +441,7 @@ namespace Protocol {
     */
     class MessageGetOverCurrentProtectionValue : public IMessage {
     public:
-        explicit MessageGetOverCurrentProtectionValue(TChannel channel) {
+        explicit MessageGetOverCurrentProtectionValue(Channel channel) {
             mChannel = channel;
         }
 
@@ -453,7 +453,7 @@ namespace Protocol {
             return 5;
         };
 
-        bool allowDrop() const override {
+        bool allowToDrop() const override {
             return true;
         }
     };
@@ -465,7 +465,7 @@ namespace Protocol {
      */
     class MessageSetOverVoltageProtectionValue : public IMessage {
     public:
-        explicit MessageSetOverVoltageProtectionValue(TChannel channel, double voltage) {
+        explicit MessageSetOverVoltageProtectionValue(Channel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
@@ -485,7 +485,7 @@ namespace Protocol {
      */
     class MessageGetOverVoltageProtectionValue : public IMessage {
     public:
-        explicit MessageGetOverVoltageProtectionValue(TChannel channel) {
+        explicit MessageGetOverVoltageProtectionValue(Channel channel) {
             mChannel = channel;
         }
 
@@ -497,7 +497,7 @@ namespace Protocol {
             return 5;
         };
 
-        bool allowDrop() const override {
+        bool allowToDrop() const override {
             return true;
         }
     };

@@ -39,14 +39,14 @@ signals:
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
     void onSerialPortDoClose();
 
-    void onOutputConnectionMethodChanged(TChannelTracking method);
-    void onOutputProtectionChanged(TOutputProtection protection);
-    void onOverVoltageProtectionChanged(TChannel channel, double value);
-    void onOverCurrentProtectionChanged(TChannel channel, double value);
-    void onPresetChanged(TMemoryKey key);
-    void onPresetSave(TMemoryKey key);
-    void onVoltageChanged(TChannel channel, double value);
-    void onCurrentChanged(TChannel channel, double value);
+    void onOutputConnectionMethodChanged(Protocol::ChannelTracking method);
+    void onOutputProtectionChanged(Protocol::OutputProtection protection);
+    void onOverVoltageProtectionChanged(Protocol::Channel channel, double value);
+    void onOverCurrentProtectionChanged(Protocol::Channel channel, double value);
+    void onPresetChanged(Protocol::MemoryKey key);
+    void onPresetSave(Protocol::MemoryKey key);
+    void onVoltageChanged(Protocol::Channel channel, double value);
+    void onCurrentChanged(Protocol::Channel channel, double value);
     void onOutputSwitchChanged(bool state);
     void onLockOperationPanelChanged(bool lock);
     void onBuzzerChanged(bool lock);
@@ -55,23 +55,23 @@ public slots:
     void slotSerialPortOpened(const QString& serialPortName, int baudRate);
     void slotSerialPortClosed();
     void slotSerialPortErrorOccurred(QString error);
-    void slotDeviceReady(DeviceInfo info);
+    void slotDeviceReady(const Protocol::DeviceInfo &info);
     void slotUnknownDevice(QString deviceID);
     void slotShowCommunicationMetrics(const CommunicationMetrics &info);
 
-    void slotShowOutputTrackingMode(TChannelTracking method);
-    void slotShowOutputProtectionMode(TOutputProtection protection);
-    void slotShowOutputMode(TOutputMode channel1, TOutputMode channel2);
+    void slotShowOutputTrackingMode(Protocol::ChannelTracking method);
+    void slotShowOutputProtectionMode(Protocol::OutputProtection protection);
+    void slotShowOutputMode(Protocol::OutputMode channel1, Protocol::OutputMode channel2);
     void slotShowOutputSwitchStatus(bool state);
-    void slotEnableMemoryKey(TMemoryKey key);
+    void slotEnableMemoryKey(Protocol::MemoryKey key);
 
-    void slotDisplayOutputVoltage(TChannel channel, double voltage);
-    void slotDisplayOutputCurrent(TChannel channel, double current);
-    void slotDisplaySetVoltage(TChannel channel, double voltage);
-    void slotDisplaySetCurrent(TChannel channel, double current);
+    void slotDisplayOutputVoltage(Protocol::Channel channel, double voltage);
+    void slotDisplayOutputCurrent(Protocol::Channel channel, double current);
+    void slotDisplaySetVoltage(Protocol::Channel channel, double voltage);
+    void slotDisplaySetCurrent(Protocol::Channel channel, double current);
 
-    void slotDisplayOverVoltageProtectionValue(TChannel channel, double voltage);
-    void slotDisplayOverCurrentProtectionValue(TChannel channel, double current);
+    void slotDisplayOverVoltageProtectionValue(Protocol::Channel channel, double voltage);
+    void slotDisplayOverCurrentProtectionValue(Protocol::Channel channel, double current);
 
     void slotLockOperationPanel(bool lock);
     void slotEnableBuzzer(bool enabled);
@@ -118,13 +118,13 @@ private:
     QLabel *mStatusCommunicationMetrics;
 
     bool mIsSerialConnected = false;
-    DeviceInfo  mDeviceInfo;
+    Protocol::DeviceInfo  mDeviceInfo;
 
 private:
     bool acceptEnable() const;
     void enableControls(bool enable);
-    void setControlLimits(const DeviceInfo &info);
-    void enableChannel(TChannel ch, bool enable);
+    void setControlLimits(const Protocol::DeviceInfo &info);
+    void enableChannel(Protocol::Channel ch, bool enable);
     void openSvg(const QString &resource);
     void createBaudRatesMenu();
     QString chosenSerialPort() const;

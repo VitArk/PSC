@@ -40,12 +40,12 @@ private:
 private slots:
     void slotAppRun();
 
-    void slotStartWorking(DeviceInfo info);
+    void slotStartWorking(const Protocol::DeviceInfo &info);
     void slotSerialPortClosed();
 
     void slotWorkingCycle();
-    void slotOutputStatus(DeviceStatus status);
-    void slotOutputProtectionChanged(TOutputProtection protection);
+    void slotOutputStatus(const Protocol::DeviceStatus &status);
+    void slotOutputProtectionChanged(Protocol::OutputProtection protection);
     void slotTuneWorkingTimerInterval(const CommunicationMetrics &metrics);
 };
 

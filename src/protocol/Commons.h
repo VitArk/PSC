@@ -18,46 +18,55 @@
 #ifndef POWER_SUPPLY_CONTROLLER_COMMONS_H
 #define POWER_SUPPLY_CONTROLLER_COMMONS_H
 
-struct DeviceInfo{
-    QString name;
-    QString ID;
-    QString description;
-    double maxChannelCurrent; // Amperes
-    double maxChannelVoltage; // Volts
-    int activeChannels;       // Only active channels, ignore fixed.
-};
+namespace Protocol {
+    struct DeviceInfo {
+        QString name;
+        QString ID;
+        QString description;
+        double maxChannelCurrent; // Amperes
+        double maxChannelVoltage; // Volts
+        int activeChannelsCount;       // Only active channels, ignore fixed.
+    };
 
-enum Channel {
-    Channel1 = 1,
-    Channel2 = 2,
-} typedef TChannel;
+    enum Channel {
+        Channel1 = 1,
+        Channel2 = 2,
+    };
 
-enum MemoryKey {
-    M1 = 1,
-    M2 = 2,
-    M3 = 3,
-    M4 = 4,
-    M5 = 5,
-} typedef TMemoryKey;
+    enum MemoryKey {
+        Memory1 = 1,
+        Memory2 = 2,
+        Memory3 = 3,
+        Memory4 = 4,
+        Memory5 = 5,
+    };
 
-enum ChannelTracking {
-    Independent = 0,
-    Serial = 1,
-    Parallel = 2,
-} typedef TChannelTracking;
+    enum ChannelTracking {
+        Independent = 0,
+        Serial = 1,
+        Parallel = 2,
+    };
 
-enum OutputMode {
-    ConstantCurrent = 0,
-    ConstantVoltage = 1,
-} typedef TOutputMode;
+    enum OutputMode {
+        ConstantCurrent = 0,
+        ConstantVoltage = 1,
+    };
 
-enum OutputProtection {
-    OutputProtectionAllDisabled = 0,
-    OutputProtectionAllEnabled = 1,
-    OverVoltageProtectionOnly = 2,
-    OverCurrentProtectionOnly = 3,
+    enum OutputProtection {
+        OutputProtectionAllDisabled = 0,
+        OutputProtectionAllEnabled = 1,
+        OverVoltageProtectionOnly = 2,
+        OverCurrentProtectionOnly = 3,
+    };
 
-} typedef TOutputProtection;
+    struct DeviceStatus {
+        OutputMode         channel1Mode;
+        OutputMode         channel2Mode;
+        ChannelTracking    tracking;
+        OutputProtection   protection;
+        bool               outputSwitch;
+    };
 
+}
 
 #endif //POWER_SUPPLY_CONTROLLER_COMMONS_H

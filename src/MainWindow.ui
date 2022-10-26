@@ -345,7 +345,7 @@
        <item>
         <widget class="QGroupBox" name="groupBoxCh2SetProtection">
          <property name="title">
-          <string>Output Protection</string>
+          <string>Output protection</string>
          </property>
          <layout class="QFormLayout" name="formLayout_4">
           <item row="0" column="0">
@@ -432,7 +432,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>M1</string>
+            <string>Memory1</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -454,7 +454,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>M2</string>
+            <string>Memory2</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -473,7 +473,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>M3</string>
+            <string>Memory3</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -492,7 +492,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>M4</string>
+            <string>Memory4</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -511,7 +511,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>M5</string>
+            <string>Memory5</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -543,7 +543,7 @@
        <item>
         <widget class="QGroupBox" name="groupBoxOutProtection">
          <property name="title">
-          <string>Output Protection</string>
+          <string>Output protection</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <property name="bottomMargin">
@@ -1041,7 +1041,7 @@
        <item>
         <widget class="QGroupBox" name="groupBoxCh1SetProtection">
          <property name="title">
-          <string>Output Protection</string>
+          <string>Output protection</string>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
           <item row="0" column="0">
@@ -1196,7 +1196,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Readonly OutputMode</string>
+    <string>Readonly Mode</string>
    </property>
   </action>
   <action name="actionBuzzer">

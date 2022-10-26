@@ -26,8 +26,7 @@
 #include <QtSerialPort/QSerialPortInfo>
 
 #include "protocol//Commons.h"
-#include "protocol/Interface.h"
-#include "DeviceStatus.h"
+#include "protocol/BaseSCPI.h"
 #include "CommunicationMetrics.h"
 
 class Communication : public QObject {
@@ -39,21 +38,22 @@ signals:
     void onSerialPortOpened(QString serialPortName, int baudRate);
     void onSerialPortClosed();
     void onSerialPortErrorOccurred(QString error);
-    void onDeviceReady(DeviceInfo info);
+    void onDeviceReady(Protocol::DeviceInfo info);
     void onUnknownDevice(QString deviceID);
+
     void onMetricsReady(const CommunicationMetrics &info);
 
-    void onOperationPanelLocked(bool locked);
-    void onSetCurrent(TChannel channel, double current);
-    void onSetVoltage(TChannel channel, double voltage);
-    void onOutputCurrent(TChannel channel, double current);
-    void onOutputVoltage(TChannel channel, double voltage);
-    void onBuzzerEnabled(bool enabled);
-    void onDeviceStatus(DeviceStatus status);
-    void onDeviceInfo(const QString &info);
-    void onActiveSettings(TMemoryKey key);
-    void onOverCurrentProtectionValue(TChannel channel, double current);
-    void onOverVoltageProtectionValue(TChannel channel, double voltage);
+    void onGetIsLocked(bool locked);
+    void onGetCurrentSet(Protocol::Channel channel, double current);
+    void onGetVoltageSet(Protocol::Channel channel, double voltage);
+    void onGetActualCurrent(Protocol::Channel channel, double current);
+    void onGetActualVoltage(Protocol::Channel channel, double voltage);
+    void onGetIsBeepEnabled(bool enabled);
+    void onGetDeviceStatus(Protocol::DeviceStatus status);
+    void onGetDeviceID(const QString &info);
+    void onGetPreset(Protocol::MemoryKey key);
+    void onGetOverCurrentProtectionValue(Protocol::Channel channel, double current);
+    void onGetOverVoltageProtectionValue(Protocol::Channel channel, double voltage);
 
 public slots:
     void openSerialPort(const QString &name, int baudRate);
@@ -61,34 +61,34 @@ public slots:
 
     void setLocked(bool lock);
     void getIsLocked();
-    void setCurrent(TChannel channel, double value);
-    void getCurrentSet(TChannel channel);
-    void setVoltage(TChannel channel, double value);
-    void getVoltageSet(TChannel channel);
-    void getActualCurrent(TChannel channel);
-    void getActualVoltage(TChannel channel);
+    void setCurrent(Protocol::Channel channel, double value);
+    void getCurrentSet(Protocol::Channel channel);
+    void setVoltage(Protocol::Channel channel, double value);
+    void getVoltageSet(Protocol::Channel channel);
+    void getActualCurrent(Protocol::Channel channel);
+    void getActualVoltage(Protocol::Channel channel);
     void setEnableOutputSwitch(bool enable);
     void setEnableBuzzer(bool enable);
     void getIsBuzzerEnabled();
     void getDeviceStatus();
     void getDeviceID();
-    void setPreset(TMemoryKey key);
+    void setPreset(Protocol::MemoryKey key);
     void getPreset();
-    void savePreset(TMemoryKey key);
-    void setChannelTracking(TChannelTracking mode);
+    void savePreset(Protocol::MemoryKey key);
+    void setChannelTracking(Protocol::ChannelTracking mode);
     void setEnableOverCurrentProtection(bool enable);
     void setEnableOverVoltageProtection(bool enable);
-    void setOverCurrentProtectionValue(TChannel channel, double current);
-    void getOverCurrentProtectionValue(TChannel channel);
-    void setOverVoltageProtectionValue(TChannel channel, double voltage);
-    void getOverVoltageProtectionValue(TChannel channel);
+    void setOverCurrentProtectionValue(Protocol::Channel channel, double current);
+    void getOverCurrentProtectionValue(Protocol::Channel channel);
+    void setOverVoltageProtectionValue(Protocol::Channel channel, double voltage);
+    void getOverVoltageProtectionValue(Protocol::Channel channel);
 
 private slots:
-    void slotSerialReadData();
-    void slotSerialErrorOccurred(QSerialPort::SerialPortError error);
-    void slotCollectMetrics();
+    void serialPortReadData();
+    void serialPortErrorOccurred(QSerialPort::SerialPortError error);
+    void serialPortReplyTimeout();
 
-    void slotResponseTimeout();
+    void collectMetrics();
 
 private:
     void processMessageQueue(bool clearBusyFlag);
@@ -100,11 +100,11 @@ private:
     QSerialPort                  mSerialPort;
     QQueue<Protocol::IMessage*>  mMessageQueue;
     QTimer                       mWaitResponseTimer;
+    volatile bool                mIsBusy = false;
+    Protocol::BaseSCPI*          mDeviceProtocol = nullptr;
 
-    Protocol::Interface*         mDeviceProtocol = nullptr;
     QTimer                       mMetricCollectorTimer;
     CommunicationMetrics         mMetrics;
-    volatile bool                mIsBusy = false;
 };
 
 

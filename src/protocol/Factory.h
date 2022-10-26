@@ -21,7 +21,7 @@
 #include <QByteArrayList>
 #include <QSerialPort>
 
-#include "Interface.h"
+#include "BaseSCPI.h"
 #include "UTP3303C.h"
 #include "UTP3305C.h"
 
@@ -30,18 +30,19 @@ namespace Protocol {
     public:
         explicit Factory(QSerialPort &serialPort);
         ~Factory();
-        Interface *create();
+        BaseSCPI *createInstance();
 
         QString errorString() const;
+        QString deviceID() const;
 
     private:
         QSerialPort     &mSerialPort;
         QByteArrayList  mKnownGetIDQueryList;
         QString         mErrorString;
+        QString         mDeviceID;
 
     private:
-        Interface* createInstance(const QByteArray& deviceID);
-        QByteArray deviceIdentification();
+        QString     deviceIdentification();
     };
 }
 

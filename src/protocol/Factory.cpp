@@ -22,19 +22,21 @@ namespace Protocol {
         mKnownGetIDQueryList << "*IDN?";
     }
 
-    Interface *Factory::create() {
-        return createInstance(deviceIdentification());
-    }
+    BaseSCPI *Factory::createInstance() {
+        mDeviceID = deviceIdentification();
+        if (mDeviceID.isEmpty()) {
+            mErrorString = QObject::tr("Unable to fetch device identification");
+            return nullptr;
+        }
 
-    Interface *Factory::createInstance(const QByteArray &deviceID) {
-        if (UTP3305C().checkID(deviceID)) {
+        if (UTP3305C().isRecognized(mDeviceID)) {
             return new UTP3305C();
         }
-        if (UTP3303C().checkID(deviceID)) {
+        if (UTP3303C().isRecognized(mDeviceID)) {
             return new UTP3303C();
         }
 
-        mErrorString = deviceID;
+        mErrorString = QObject::tr("Unknown or unsupported device (ID: %1)").arg(mDeviceID);
         return nullptr;
     }
 
@@ -42,7 +44,7 @@ namespace Protocol {
         mSerialPort.blockSignals(false);
     }
 
-    QByteArray Factory::deviceIdentification() {
+    QString Factory::deviceIdentification() {
         if (!mSerialPort.isOpen()) {
             return nullptr;
         }
@@ -51,7 +53,7 @@ namespace Protocol {
             mSerialPort.write(query);
             if (!mSerialPort.waitForBytesWritten(200)) {
                 mErrorString = QObject::tr("Wait write identification command timeout");
-                return nullptr;
+                return "";
             }
 
             if (mSerialPort.waitForReadyRead(200)) {
@@ -77,6 +79,7 @@ namespace Protocol {
         return mErrorString;
     }
 
-
-
+    QString Factory::deviceID() const {
+        return mDeviceID;
+    }
 }

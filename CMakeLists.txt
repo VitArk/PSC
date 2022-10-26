@@ -24,13 +24,11 @@ add_executable(${PROJECT_NAME}
         src/Communication.cpp
         src/Communication.h
         src/protocol/Messages.h
-        src/DeviceStatus.cpp
-        src/DeviceStatus.h
         src/Settings.cpp
         src/Settings.h
         src/protocol/UTP3305C.h
         src/protocol/UTP3303C.h
-        src/protocol/Interface.h
+        src/protocol/BaseSCPI.h
         src/protocol/Factory.h
         src/protocol/Factory.cpp
         src/CommunicationMetrics.h

@@ -51,14 +51,14 @@ void Application::slotAppRun() {
 
     // Lock operation panel
     connect(mMainWindow, &MainWindow::onLockOperationPanelChanged, mCommunication, &Communication::setLocked);
-    connect(mCommunication, &Communication::onOperationPanelLocked, mMainWindow, &MainWindow::slotLockOperationPanel);
+    connect(mCommunication, &Communication::onGetIsLocked, mMainWindow, &MainWindow::slotLockOperationPanel);
 
     // Buzzer
     connect(mMainWindow, &MainWindow::onBuzzerChanged, mCommunication, &Communication::setEnableBuzzer);
-    connect(mCommunication, &Communication::onBuzzerEnabled, mMainWindow, &MainWindow::slotEnableBuzzer);
+    connect(mCommunication, &Communication::onGetIsBeepEnabled, mMainWindow, &MainWindow::slotEnableBuzzer);
 
     // Memory / Presets
-    connect(mCommunication, &Communication::onActiveSettings, mMainWindow, &MainWindow::slotEnableMemoryKey);
+    connect(mCommunication, &Communication::onGetPreset, mMainWindow, &MainWindow::slotEnableMemoryKey);
     connect(mMainWindow, &MainWindow::onPresetChanged, mCommunication, &Communication::setPreset);
     connect(mMainWindow, &MainWindow::onPresetSave, mCommunication, &Communication::savePreset);
 
@@ -66,18 +66,18 @@ void Application::slotAppRun() {
     connect(mMainWindow, &MainWindow::onOutputConnectionMethodChanged, mCommunication,
             &Communication::setChannelTracking);
     connect(mMainWindow, &MainWindow::onOutputProtectionChanged, this, &Application::slotOutputProtectionChanged);
-    connect(mCommunication, &Communication::onOverCurrentProtectionValue, mMainWindow, &MainWindow::slotDisplayOverCurrentProtectionValue);
-    connect(mCommunication, &Communication::onOverVoltageProtectionValue, mMainWindow, &MainWindow::slotDisplayOverVoltageProtectionValue);
+    connect(mCommunication, &Communication::onGetOverCurrentProtectionValue, mMainWindow, &MainWindow::slotDisplayOverCurrentProtectionValue);
+    connect(mCommunication, &Communication::onGetOverVoltageProtectionValue, mMainWindow, &MainWindow::slotDisplayOverVoltageProtectionValue);
     connect(mMainWindow, &MainWindow::onOverCurrentProtectionChanged, mCommunication, &Communication::setOverCurrentProtectionValue);
     connect(mMainWindow, &MainWindow::onOverVoltageProtectionChanged, mCommunication, &Communication::setOverVoltageProtectionValue);
 
-    connect(mCommunication, &Communication::onSetCurrent, mMainWindow, &MainWindow::slotDisplaySetCurrent);
-    connect(mCommunication, &Communication::onOutputCurrent, mMainWindow, &MainWindow::slotDisplayOutputCurrent);
+    connect(mCommunication, &Communication::onGetCurrentSet, mMainWindow, &MainWindow::slotDisplaySetCurrent);
+    connect(mCommunication, &Communication::onGetActualCurrent, mMainWindow, &MainWindow::slotDisplayOutputCurrent);
 
-    connect(mCommunication, &Communication::onSetVoltage, mMainWindow, &MainWindow::slotDisplaySetVoltage);
-    connect(mCommunication, &Communication::onOutputVoltage, mMainWindow, &MainWindow::slotDisplayOutputVoltage);
+    connect(mCommunication, &Communication::onGetVoltageSet, mMainWindow, &MainWindow::slotDisplaySetVoltage);
+    connect(mCommunication, &Communication::onGetActualVoltage, mMainWindow, &MainWindow::slotDisplayOutputVoltage);
 
-    connect(mCommunication, &Communication::onDeviceStatus, this, &Application::slotOutputStatus);
+    connect(mCommunication, &Communication::onGetDeviceStatus, this, &Application::slotOutputStatus);
 
     connect(mMainWindow, &MainWindow::onVoltageChanged, mCommunication, &Communication::setVoltage);
     connect(mMainWindow, &MainWindow::onCurrentChanged, mCommunication, &Communication::setCurrent);
@@ -86,14 +86,14 @@ void Application::slotAppRun() {
     mMainWindow->autoOpenSerialPort();
 }
 
-void Application::slotStartWorking(DeviceInfo info) {
+void Application::slotStartWorking(const Protocol::DeviceInfo &info) {
     mMainWindow->slotDeviceReady(info);
 
 //    mCommunication->getDeviceID();
-    mCommunication->getOverCurrentProtectionValue(Channel1);
-    mCommunication->getOverCurrentProtectionValue(Channel2);
-    mCommunication->getOverVoltageProtectionValue(Channel1);
-    mCommunication->getOverVoltageProtectionValue(Channel2);
+    mCommunication->getOverCurrentProtectionValue(Protocol::Channel1);
+    mCommunication->getOverCurrentProtectionValue(Protocol::Channel2);
+    mCommunication->getOverVoltageProtectionValue(Protocol::Channel1);
+    mCommunication->getOverVoltageProtectionValue(Protocol::Channel2);
 
     mWorkingTimer.start();
 }
@@ -110,45 +110,45 @@ void Application::slotWorkingCycle() {
     mCommunication->getIsBuzzerEnabled();
 }
 
-void Application::slotOutputStatus(DeviceStatus status) {
-    if (status.outputSwitch()) {
-        mCommunication->getActualCurrent(Channel1);
-        mCommunication->getActualCurrent(Channel2);
-        mCommunication->getActualVoltage(Channel1);
-        mCommunication->getActualVoltage(Channel2);
+void Application::slotOutputStatus(const Protocol::DeviceStatus &status) {
+    if (status.outputSwitch) {
+        mCommunication->getActualCurrent(Protocol::Channel1);
+        mCommunication->getActualCurrent(Protocol::Channel2);
+        mCommunication->getActualVoltage(Protocol::Channel1);
+        mCommunication->getActualVoltage(Protocol::Channel2);
 
-        disconnect(mCommunication, &Communication::onSetCurrent, mMainWindow, &MainWindow::slotDisplayOutputCurrent);
-        disconnect(mCommunication, &Communication::onSetVoltage, mMainWindow, &MainWindow::slotDisplayOutputVoltage);
+        disconnect(mCommunication, &Communication::onGetCurrentSet, mMainWindow, &MainWindow::slotDisplayOutputCurrent);
+        disconnect(mCommunication, &Communication::onGetVoltageSet, mMainWindow, &MainWindow::slotDisplayOutputVoltage);
     } else {
-        connect(mCommunication, &Communication::onSetCurrent, mMainWindow, &MainWindow::slotDisplayOutputCurrent);
-        connect(mCommunication, &Communication::onSetVoltage, mMainWindow, &MainWindow::slotDisplayOutputVoltage);
+        connect(mCommunication, &Communication::onGetCurrentSet, mMainWindow, &MainWindow::slotDisplayOutputCurrent);
+        connect(mCommunication, &Communication::onGetVoltageSet, mMainWindow, &MainWindow::slotDisplayOutputVoltage);
     }
 
-    mCommunication->getCurrentSet(Channel1);
-    mCommunication->getCurrentSet(Channel2);
-    mCommunication->getVoltageSet(Channel1);
-    mCommunication->getVoltageSet(Channel2);
+    mCommunication->getCurrentSet(Protocol::Channel1);
+    mCommunication->getCurrentSet(Protocol::Channel2);
+    mCommunication->getVoltageSet(Protocol::Channel1);
+    mCommunication->getVoltageSet(Protocol::Channel2);
 
-    if (status.protection() == OverVoltageProtectionOnly || status.protection() == OutputProtectionAllEnabled) {
-        mCommunication->getOverVoltageProtectionValue(Channel1);
-        mCommunication->getOverVoltageProtectionValue(Channel2);
+    if (status.protection == Protocol::OverVoltageProtectionOnly || status.protection == Protocol::OutputProtectionAllEnabled) {
+        mCommunication->getOverVoltageProtectionValue(Protocol::Channel1);
+        mCommunication->getOverVoltageProtectionValue(Protocol::Channel2);
     }
-    if (status.protection() == OverCurrentProtectionOnly || status.protection() == OutputProtectionAllEnabled) {
-        mCommunication->getOverCurrentProtectionValue(Channel1);
-        mCommunication->getOverCurrentProtectionValue(Channel2);
+    if (status.protection == Protocol::OverCurrentProtectionOnly || status.protection == Protocol::OutputProtectionAllEnabled) {
+        mCommunication->getOverCurrentProtectionValue(Protocol::Channel1);
+        mCommunication->getOverCurrentProtectionValue(Protocol::Channel2);
     }
 
-    mMainWindow->slotShowOutputMode(status.mode(Channel1), status.mode(Channel2));
-    mMainWindow->slotShowOutputSwitchStatus(status.outputSwitch());
-    mMainWindow->slotShowOutputProtectionMode(status.protection());
-    mMainWindow->slotShowOutputTrackingMode(status.tracking());
+    mMainWindow->slotShowOutputMode(status.channel1Mode, status.channel2Mode);
+    mMainWindow->slotShowOutputSwitchStatus(status.outputSwitch);
+    mMainWindow->slotShowOutputProtectionMode(status.protection);
+    mMainWindow->slotShowOutputTrackingMode(status.tracking);
 }
 
-void Application::slotOutputProtectionChanged(TOutputProtection protection) {
+void Application::slotOutputProtectionChanged(Protocol::OutputProtection protection) {
     mCommunication->setEnableOverVoltageProtection(
-            protection == OverVoltageProtectionOnly || protection == OutputProtectionAllEnabled);
+            protection == Protocol::OverVoltageProtectionOnly || protection == Protocol::OutputProtectionAllEnabled);
     mCommunication->setEnableOverCurrentProtection(
-            protection == OverCurrentProtectionOnly || protection == OutputProtectionAllEnabled);
+            protection == Protocol::OverCurrentProtectionOnly || protection == Protocol::OutputProtectionAllEnabled);
 }
 
 void Application::slotTuneWorkingTimerInterval(const CommunicationMetrics &metrics) {

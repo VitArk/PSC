@@ -17,7 +17,6 @@
 
 #include "Settings.h"
 #include "Application.h"
-#include <QDebug>
 
 Settings::Settings(QObject *parent) : QObject(parent),
 mSettings(QSettings::Scope::UserScope,
