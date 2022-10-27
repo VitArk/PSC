@@ -33,20 +33,20 @@ public:
     ~Application() override;
 
 private:
-    Communication *mCommunication;
-    MainWindow *mMainWindow;
-    QTimer     mWorkingTimer;
+    Communication   *mCommunication;
+    MainWindow      *mMainWindow;
+    QTimer          mDeviceUpdaterTimer;
 
 private slots:
-    void slotAppRun();
+    void Run();
 
-    void slotStartWorking(const Protocol::DeviceInfo &info);
-    void slotSerialPortClosed();
+    void DeviceReady(const Protocol::DeviceInfo &info);
+    void SerialPortClosed();
 
-    void slotWorkingCycle();
-    void slotOutputStatus(const Protocol::DeviceStatus &status);
-    void slotOutputProtectionChanged(Protocol::OutputProtection protection);
-    void slotTuneWorkingTimerInterval(const CommunicationMetrics &metrics);
+    void DeviceUpdateCycle();
+    void OutputStatus(const Protocol::DeviceStatus &status);
+    void OutputProtectionChanged(Protocol::OutputProtection protection);
+    void TuneDeviceUpdaterTimerInterval(const CommunicationMetrics &metrics);
 };
 
 

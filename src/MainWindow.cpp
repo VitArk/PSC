@@ -29,6 +29,10 @@ const double aDialCorrection = 1000.0;
 const double V0= 00.00;
 const double A0 = 0.000;
 
+const char* const STYLE_BG_RED = "background-color: rgb(210, 0, 0)";
+const char* const STYLE_BG_GREEN = "background-color: rgb(0, 210, 0)";
+const char* const STYLE_BG_NONE = "";
+
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow) {
@@ -43,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
     mStatusBarDeviceInfo = new ClickableLabel(this);
-    connect(mStatusBarDeviceInfo, &ClickableLabel::onDoubleClick, this, &MainWindow::slotShowDeviceNameOrID);
+    connect(mStatusBarDeviceInfo, &ClickableLabel::onDoubleClick, this, &MainWindow::ShowDeviceNameOrID);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 100);
     mStatusBarDeviceLock = new QLabel(this);
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceLock, 120);
@@ -53,27 +57,27 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow::statusBar()->addPermanentWidget(mStatusBarConnectionStatus);
 
 
-    connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::slotEnableReadonlyMode);
+    connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::SetEnableReadonlyMode);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::onSerialPortDoClose);
-    connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onLockOperationPanelChanged);
-    connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onBuzzerChanged);
+    connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onSetLocked);
+    connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onSetEnabledBeep);
     connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
 
-    connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
-    connect(ui->rdoBtnOutParallel, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
-    connect(ui->rdoBtnOutSerial, &QRadioButton::clicked, this, &MainWindow::slotOutputConnectionMethodChanged);
+    connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::ChannelTrackingChanged);
+    connect(ui->rdoBtnOutParallel, &QRadioButton::clicked, this, &MainWindow::ChannelTrackingChanged);
+    connect(ui->rdoBtnOutSerial, &QRadioButton::clicked, this, &MainWindow::ChannelTrackingChanged);
 
-    connect(ui->btnOVP, &QPushButton::clicked, this, &MainWindow::slotOutputProtectionChanged);
-    connect(ui->btnOCP, &QPushButton::clicked, this, &MainWindow::slotOutputProtectionChanged);
+    connect(ui->btnOVP, &QPushButton::clicked, this, &MainWindow::OutputProtectionChanged);
+    connect(ui->btnOCP, &QPushButton::clicked, this, &MainWindow::OutputProtectionChanged);
 
-    connect(ui->btnM1, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
-    connect(ui->btnM2, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
-    connect(ui->btnM3, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
-    connect(ui->btnM4, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
-    connect(ui->btnM5, &QPushButton::clicked, this, &MainWindow::slotPresetKeyClicked);
-    connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::slotPresetSaveClicked);
+    connect(ui->btnM1, &QPushButton::clicked, this, &MainWindow::PresetChanged);
+    connect(ui->btnM2, &QPushButton::clicked, this, &MainWindow::PresetChanged);
+    connect(ui->btnM3, &QPushButton::clicked, this, &MainWindow::PresetChanged);
+    connect(ui->btnM4, &QPushButton::clicked, this, &MainWindow::PresetChanged);
+    connect(ui->btnM5, &QPushButton::clicked, this, &MainWindow::PresetChanged);
+    connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::PresetSave);
 
-    connect(ui->btnOutput, &QPushButton::clicked, this, &MainWindow::onOutputSwitchChanged);
+    connect(ui->btnOutput, &QPushButton::clicked, this, &MainWindow::onSetEnableOutputSwitch);
 
     connect(ui->dialCh1V, &QDial::valueChanged, this, &MainWindow::slotDialControlChanged);
     connect(ui->dialCh1A, &QDial::valueChanged, this, &MainWindow::slotDialControlChanged);
@@ -95,16 +99,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&mDebouncedCh2V, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
     connect(&mDebouncedCh2A, &Debounce::onChangedDebounced, this, &MainWindow::slotControlValueChangedDebounced);
 
-    connect(ui->spinCh1OVP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
-    connect(ui->spinCh2OVP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
-    connect(ui->spinCh1OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
-    connect(ui->spinCh2OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotOverProtectionChanged);
+    connect(ui->spinCh1OVP, &QDoubleSpinBox::editingFinished, this, &MainWindow::OverProtectionValueChanged);
+    connect(ui->spinCh2OVP, &QDoubleSpinBox::editingFinished, this, &MainWindow::OverProtectionValueChanged);
+    connect(ui->spinCh1OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::OverProtectionValueChanged);
+    connect(ui->spinCh2OCP, &QDoubleSpinBox::editingFinished, this, &MainWindow::OverProtectionValueChanged);
 
     connect(ui->menuPort, &QMenu::aboutToShow, this, &MainWindow::slotCreateSerialPortMenuItems);
-    connect(ui->menuHelp, &QMenu::triggered, this, &MainWindow::slotShowAboutBox);
+    connect(ui->menuHelp, &QMenu::triggered, this, &MainWindow::ShowAboutBox);
 
     createBaudRatesMenu();
-    slotSerialPortClosed();
+    SerialPortClosed();
 }
 
 MainWindow::~MainWindow() {
@@ -115,31 +119,31 @@ bool MainWindow::acceptEnable() const {
     return mIsSerialConnected && !ui->actionReadonlyMode->isChecked();
 }
 
-void MainWindow::slotSerialPortOpened(const QString &serialPortName, int baudRate) {
+void MainWindow::SerialPortOpened(const QString &serialPortName, int baudRate) {
     mIsSerialConnected = true;
     mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(serialPortName).arg(baudRate));
     ui->actionDisconnect->setEnabled(true);
 }
 
-void MainWindow::slotSerialPortErrorOccurred(QString error) {
+void MainWindow::SerialPortErrorOccurred(QString error) {
     QMessageBox::warning(this, tr("Serial Port Error Occurred"),error, QMessageBox::Close);
 }
 
-void MainWindow::slotDeviceReady(const Protocol::DeviceInfo &info) {
+void MainWindow::ConnectionDeviceReady(const Protocol::DeviceInfo &info) {
     mDeviceInfo = info;
-    slotShowDeviceNameOrID();
+    ShowDeviceNameOrID();
     setControlLimits(info);
     enableControls(true);
 }
 
-void MainWindow::slotUnknownDevice(QString deviceID) {
+void MainWindow::ConnectionUnknownDevice(QString deviceID) {
     QMessageBox::warning(this, tr("Unknown Device"),
                          tr("Unknown Device (ID: %1)").arg(deviceID),
                          QMessageBox::Close
     );
 }
 
-void MainWindow::slotShowCommunicationMetrics(const CommunicationMetrics &info) {
+void MainWindow::UpdateCommunicationMetrics(const CommunicationMetrics &info) {
     mStatusCommunicationMetrics->setText(tr("Q:%1 E:%2 D:%3 T:%4")
                                   .arg(info.queueLength())
                                   .arg(info.errorCount)
@@ -147,7 +151,7 @@ void MainWindow::slotShowCommunicationMetrics(const CommunicationMetrics &info) 
                                   .arg(info.responseTimeoutCount));
 }
 
-void MainWindow::slotSerialPortClosed() {
+void MainWindow::SerialPortClosed() {
     mIsSerialConnected = false;
 
     ui->actionDisconnect->setEnabled(false);
@@ -155,18 +159,18 @@ void MainWindow::slotSerialPortClosed() {
     mStatusBarDeviceInfo->setText(tr("N/A"));
     mStatusBarDeviceLock->setText(tr("N/A"));
 
-    slotShowOutputTrackingMode(Protocol::Independent);
+    UpdateChannelTrackingMode(Protocol::Independent);
     enableControls(false);
 
-    slotDisplayOutputVoltage(Protocol::Channel1, V0);
-    slotDisplayOutputVoltage(Protocol::Channel2, V0);
-    slotDisplayOutputCurrent(Protocol::Channel1, A0);
-    slotDisplayOutputCurrent(Protocol::Channel2, A0);
+    UpdateActualVoltage(Protocol::Channel1, V0);
+    UpdateActualVoltage(Protocol::Channel2, V0);
+    UpdateActualCurrent(Protocol::Channel1, A0);
+    UpdateActualCurrent(Protocol::Channel2, A0);
 
-    slotDisplayOverVoltageProtectionValue(Protocol::Channel1, V0);
-    slotDisplayOverVoltageProtectionValue(Protocol::Channel2, V0);
-    slotDisplayOverCurrentProtectionValue(Protocol::Channel1, A0);
-    slotDisplayOverCurrentProtectionValue(Protocol::Channel2, A0);
+    UpdateOverVoltageProtectionSet(Protocol::Channel1, V0);
+    UpdateOverVoltageProtectionSet(Protocol::Channel2, V0);
+    UpdateOverCurrentProtectionSet(Protocol::Channel1, A0);
+    UpdateOverCurrentProtectionSet(Protocol::Channel2, A0);
 }
 
 void MainWindow::enableControls(bool enable) {
@@ -183,31 +187,31 @@ void MainWindow::enableControls(bool enable) {
 }
 
 void MainWindow::setControlLimits(const Protocol::DeviceInfo &info) {
-    ui->dialCh1V->setMaximum(int(info.maxChannelVoltage * vDialCorrection));
-    ui->dialCh2V->setMaximum(int(info.maxChannelVoltage * vDialCorrection));
-    ui->spinCh1V->setMaximum(info.maxChannelVoltage);
-    ui->spinCh2V->setMaximum(info.maxChannelVoltage);
-    ui->spinCh1OVP->setMaximum(info.maxChannelVoltage);
-    ui->spinCh2OVP->setMaximum(info.maxChannelVoltage);
+    ui->dialCh1V->setMaximum(int(info.MaxVoltage * vDialCorrection));
+    ui->dialCh2V->setMaximum(int(info.MaxVoltage * vDialCorrection));
+    ui->spinCh1V->setMaximum(info.MaxVoltage);
+    ui->spinCh2V->setMaximum(info.MaxVoltage);
+    ui->spinCh1OVP->setMaximum(info.MaxVoltage);
+    ui->spinCh2OVP->setMaximum(info.MaxVoltage);
 
-    ui->dialCh1A->setMaximum(int(info.maxChannelCurrent * aDialCorrection));
-    ui->dialCh2A->setMaximum(int(info.maxChannelCurrent * aDialCorrection));
-    ui->spinCh1A->setMaximum(info.maxChannelCurrent);
-    ui->spinCh2A->setMaximum(info.maxChannelCurrent);
-    ui->spinCh1OCP->setMaximum(info.maxChannelCurrent);
-    ui->spinCh2OCP->setMaximum(info.maxChannelCurrent);
+    ui->dialCh1A->setMaximum(int(info.MaxCurrent * aDialCorrection));
+    ui->dialCh2A->setMaximum(int(info.MaxCurrent * aDialCorrection));
+    ui->spinCh1A->setMaximum(info.MaxCurrent);
+    ui->spinCh2A->setMaximum(info.MaxCurrent);
+    ui->spinCh1OCP->setMaximum(info.MaxCurrent);
+    ui->spinCh2OCP->setMaximum(info.MaxCurrent);
 }
 
-void MainWindow::slotEnableReadonlyMode(bool enable) {
+void MainWindow::SetEnableReadonlyMode(bool enable) {
     ui->actionReadonlyMode->setChecked(enable);
     enableControls(!enable);
 }
 
-void MainWindow::slotEnableBuzzer(bool enabled) {
-    ui->actionBuzzer->setChecked(enabled);
+void MainWindow::SetEnableBeep(bool enable) {
+    ui->actionBuzzer->setChecked(enable);
 }
 
-void MainWindow::slotOutputConnectionMethodChanged() {
+void MainWindow::ChannelTrackingChanged() {
     auto channelTracking = Protocol::Independent;
     if (ui->rdoBtnOutParallel->isChecked()) {
         channelTracking = Protocol::Parallel;
@@ -215,13 +219,13 @@ void MainWindow::slotOutputConnectionMethodChanged() {
         channelTracking = Protocol::Serial;
     }
 
-    emit onOutputConnectionMethodChanged(channelTracking);
+    emit onSetChannelTracking(channelTracking);
 }
 
-void MainWindow::slotShowOutputTrackingMode(Protocol::ChannelTracking method) {
+void MainWindow::UpdateChannelTrackingMode(Protocol::ChannelTracking tracking) {
     QString resourceName;
     QString labelText;
-    switch (method) {
+    switch (tracking) {
         case Protocol::Independent:
             ui->rdoBtnOutIndependent->setChecked(true);
             enableChannel(Protocol::Channel1, true);
@@ -251,62 +255,57 @@ void MainWindow::slotShowOutputTrackingMode(Protocol::ChannelTracking method) {
     openSvg(QFile(resourceName).fileName());
 }
 
-void MainWindow::slotOutputProtectionChanged() {
+void MainWindow::OutputProtectionChanged() {
     auto protection = Protocol::OutputProtectionAllDisabled;
     protection = ui->btnOVP->isChecked() ? Protocol::OverVoltageProtectionOnly : protection;
     protection = ui->btnOCP->isChecked() ? Protocol::OverCurrentProtectionOnly : protection;
     protection = ui->btnOCP->isChecked() && ui->btnOVP->isChecked() ? Protocol::OutputProtectionAllEnabled : protection;
 
-    emit onOutputProtectionChanged(protection);
+    emit onSetEnableOutputProtection(protection);
 }
 
-void MainWindow::slotShowOutputProtectionMode(Protocol::OutputProtection protection) {
-    switch (protection) {
-        case Protocol::OutputProtectionAllDisabled:
-            ui->btnOVP->setChecked(false);
-            ui->btnOCP->setChecked(false);
-            break;
-        case Protocol::OutputProtectionAllEnabled:
-            ui->btnOVP->setChecked(true);
-            ui->btnOCP->setChecked(true);
-            break;
-        case Protocol::OverVoltageProtectionOnly:
-            ui->btnOVP->setChecked(true);
-            ui->btnOCP->setChecked(false);
-            break;
-        case Protocol::OverCurrentProtectionOnly:
-            ui->btnOVP->setChecked(false);
-            ui->btnOCP->setChecked(true);
-            break;
+void MainWindow::OverProtectionValueChanged() {
+    if (sender() == ui->spinCh1OVP)      emit onSetOverVoltageProtectionValue(Protocol::Channel1,ui->spinCh1OVP->value());
+    else if (sender() == ui->spinCh2OVP) emit onSetOverVoltageProtectionValue(Protocol::Channel2,ui->spinCh2OVP->value());
+    else if (sender() == ui->spinCh1OCP) emit onSetOverCurrentProtectionValue(Protocol::Channel1,ui->spinCh1OCP->value());
+    else if (sender() == ui->spinCh2OCP) emit onSetOverCurrentProtectionValue(Protocol::Channel2,ui->spinCh2OCP->value());
+}
+
+
+void MainWindow::UpdateOutputProtectionMode(Protocol::OutputProtection protection) {
+    ui->btnOVP->setChecked(protection == Protocol::OverVoltageProtectionOnly || protection == Protocol::OutputProtectionAllEnabled);
+    ui->btnOCP->setChecked(protection == Protocol::OverCurrentProtectionOnly || protection == Protocol::OutputProtectionAllEnabled);
+}
+
+void MainWindow::UpdateChannelMode(Protocol::Channel channel, Protocol::OutputMode mode) {
+    if (channel == Protocol::Channel1) {
+        if (mode == Protocol::ConstantCurrent) {
+            ui->lblCh1CC->setStyleSheet(STYLE_BG_RED);
+            ui->lblCh1CV->setStyleSheet(STYLE_BG_NONE);
+        } else {
+            ui->lblCh1CC->setStyleSheet(STYLE_BG_NONE);
+            ui->lblCh1CV->setStyleSheet(STYLE_BG_GREEN);
+        }
+    }
+    if (channel == Protocol::Channel2) {
+        if (mode == Protocol::ConstantCurrent) {
+            ui->lblCh2CC->setStyleSheet(STYLE_BG_RED);
+            ui->lblCh2CV->setStyleSheet(STYLE_BG_NONE);
+        } else {
+            ui->lblCh2CC->setStyleSheet(STYLE_BG_NONE);
+            ui->lblCh2CV->setStyleSheet(STYLE_BG_GREEN);
+        }
     }
 }
 
-void MainWindow::slotShowOutputMode(Protocol::OutputMode channel1, Protocol::OutputMode channel2) {
-    if (channel1 == Protocol::ConstantCurrent) {
-        highlight(HighlightRed, ui->lblCh1CC);
-        highlight(HighlightNone, ui->lblCh1CV);
-    } else {
-        highlight(HighlightNone, ui->lblCh1CC);
-        highlight(HighlightGreen, ui->lblCh1CV);
-    }
-
-    if (channel2 == Protocol::ConstantCurrent) {
-        highlight(HighlightRed, ui->lblCh2CC);
-        highlight(HighlightNone, ui->lblCh2CV);
-    } else {
-        highlight(HighlightNone, ui->lblCh2CC);
-        highlight(HighlightGreen, ui->lblCh2CV);
-    }
-}
-
-void MainWindow::slotShowOutputSwitchStatus(bool state) {
-    if (state) {
+void MainWindow::SetEnableOutputSwitch(bool enable) {
+    if (enable) {
         ui->btnOutput->setChecked(true);
-        ui->btnOutput->setStyleSheet("background-color: rgb(0, 210, 0)");
+        ui->btnOutput->setStyleSheet(STYLE_BG_GREEN);
         ui->btnOutput->setText(tr("OUTPUT ON"));
     } else {
         ui->btnOutput->setChecked(false);
-        ui->btnOutput->setStyleSheet("");
+        ui->btnOutput->setStyleSheet(STYLE_BG_NONE);
         ui->btnOutput->setText(tr("OUTPUT OFF"));
     }
 }
@@ -325,7 +324,7 @@ void MainWindow::enableChannel(Protocol::Channel ch, bool enable) {
     }
 }
 
-void MainWindow::slotEnableMemoryKey(Protocol::MemoryKey key) {
+void MainWindow::UpdateActivePreset(Protocol::MemoryKey key) {
     switch (key) {
         case Protocol::Memory1: ui->btnM1->setChecked(true); break;
         case Protocol::Memory2: ui->btnM2->setChecked(true); break;
@@ -335,23 +334,24 @@ void MainWindow::slotEnableMemoryKey(Protocol::MemoryKey key) {
     }
 }
 
-void MainWindow::slotPresetKeyClicked() {
-    if (sender() == ui->btnM1) emit onPresetChanged(Protocol::Memory1);
-    else if (sender() == ui->btnM2) emit onPresetChanged(Protocol::Memory2);
-    else if (sender() == ui->btnM3) emit onPresetChanged(Protocol::Memory3);
-    else if (sender() == ui->btnM4) emit onPresetChanged(Protocol::Memory4);
-    else if (sender() == ui->btnM5) emit onPresetChanged(Protocol::Memory5);
+void MainWindow::PresetChanged() {
+    if (sender() == ui->btnM1) emit onSetPreset(Protocol::Memory1);
+    else if (sender() == ui->btnM2) emit onSetPreset(Protocol::Memory2);
+    else if (sender() == ui->btnM3) emit onSetPreset(Protocol::Memory3);
+    else if (sender() == ui->btnM4) emit onSetPreset(Protocol::Memory4);
+    else if (sender() == ui->btnM5) emit onSetPreset(Protocol::Memory5);
 }
 
-void MainWindow::slotPresetSaveClicked() {
-    if (ui->btnM1->isChecked()) emit onPresetSave(Protocol::Memory1);
-    else if (ui->btnM2->isChecked()) emit onPresetSave(Protocol::Memory2);
-    else if (ui->btnM3->isChecked()) emit onPresetSave(Protocol::Memory3);
-    else if (ui->btnM4->isChecked()) emit onPresetSave(Protocol::Memory4);
-    else if (ui->btnM5->isChecked()) emit onPresetSave(Protocol::Memory5);
+void MainWindow::PresetSave() {
+    if (ui->btnM1->isChecked()) emit onSavePreset(Protocol::Memory1);
+    else if (ui->btnM2->isChecked()) emit onSavePreset(Protocol::Memory2);
+    else if (ui->btnM3->isChecked()) emit onSavePreset(Protocol::Memory3);
+    else if (ui->btnM4->isChecked()) emit onSavePreset(Protocol::Memory4);
+    else if (ui->btnM5->isChecked()) emit onSavePreset(Protocol::Memory5);
 }
 
 void MainWindow::slotDialControlChanged() {
+    qDebug() << "slotDialControlChanged" << qobject_cast<QDial*>(sender())->value();
     ui->spinCh1V->setValue(ui->dialCh1V->value() / vDialCorrection);
     ui->spinCh2V->setValue(ui->dialCh2V->value() / vDialCorrection);
     ui->spinCh1A->setValue(ui->dialCh1A->value() / aDialCorrection);
@@ -359,6 +359,7 @@ void MainWindow::slotDialControlChanged() {
 }
 
 void MainWindow::slotSpinControlChanged() {
+    //qDebug() << "slotSpinControlChanged" << qobject_cast<QDoubleSpinBox*>(sender())->value();
     ui->dialCh1V->setValue(int(ui->spinCh1V->value() * vDialCorrection));
     ui->dialCh2V->setValue(int(ui->spinCh2V->value() * vDialCorrection));
     ui->dialCh1A->setValue(int(ui->spinCh1A->value() * aDialCorrection));
@@ -367,6 +368,7 @@ void MainWindow::slotSpinControlChanged() {
 }
 
 void MainWindow::slotControlValueChanged() {
+    //qDebug() << "slotControlValueChanged" << qobject_cast<QDial*>(sender())->value();
     mDebouncedCh1V.setValue(ui->spinCh1V->value());
     mDebouncedCh1A.setValue(ui->spinCh1A->value());
     mDebouncedCh2V.setValue(ui->spinCh2V->value());
@@ -374,10 +376,11 @@ void MainWindow::slotControlValueChanged() {
 }
 
 void MainWindow::slotControlValueChangedDebounced(double value) {
-    if (sender() == &mDebouncedCh1V) emit onVoltageChanged(Protocol::Channel1, value);
-    else if (sender() == &mDebouncedCh1A) emit onCurrentChanged(Protocol::Channel1, value);
-    else if (sender() == &mDebouncedCh2V) emit onVoltageChanged(Protocol::Channel2, value);
-    else if (sender() == &mDebouncedCh2A) emit onCurrentChanged(Protocol::Channel2, value);
+    //qDebug() << "slotControlValueChangedDebounced" << value;
+    if (sender() == &mDebouncedCh1V) emit onSetVoltage(Protocol::Channel1, value);
+    else if (sender() == &mDebouncedCh1A) emit onSetCurrent(Protocol::Channel1, value);
+    else if (sender() == &mDebouncedCh2V) emit onSetVoltage(Protocol::Channel2, value);
+    else if (sender() == &mDebouncedCh2A) emit onSetCurrent(Protocol::Channel2, value);
 
     ui->spinCh1A->clearFocus();
     ui->spinCh1V->clearFocus();
@@ -389,7 +392,7 @@ void MainWindow::slotControlValueChangedDebounced(double value) {
     ui->dialCh2V->clearFocus();
 }
 
-void MainWindow::slotDisplayOutputVoltage(Protocol::Channel channel, double voltage) {
+void MainWindow::UpdateActualVoltage(Protocol::Channel channel, double voltage) {
     if (channel == Protocol::Channel1) {
         ui->lcdCh1V->display(voltageFormat(voltage));
     } else {
@@ -397,7 +400,7 @@ void MainWindow::slotDisplayOutputVoltage(Protocol::Channel channel, double volt
     }
 }
 
-void MainWindow::slotDisplayOutputCurrent(Protocol::Channel channel, double current) {
+void MainWindow::UpdateActualCurrent(Protocol::Channel channel, double current) {
     if (channel == Protocol::Channel1) {
         ui->lcdCh1A->display(currentFormat(current));
     } else {
@@ -405,7 +408,7 @@ void MainWindow::slotDisplayOutputCurrent(Protocol::Channel channel, double curr
     }
 }
 
-void MainWindow::slotDisplaySetVoltage(Protocol::Channel channel, double voltage) {
+void MainWindow::UpdateVoltageSet(Protocol::Channel channel, double voltage) {
     if (channel == Protocol::Channel1) {
         if (ui->spinCh1V->hasFocus() || ui->dialCh1V->hasFocus())
             return;
@@ -419,7 +422,7 @@ void MainWindow::slotDisplaySetVoltage(Protocol::Channel channel, double voltage
     }
 }
 
-void MainWindow::slotDisplaySetCurrent(Protocol::Channel channel, double current) {
+void MainWindow::UpdateCurrentSet(Protocol::Channel channel, double current) {
     if (channel == Protocol::Channel1) {
         if (ui->spinCh1A->hasFocus() || ui->dialCh1A->hasFocus())
             return;
@@ -433,7 +436,7 @@ void MainWindow::slotDisplaySetCurrent(Protocol::Channel channel, double current
     }
 }
 
-void MainWindow::slotDisplayOverCurrentProtectionValue(Protocol::Channel channel, double current) {
+void MainWindow::UpdateOverCurrentProtectionSet(Protocol::Channel channel, double current) {
     if (channel == Protocol::Channel1) {
         ui->spinCh1OCP->setValue(current);
     } else {
@@ -441,7 +444,7 @@ void MainWindow::slotDisplayOverCurrentProtectionValue(Protocol::Channel channel
     }
 }
 
-void MainWindow::slotDisplayOverVoltageProtectionValue(Protocol::Channel channel, double voltage) {
+void MainWindow::UpdateOverVoltageProtectionSet(Protocol::Channel channel, double voltage) {
     if (channel == Protocol::Channel1) {
         ui->spinCh1OVP->setValue(voltage);
     } else {
@@ -449,15 +452,10 @@ void MainWindow::slotDisplayOverVoltageProtectionValue(Protocol::Channel channel
     }
 }
 
-void MainWindow::slotOverProtectionChanged() {
-    if (sender() == ui->spinCh1OVP) emit onOverVoltageProtectionChanged(Protocol::Channel1, ui->spinCh1OVP->value());
-    else if (sender() == ui->spinCh2OVP) emit onOverVoltageProtectionChanged(Protocol::Channel1, ui->spinCh2OVP->value());
-    else if (sender() == ui->spinCh1OCP) emit onOverCurrentProtectionChanged(Protocol::Channel2, ui->spinCh1OCP->value());
-    else if (sender() == ui->spinCh2OCP) emit onOverCurrentProtectionChanged(Protocol::Channel2, ui->spinCh2OCP->value());
-}
 
-void MainWindow::slotLockOperationPanel(bool lock) {
-    if (lock) {
+
+void MainWindow::SetEnableLock(bool enable) {
+    if (enable) {
         mStatusBarDeviceLock->setText(tr("Device Controls: Lock"));
         ui->actionLockDevice->setText(tr("Unlock Device Controls"));
     } else {
@@ -501,7 +499,7 @@ QString MainWindow::chosenSerialPort() const {
     return "";
 }
 
-void MainWindow::slotSerialPortConnectionToggled(bool toggled) {
+void MainWindow::SerialPortChanged(bool toggled) {
     if (!toggled)
         return;
 
@@ -547,7 +545,7 @@ void MainWindow::slotCreateSerialPortMenuItems() {
         availableSerialPortsGroup->addAction(action);
         ui->menuPort->addAction(action);
 
-        connect(action, &QAction::toggled, this, &MainWindow::slotSerialPortConnectionToggled);
+        connect(action, &QAction::toggled, this, &MainWindow::SerialPortChanged);
     }
 }
 
@@ -568,7 +566,7 @@ void MainWindow::createBaudRatesMenu() {
         baudRatesGroup->addAction(action);
         ui->menuBaudRate->addAction(action);
 
-        connect(action, &QAction::toggled, this, &MainWindow::slotSerialPortConnectionToggled);
+        connect(action, &QAction::toggled, this, &MainWindow::SerialPortChanged);
     }
 }
 
@@ -580,19 +578,7 @@ QString MainWindow::voltageFormat(double value) {
     return QString::asprintf("%05.02f", value);
 }
 
-void MainWindow::highlight(MainWindow::THighlight color, QLabel *label) {
-    switch (color) {
-        case HighlightRed:
-            label->setStyleSheet("background-color: rgb(210, 0, 0)");
-            break;
-        case HighlightGreen:
-            label->setStyleSheet("background-color: rgb(0, 210, 0)");
-            break;
-        default:
-            label->setStyleSheet("");
-            break;
-    }
-}
+
 
 void MainWindow::openSvg(const QString &resource) {
     QGraphicsScene *s = ui->graphicsView->scene();
@@ -610,7 +596,7 @@ void MainWindow::openSvg(const QString &resource) {
     s->addItem(item);
 }
 
-void MainWindow::slotShowAboutBox() {
+void MainWindow::ShowAboutBox() {
     QPixmap icon;
     icon.load(":power-supply-64");
     QMessageBox aboutBox(
@@ -629,12 +615,12 @@ void MainWindow::slotShowAboutBox() {
     aboutBox.exec();
 }
 
-void MainWindow::slotShowDeviceNameOrID() {
+void MainWindow::ShowDeviceNameOrID() {
     static bool showDeviceID = false;
     if (showDeviceID) {
         mStatusBarDeviceInfo->setText(mDeviceInfo.ID);
     } else {
-        mStatusBarDeviceInfo->setText(mDeviceInfo.name);
+        mStatusBarDeviceInfo->setText(mDeviceInfo.Name);
     }
     showDeviceID = !showDeviceID;
 }

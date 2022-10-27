@@ -56,39 +56,39 @@ signals:
     void onGetOverVoltageProtectionValue(Protocol::Channel channel, double voltage);
 
 public slots:
-    void openSerialPort(const QString &name, int baudRate);
-    void closeSerialPort();
+    void OpenSerialPort(const QString &name, int baudRate);
+    void CloseSerialPort();
 
-    void setLocked(bool lock);
-    void getIsLocked();
-    void setCurrent(Protocol::Channel channel, double value);
-    void getCurrentSet(Protocol::Channel channel);
-    void setVoltage(Protocol::Channel channel, double value);
-    void getVoltageSet(Protocol::Channel channel);
-    void getActualCurrent(Protocol::Channel channel);
-    void getActualVoltage(Protocol::Channel channel);
-    void setEnableOutputSwitch(bool enable);
-    void setEnableBuzzer(bool enable);
-    void getIsBuzzerEnabled();
-    void getDeviceStatus();
-    void getDeviceID();
-    void setPreset(Protocol::MemoryKey key);
-    void getPreset();
-    void savePreset(Protocol::MemoryKey key);
-    void setChannelTracking(Protocol::ChannelTracking mode);
-    void setEnableOverCurrentProtection(bool enable);
-    void setEnableOverVoltageProtection(bool enable);
-    void setOverCurrentProtectionValue(Protocol::Channel channel, double current);
-    void getOverCurrentProtectionValue(Protocol::Channel channel);
-    void setOverVoltageProtectionValue(Protocol::Channel channel, double voltage);
-    void getOverVoltageProtectionValue(Protocol::Channel channel);
+    void SetLocked(bool lock);
+    void GetIsLocked();
+    void SetCurrent(Protocol::Channel channel, double value);
+    void GetCurrentSet(Protocol::Channel channel);
+    void SetVoltage(Protocol::Channel channel, double value);
+    void GetVoltageSet(Protocol::Channel channel);
+    void GetActualCurrent(Protocol::Channel channel);
+    void GetActualVoltage(Protocol::Channel channel);
+    void SetEnableOutputSwitch(bool enable);
+    void SetEnableBeep(bool enable);
+    void GetIsBuzzerEnabled();
+    void GetDeviceStatus();
+    void GetDeviceID();
+    void SetPreset(Protocol::MemoryKey key);
+    void GetPreset();
+    void SavePreset(Protocol::MemoryKey key);
+    void SetChannelTracking(Protocol::ChannelTracking mode);
+    void SetEnableOverCurrentProtection(bool enable);
+    void SetEnableOverVoltageProtection(bool enable);
+    void SetOverCurrentProtectionValue(Protocol::Channel channel, double current);
+    void GetOverCurrentProtectionValue(Protocol::Channel channel);
+    void SetOverVoltageProtectionValue(Protocol::Channel channel, double voltage);
+    void GetOverVoltageProtectionValue(Protocol::Channel channel);
 
 private slots:
-    void serialPortReadData();
-    void serialPortErrorOccurred(QSerialPort::SerialPortError error);
-    void serialPortReplyTimeout();
+    void SerialPortReadyRead();
+    void SerialPortErrorOccurred(QSerialPort::SerialPortError error);
+    void SerialPortReplyTimeout();
 
-    void collectMetrics();
+    void CollectMetrics();
 
 private:
     void processMessageQueue(bool clearBusyFlag);

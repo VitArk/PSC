@@ -41,23 +41,23 @@ public:
 
     virtual DeviceInfo deviceInfo() const {
         return {
-            .name = name(),
+            .Name = name(),
             .ID = deviceID(),
-            .description = description(),
-            .maxChannelCurrent = maxChannelCurrent(),
-            .maxChannelVoltage = maxChannelVoltage(),
-            .activeChannelsCount = activeChannelsCount(),
+            .Description = description(),
+            .MaxCurrent = maxChannelCurrent(),
+            .MaxVoltage = maxChannelVoltage(),
+            .ActiveChannelsCount = activeChannelsCount(),
         };
     }
 
     virtual DeviceStatus processDeviceStatusReply(const QByteArray &rawReply) const {
         Q_ASSERT(!rawReply.isEmpty());
         return {
-            .channel1Mode   = evaluateOutputMode(rawReply, Channel1),
-            .channel2Mode   = evaluateOutputMode(rawReply, Channel2),
-            .tracking       = evaluateChannelTracking(rawReply),
-            .protection     = evaluateOutputProtection(rawReply),
-            .outputSwitch   = evaluateOutputSwitchState(rawReply),
+            .ModeCh1   = evaluateOutputMode(rawReply, Channel1),
+            .ModeCh2   = evaluateOutputMode(rawReply, Channel2),
+            .Tracking       = evaluateChannelTracking(rawReply),
+            .Protection     = evaluateOutputProtection(rawReply),
+            .OutputSwitch   = evaluateOutputSwitchState(rawReply),
         };
     }
 

@@ -29,22 +29,22 @@ Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setStopBits(QSerialPort::OneStop);
     mSerialPort.setFlowControl(QSerialPort::NoFlowControl);
 
-    connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::serialPortReadData);
-    connect(&mSerialPort, &QSerialPort::errorOccurred, this, &Communication::serialPortErrorOccurred);
+    connect(&mSerialPort, &QSerialPort::readyRead, this, &Communication::SerialPortReadyRead);
+    connect(&mSerialPort, &QSerialPort::errorOccurred, this, &Communication::SerialPortErrorOccurred);
 
     mMetricCollectorTimer.start(COLLECT_DEBUG_INFO_MS);
-    connect(&mMetricCollectorTimer, &QTimer::timeout, this, &Communication::collectMetrics);
+    connect(&mMetricCollectorTimer, &QTimer::timeout, this, &Communication::CollectMetrics);
 
     mWaitResponseTimer.setSingleShot(true);
-    connect(&mWaitResponseTimer, &QTimer::timeout, this, &Communication::serialPortReplyTimeout);
+    connect(&mWaitResponseTimer, &QTimer::timeout, this, &Communication::SerialPortReplyTimeout);
 }
 
 Communication::~Communication() {
-    closeSerialPort();
+    CloseSerialPort();
 }
 
-void Communication::openSerialPort(const QString &name, int baudRate) {
-    closeSerialPort();
+void Communication::OpenSerialPort(const QString &name, int baudRate) {
+    CloseSerialPort();
     mSerialPort.setPortName(name);
     mSerialPort.setBaudRate(baudRate);
 
@@ -69,7 +69,7 @@ void Communication::openSerialPort(const QString &name, int baudRate) {
     }
 }
 
-void Communication::closeSerialPort() {
+void Communication::CloseSerialPort() {
     while (!mMessageQueue.isEmpty()){
         delete mMessageQueue.dequeue();
     }
@@ -84,10 +84,10 @@ void Communication::closeSerialPort() {
     }
 }
 
-void Communication::serialPortErrorOccurred(QSerialPort::SerialPortError error) {
+void Communication::SerialPortErrorOccurred(QSerialPort::SerialPortError error) {
     if (error != QSerialPort::NoError) {
         QString errorString = mSerialPort.errorString();
-        closeSerialPort();
+        CloseSerialPort();
         mSerialPort.clearError();
 
         emit onSerialPortErrorOccurred(errorString);
@@ -120,7 +120,7 @@ void Communication::processMessageQueue(bool clearBusyFlag) {
     }
 }
 
-void Communication::serialPortReadData() {
+void Communication::SerialPortReadyRead() {
     if (mMessageQueue.isEmpty()) {
         mSerialPort.clear();
         return;
@@ -138,7 +138,7 @@ void Communication::serialPortReadData() {
     }
 }
 
-void Communication::serialPortReplyTimeout() {
+void Communication::SerialPortReplyTimeout() {
     mMetrics.responseTimeoutCount++;
     mMessageQueue.clear();
     mSerialPort.clear();
@@ -168,7 +168,7 @@ void Communication::enqueueMessage(Protocol::IMessage *pMessage) {
     processMessageQueue(false);
 }
 
-void Communication::collectMetrics() {
+void Communication::CollectMetrics() {
     mMetrics.setQueueLength(mMessageQueue.length());
     emit onMetricsReady(mMetrics);
 }
@@ -207,94 +207,94 @@ void Communication::dispatchMessageReplay(const Protocol::IMessage &message, con
     }
 }
 
-void Communication::setLocked(bool lock) {
+void Communication::SetLocked(bool lock) {
     enqueueMessage(mDeviceProtocol->createMessageSetLocked(lock));
 }
 
-void Communication::getIsLocked() {
+void Communication::GetIsLocked() {
     enqueueMessage(mDeviceProtocol->createMessageGetIsLocked());
 }
 
-void Communication::setCurrent(Protocol::Channel channel, double value) {
+void Communication::SetCurrent(Protocol::Channel channel, double value) {
     enqueueMessage(mDeviceProtocol->createMessageSetCurrent(channel, value));
 }
 
-void Communication::getCurrentSet(Protocol::Channel channel) {
+void Communication::GetCurrentSet(Protocol::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetCurrentSet(channel));
 }
 
-void Communication::setVoltage(Protocol::Channel channel, double value) {
+void Communication::SetVoltage(Protocol::Channel channel, double value) {
     enqueueMessage(mDeviceProtocol->createMessageSetVoltage(channel, value));
 }
 
-void Communication::getVoltageSet(Protocol::Channel channel) {
+void Communication::GetVoltageSet(Protocol::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetVoltageSet(channel));
 }
 
-void Communication::getActualCurrent(Protocol::Channel channel) {
+void Communication::GetActualCurrent(Protocol::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetActualCurrent(channel));
 }
 
-void Communication::getActualVoltage(Protocol::Channel channel) {
+void Communication::GetActualVoltage(Protocol::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetActualVoltage(channel));
 }
 
-void Communication::setEnableOutputSwitch(bool enable) {
+void Communication::SetEnableOutputSwitch(bool enable) {
     enqueueMessage(mDeviceProtocol->createMessageSetEnableOutputSwitch(enable));
 }
 
-void Communication::setEnableBuzzer(bool enable) {
+void Communication::SetEnableBeep(bool enable) {
     enqueueMessage(mDeviceProtocol->createMessageSetEnableBeep(enable));
 }
 
-void Communication::getIsBuzzerEnabled() {
+void Communication::GetIsBuzzerEnabled() {
     enqueueMessage(mDeviceProtocol->createMessageGetIsBeepEnabled());
 }
 
-void Communication::getDeviceStatus() {
+void Communication::GetDeviceStatus() {
     enqueueMessage(mDeviceProtocol->createMessageGetDeviceStatus());
 }
 
-void Communication::getDeviceID() {
+void Communication::GetDeviceID() {
     enqueueMessage(mDeviceProtocol->createMessageGetDeviceID());
 }
 
-void Communication::setPreset(Protocol::MemoryKey key) {
+void Communication::SetPreset(Protocol::MemoryKey key) {
     enqueueMessage(mDeviceProtocol->createMessageSetPreset(key));
 }
 
-void Communication::getPreset() {
+void Communication::GetPreset() {
     enqueueMessage(mDeviceProtocol->createMessageGetPreset());
 }
 
-void Communication::savePreset(Protocol::MemoryKey key) {
+void Communication::SavePreset(Protocol::MemoryKey key) {
     enqueueMessage(mDeviceProtocol->createMessageSavePreset(key));
 }
 
-void Communication::setChannelTracking(Protocol::ChannelTracking mode) {
+void Communication::SetChannelTracking(Protocol::ChannelTracking mode) {
     enqueueMessage(mDeviceProtocol->createMessageSetChannelTracking(mode));
 }
 
-void Communication::setEnableOverCurrentProtection(bool enable) {
+void Communication::SetEnableOverCurrentProtection(bool enable) {
     enqueueMessage(mDeviceProtocol->createMessageSetEnableOverCurrentProtection(enable));
 }
 
-void Communication::setEnableOverVoltageProtection(bool enable) {
+void Communication::SetEnableOverVoltageProtection(bool enable) {
     enqueueMessage(mDeviceProtocol->createMessageSetEnableOverVoltageProtection(enable));
 }
 
-void Communication::setOverCurrentProtectionValue(Protocol::Channel channel, double current) {
+void Communication::SetOverCurrentProtectionValue(Protocol::Channel channel, double current) {
     enqueueMessage(mDeviceProtocol->createMessageSetOverCurrentProtectionValue(channel, current));
 }
 
-void Communication::getOverCurrentProtectionValue(Protocol::Channel channel) {
+void Communication::GetOverCurrentProtectionValue(Protocol::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetOverCurrentProtectionValue(channel));
 }
 
-void Communication::setOverVoltageProtectionValue(Protocol::Channel channel, double voltage) {
+void Communication::SetOverVoltageProtectionValue(Protocol::Channel channel, double voltage) {
     enqueueMessage(mDeviceProtocol->createMessageSetOverVoltageProtectionValue(channel, voltage));
 }
 
-void Communication::getOverVoltageProtectionValue(Protocol::Channel channel) {
+void Communication::GetOverVoltageProtectionValue(Protocol::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetOverVoltageProtectionValue(channel));
 }

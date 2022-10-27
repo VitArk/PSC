@@ -23,7 +23,7 @@ Debounce::Debounce(QObject *parent) :
         QObject(parent) {
     mTimer.setInterval(debounceTimeoutMs);
     mTimer.setSingleShot(true);
-    connect(&mTimer, &QTimer::timeout, this, &Debounce::slotTimeout);
+    connect(&mTimer, &QTimer::timeout, this, &Debounce::Timeout);
 }
 
 void Debounce::setValue(double value) {
@@ -33,6 +33,6 @@ void Debounce::setValue(double value) {
     mValue = value;
 }
 
-void Debounce::slotTimeout() {
+void Debounce::Timeout() {
     emit onChangedDebounced(mValue);
 }

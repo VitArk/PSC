@@ -35,7 +35,7 @@ private:
     double mValue = 0.0;
 
 private slots:
-    void slotTimeout();
+    void Timeout();
 };
 
 

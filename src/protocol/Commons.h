@@ -20,12 +20,12 @@
 
 namespace Protocol {
     struct DeviceInfo {
-        QString name;
+        QString Name;
         QString ID;
-        QString description;
-        double maxChannelCurrent; // Amperes
-        double maxChannelVoltage; // Volts
-        int activeChannelsCount;       // Only active channels, ignore fixed.
+        QString Description;
+        double MaxCurrent; // Amperes
+        double MaxVoltage; // Volts
+        int ActiveChannelsCount;       // Only active channels, ignore fixed.
     };
 
     enum Channel {
@@ -60,11 +60,11 @@ namespace Protocol {
     };
 
     struct DeviceStatus {
-        OutputMode         channel1Mode;
-        OutputMode         channel2Mode;
-        ChannelTracking    tracking;
-        OutputProtection   protection;
-        bool               outputSwitch;
+        OutputMode         ModeCh1;
+        OutputMode         ModeCh2;
+        ChannelTracking    Tracking;
+        OutputProtection   Protection;
+        bool               OutputSwitch;
     };
 
 }

@@ -165,7 +165,7 @@ namespace Protocol {
 
     /**
      * IOUT<X>?
-     * Function Description: Read current setEnableOutputSwitch value
+     * Function Description: Read current SetEnableOutputSwitch value
      * Example: IOUT1?
      * Read the set current value
      */
@@ -186,7 +186,7 @@ namespace Protocol {
 
     /**
     * VOUT<X>?
-    * Function Description: Read voltage setEnableOutputSwitch value
+    * Function Description: Read voltage SetEnableOutputSwitch value
     * Example: VOUT1?
     * Read the set voltage value
     */
@@ -207,9 +207,9 @@ namespace Protocol {
 
     /**
     * OUT<Boolean>
-    * Function Description: Turn on/off power supply setEnableOutputSwitch
+    * Function Description: Turn on/off power supply SetEnableOutputSwitch
     * Boolean: 0 off; 1 on
-    * Example: OUT1 Turn on power supply setEnableOutputSwitch
+    * Example: OUT1 Turn on power supply SetEnableOutputSwitch
     */
     class MessageSetEnableOutputSwitch : public IMessage {
     public:
@@ -226,8 +226,8 @@ namespace Protocol {
 
     /**
     * BEEP<Boolean>
-    * Function Description: Turn on/off setEnableBuzzer
-    * Example: BEEP1 Turn on setEnableBuzzer
+    * Function Description: Turn on/off SetEnableBeep
+    * Example: BEEP1 Turn on SetEnableBeep
     */
     class MessageSetEnableBeep : public IMessage {
     public:
@@ -263,7 +263,7 @@ namespace Protocol {
 
     /**
      * STATUS?
-     * Function Description: Read power supply setEnableOutputSwitch status
+     * Function Description: Read power supply SetEnableOutputSwitch status
      * Contents 8 bits in the following format:
      *  Bit     Item            Description
      *  0       CH1             0=CC mode, 1=CV mode
@@ -272,7 +272,7 @@ namespace Protocol {
      *  3       ParallelMode    0=Off, 1=On
      *  4       OVP             0=Off, 1=On
      *  5       OCP             0=Off, 1=On
-     *  6       outputSwitch    0=Off, 1=On
+     *  6       OutputSwitch    0=Off, 1=On
      *  7       N/A             N/A
      *
      *  ** if bits (2=0 and 3=0) -- Independent method.
@@ -358,7 +358,7 @@ namespace Protocol {
 
     /**
      * TRACK<NR1>
-     * Function Description: Set series & parallel channels tracking
+     * Function Description: Set series & parallel channels Tracking
      * NR1: 0=independent output; 1=series output; 2=parallel
      * Example: TRACK1
      */

@@ -432,7 +432,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Memory1</string>
+            <string>M1</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -454,7 +454,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Memory2</string>
+            <string>M2</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -473,7 +473,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Memory3</string>
+            <string>M3</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -492,7 +492,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Memory4</string>
+            <string>M4</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -511,7 +511,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Memory5</string>
+            <string>M5</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
