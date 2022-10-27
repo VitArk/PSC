@@ -84,10 +84,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->dialCh2V, &QDial::valueChanged, this, &MainWindow::slotDialControlChanged);
     connect(ui->dialCh2A, &QDial::valueChanged, this, &MainWindow::slotDialControlChanged);
 
-    connect(ui->dialCh1V, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
-    connect(ui->dialCh1A, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
-    connect(ui->dialCh2V, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
-    connect(ui->dialCh2A, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
+//    connect(ui->dialCh1V, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
+//    connect(ui->dialCh1A, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
+//    connect(ui->dialCh2V, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
+//    connect(ui->dialCh2A, &QDial::sliderReleased, this, &MainWindow::slotControlValueChanged);
 
     connect(ui->spinCh1V, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotSpinControlChanged);
     connect(ui->spinCh1A, &QDoubleSpinBox::editingFinished, this, &MainWindow::slotSpinControlChanged);
@@ -326,29 +326,35 @@ void MainWindow::enableChannel(Protocol::Channel ch, bool enable) {
 
 void MainWindow::UpdateActivePreset(Protocol::MemoryKey key) {
     switch (key) {
-        case Protocol::Memory1: ui->btnM1->setChecked(true); break;
-        case Protocol::Memory2: ui->btnM2->setChecked(true); break;
-        case Protocol::Memory3: ui->btnM3->setChecked(true); break;
-        case Protocol::Memory4: ui->btnM4->setChecked(true); break;
-        case Protocol::Memory5: ui->btnM5->setChecked(true); break;
+        case Protocol::MemoryKey::M1: ui->btnM1->setChecked(true); break;
+        case Protocol::MemoryKey::M2: ui->btnM2->setChecked(true); break;
+        case Protocol::MemoryKey::M3: ui->btnM3->setChecked(true); break;
+        case Protocol::MemoryKey::M4: ui->btnM4->setChecked(true); break;
+        case Protocol::MemoryKey::M5: ui->btnM5->setChecked(true); break;
     }
 }
 
 void MainWindow::PresetChanged() {
-    if (sender() == ui->btnM1) emit onSetPreset(Protocol::Memory1);
-    else if (sender() == ui->btnM2) emit onSetPreset(Protocol::Memory2);
-    else if (sender() == ui->btnM3) emit onSetPreset(Protocol::Memory3);
-    else if (sender() == ui->btnM4) emit onSetPreset(Protocol::Memory4);
-    else if (sender() == ui->btnM5) emit onSetPreset(Protocol::Memory5);
+    if (sender() == ui->btnM1) emit onSetPreset(Protocol::MemoryKey::M1);
+    else if (sender() == ui->btnM2) emit onSetPreset(Protocol::MemoryKey::M2);
+    else if (sender() == ui->btnM3) emit onSetPreset(Protocol::MemoryKey::M3);
+    else if (sender() == ui->btnM4) emit onSetPreset(Protocol::MemoryKey::M4);
+    else if (sender() == ui->btnM5) emit onSetPreset(Protocol::MemoryKey::M5);
 }
 
 void MainWindow::PresetSave() {
-    if (ui->btnM1->isChecked()) emit onSavePreset(Protocol::Memory1);
-    else if (ui->btnM2->isChecked()) emit onSavePreset(Protocol::Memory2);
-    else if (ui->btnM3->isChecked()) emit onSavePreset(Protocol::Memory3);
-    else if (ui->btnM4->isChecked()) emit onSavePreset(Protocol::Memory4);
-    else if (ui->btnM5->isChecked()) emit onSavePreset(Protocol::Memory5);
+    if (ui->btnM1->isChecked()) emit onSavePreset(Protocol::MemoryKey::M1);
+    else if (ui->btnM2->isChecked()) emit onSavePreset(Protocol::MemoryKey::M2);
+    else if (ui->btnM3->isChecked()) emit onSavePreset(Protocol::MemoryKey::M3);
+    else if (ui->btnM4->isChecked()) emit onSavePreset(Protocol::MemoryKey::M4);
+    else if (ui->btnM5->isChecked()) emit onSavePreset(Protocol::MemoryKey::M5);
 }
+
+//void MainWindow::ControlValueChanged() {
+//
+//}
+
+
 
 void MainWindow::slotDialControlChanged() {
     qDebug() << "slotDialControlChanged" << qobject_cast<QDial*>(sender())->value();
@@ -359,7 +365,7 @@ void MainWindow::slotDialControlChanged() {
 }
 
 void MainWindow::slotSpinControlChanged() {
-    //qDebug() << "slotSpinControlChanged" << qobject_cast<QDoubleSpinBox*>(sender())->value();
+    qDebug() << "slotSpinControlChanged - edit finished" << qobject_cast<QDoubleSpinBox*>(sender())->value();
     ui->dialCh1V->setValue(int(ui->spinCh1V->value() * vDialCorrection));
     ui->dialCh2V->setValue(int(ui->spinCh2V->value() * vDialCorrection));
     ui->dialCh1A->setValue(int(ui->spinCh1A->value() * aDialCorrection));
@@ -376,7 +382,7 @@ void MainWindow::slotControlValueChanged() {
 }
 
 void MainWindow::slotControlValueChangedDebounced(double value) {
-    //qDebug() << "slotControlValueChangedDebounced" << value;
+    qDebug() << "slotControlValueChangedDebounced" << value;
     if (sender() == &mDebouncedCh1V) emit onSetVoltage(Protocol::Channel1, value);
     else if (sender() == &mDebouncedCh1A) emit onSetCurrent(Protocol::Channel1, value);
     else if (sender() == &mDebouncedCh2V) emit onSetVoltage(Protocol::Channel2, value);
@@ -624,3 +630,4 @@ void MainWindow::ShowDeviceNameOrID() {
     }
     showDeviceID = !showDeviceID;
 }
+

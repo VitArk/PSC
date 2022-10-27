@@ -86,6 +86,8 @@ private slots:
     void SetEnableReadonlyMode(bool enable);
 
 
+    void ControlValueChanged();
+
     void slotDialControlChanged();
     void slotSpinControlChanged();
     void slotControlValueChanged();

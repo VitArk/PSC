@@ -306,7 +306,7 @@ namespace Protocol {
 
     /**
      * RCL<NR1>
-     * Function Description:Storage recall by pressing keys from Memory1-Memory5
+     * Function Description:Storage recall by pressing keys from M1-M5
      */
     class MessageSetPreset : public IMessage {
     public:
@@ -323,7 +323,7 @@ namespace Protocol {
 
     /**
      * RCL?
-     * Function Description:Read current/active setting number (keys from Memory1-Memory5)
+     * Function Description:Read current/active setting number (keys from M1-M5)
      */
     class MessageGetPreset : public IMessage {
     public:
