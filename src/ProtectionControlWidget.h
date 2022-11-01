@@ -12,31 +12,38 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //
-// Created by Vitalii Arkusha on 30.05.2021.
+// Created by Vitalii Arkusha on 01.11.2022.
 //
 
-#ifndef POWER_SUPPLY_CONTROLLER_CONTROLDEBOUNCE_H
-#define POWER_SUPPLY_CONTROLLER_CONTROLDEBOUNCE_H
+#ifndef PS_MANAGEMENT_PROTECTIONCONTROLWIDGET_H
+#define PS_MANAGEMENT_PROTECTIONCONTROLWIDGET_H
 
-#include <QObject>
-#include <QTimer>
+#include <QWidget>
+#include <QPushButton>
+#include "Global.h"
 
-class Debounce : public QObject {
+class ProtectionControlWidget : public QWidget {
 Q_OBJECT
 public:
-    explicit Debounce(QObject *parent = nullptr);
-    void setValue(double value);
+    explicit ProtectionControlWidget(QWidget *parent);
 
 signals:
-    void onChangedDebounced(double value);
+    void onProtectionChanged(Global::OutputProtection protection);
+
+public slots:
+    void SetActiveProtection(Global::OutputProtection protection);
 
 private:
-    QTimer mTimer;
-    double mValue = 0.0;
+    void setupUI();
+    QPushButton* createButton(const QString &text);
 
 private slots:
-    void Timeout();
+    void OnButtonClick();
+
+private:
+    QPushButton* mButtonOVP;
+    QPushButton* mButtonOCP;
 };
 
 
-#endif //POWER_SUPPLY_CONTROLLER_CONTROLDEBOUNCE_H
+#endif //PS_MANAGEMENT_PROTECTIONCONTROLWIDGET_H

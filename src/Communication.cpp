@@ -191,7 +191,7 @@ void Communication::dispatchMessageReplay(const Protocol::IMessage &message, con
     } else if (typeid(message) == typeid(Protocol::MessageGetOverVoltageProtectionValue)) {
         emit onGetOverVoltageProtectionValue(message.channel(), reply.toDouble(&ok));
     } else if (typeid(message) == typeid(Protocol::MessageGetPreset)) {
-        emit onGetPreset(Protocol::MemoryKey(reply.toInt(&ok)));
+        emit onGetPreset(Global::MemoryKey(reply.toInt(&ok)));
     } else if (typeid(message) == typeid(Protocol::MessageGetIsLocked)) {
         emit onGetIsLocked(bool(reply.toInt(&ok)));
     } else if (typeid(message) == typeid(Protocol::MessageGetIsBeepEnabled)) {
@@ -215,27 +215,27 @@ void Communication::GetIsLocked() {
     enqueueMessage(mDeviceProtocol->createMessageGetIsLocked());
 }
 
-void Communication::SetCurrent(Protocol::Channel channel, double value) {
+void Communication::SetCurrent(Global::Channel channel, double value) {
     enqueueMessage(mDeviceProtocol->createMessageSetCurrent(channel, value));
 }
 
-void Communication::GetCurrentSet(Protocol::Channel channel) {
+void Communication::GetCurrentSet(Global::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetCurrentSet(channel));
 }
 
-void Communication::SetVoltage(Protocol::Channel channel, double value) {
+void Communication::SetVoltage(Global::Channel channel, double value) {
     enqueueMessage(mDeviceProtocol->createMessageSetVoltage(channel, value));
 }
 
-void Communication::GetVoltageSet(Protocol::Channel channel) {
+void Communication::GetVoltageSet(Global::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetVoltageSet(channel));
 }
 
-void Communication::GetActualCurrent(Protocol::Channel channel) {
+void Communication::GetActualCurrent(Global::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetActualCurrent(channel));
 }
 
-void Communication::GetActualVoltage(Protocol::Channel channel) {
+void Communication::GetActualVoltage(Global::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetActualVoltage(channel));
 }
 
@@ -259,7 +259,7 @@ void Communication::GetDeviceID() {
     enqueueMessage(mDeviceProtocol->createMessageGetDeviceID());
 }
 
-void Communication::SetPreset(Protocol::MemoryKey key) {
+void Communication::SetPreset(Global::MemoryKey key) {
     enqueueMessage(mDeviceProtocol->createMessageSetPreset(key));
 }
 
@@ -267,11 +267,11 @@ void Communication::GetPreset() {
     enqueueMessage(mDeviceProtocol->createMessageGetPreset());
 }
 
-void Communication::SavePreset(Protocol::MemoryKey key) {
+void Communication::SavePreset(Global::MemoryKey key) {
     enqueueMessage(mDeviceProtocol->createMessageSavePreset(key));
 }
 
-void Communication::SetChannelTracking(Protocol::ChannelTracking mode) {
+void Communication::SetChannelTracking(Global::ChannelTracking mode) {
     enqueueMessage(mDeviceProtocol->createMessageSetChannelTracking(mode));
 }
 
@@ -283,18 +283,18 @@ void Communication::SetEnableOverVoltageProtection(bool enable) {
     enqueueMessage(mDeviceProtocol->createMessageSetEnableOverVoltageProtection(enable));
 }
 
-void Communication::SetOverCurrentProtectionValue(Protocol::Channel channel, double current) {
+void Communication::SetOverCurrentProtectionValue(Global::Channel channel, double current) {
     enqueueMessage(mDeviceProtocol->createMessageSetOverCurrentProtectionValue(channel, current));
 }
 
-void Communication::GetOverCurrentProtectionValue(Protocol::Channel channel) {
+void Communication::GetOverCurrentProtectionValue(Global::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetOverCurrentProtectionValue(channel));
 }
 
-void Communication::SetOverVoltageProtectionValue(Protocol::Channel channel, double voltage) {
+void Communication::SetOverVoltageProtectionValue(Global::Channel channel, double voltage) {
     enqueueMessage(mDeviceProtocol->createMessageSetOverVoltageProtectionValue(channel, voltage));
 }
 
-void Communication::GetOverVoltageProtectionValue(Protocol::Channel channel) {
+void Communication::GetOverVoltageProtectionValue(Global::Channel channel) {
     enqueueMessage(mDeviceProtocol->createMessageGetOverVoltageProtectionValue(channel));
 }

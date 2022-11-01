@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QApplication>
 #include <QQueue>
-#include "protocol/Commons.h"
+#include "Global.h"
 #include "Communication.h"
 #include "MainWindow.h"
 
@@ -40,12 +40,12 @@ private:
 private slots:
     void Run();
 
-    void DeviceReady(const Protocol::DeviceInfo &info);
+    void DeviceReady(const Global::DeviceInfo &info);
     void SerialPortClosed();
 
     void DeviceUpdateCycle();
-    void OutputStatus(const Protocol::DeviceStatus &status);
-    void OutputProtectionChanged(Protocol::OutputProtection protection);
+    void OutputStatus(const Global::DeviceStatus &status);
+    void OutputProtectionChanged(Global::OutputProtection protection);
     void TuneDeviceUpdaterTimerInterval(const CommunicationMetrics &metrics);
 };
 

@@ -15,19 +15,10 @@
 // Created by Vitalii Arkusha on 13.05.2021.
 //
 
-#ifndef POWER_SUPPLY_CONTROLLER_COMMONS_H
-#define POWER_SUPPLY_CONTROLLER_COMMONS_H
+#ifndef POWER_SUPPLY_CONTROLLER_GLOBAL_H
+#define POWER_SUPPLY_CONTROLLER_GLOBAL_H
 
-namespace Protocol {
-    struct DeviceInfo {
-        QString Name;
-        QString ID;
-        QString Description;
-        double MaxCurrent; // Amperes
-        double MaxVoltage; // Volts
-        int ActiveChannelsCount;       // Only active channels, ignore fixed.
-    };
-
+namespace Global {
     enum Channel {
         Channel1 = 1,
         Channel2 = 2,
@@ -48,8 +39,8 @@ namespace Protocol {
     };
 
     enum OutputMode {
-        ConstantCurrent = 0,
-        ConstantVoltage = 1,
+        ConstantCurrent = false,
+        ConstantVoltage = true,
     };
 
     enum OutputProtection {
@@ -66,7 +57,22 @@ namespace Protocol {
         OutputProtection   Protection;
         bool               OutputSwitch;
     };
+    
+    struct DeviceInfo {
+        QString Name;
+        QString ID;
+        QString Description;
 
+        double MinCurrent;
+        double MaxCurrent; // Amperes
+        double CurrentSetPrecision;
+
+        double MinVoltage;
+        double MaxVoltage; // Volts
+        double VoltageSetPrecision;
+
+        int ActiveChannelsCount;       // Only active channels, ignore fixed.
+    };
 }
 
-#endif //POWER_SUPPLY_CONTROLLER_COMMONS_H
+#endif //POWER_SUPPLY_CONTROLLER_GLOBAL_H

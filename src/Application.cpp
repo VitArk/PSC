@@ -90,14 +90,14 @@ void Application::Run() {
     mMainWindow->autoOpenSerialPort();
 }
 
-void Application::DeviceReady(const Protocol::DeviceInfo &info) {
+void Application::DeviceReady(const Global::DeviceInfo &info) {
     mMainWindow->ConnectionDeviceReady(info);
 
 //    mCommunication->GetDeviceID();
-    mCommunication->GetOverCurrentProtectionValue(Protocol::Channel1);
-    mCommunication->GetOverCurrentProtectionValue(Protocol::Channel2);
-    mCommunication->GetOverVoltageProtectionValue(Protocol::Channel1);
-    mCommunication->GetOverVoltageProtectionValue(Protocol::Channel2);
+    mCommunication->GetOverCurrentProtectionValue(Global::Channel1);
+    mCommunication->GetOverCurrentProtectionValue(Global::Channel2);
+    mCommunication->GetOverVoltageProtectionValue(Global::Channel1);
+    mCommunication->GetOverVoltageProtectionValue(Global::Channel2);
 
     mDeviceUpdaterTimer.start();
 }
@@ -114,12 +114,12 @@ void Application::DeviceUpdateCycle() {
     mCommunication->GetIsBuzzerEnabled();
 }
 
-void Application::OutputStatus(const Protocol::DeviceStatus &status) {
+void Application::OutputStatus(const Global::DeviceStatus &status) {
     if (status.OutputSwitch) {
-        mCommunication->GetActualCurrent(Protocol::Channel1);
-        mCommunication->GetActualCurrent(Protocol::Channel2);
-        mCommunication->GetActualVoltage(Protocol::Channel1);
-        mCommunication->GetActualVoltage(Protocol::Channel2);
+        mCommunication->GetActualCurrent(Global::Channel1);
+        mCommunication->GetActualCurrent(Global::Channel2);
+        mCommunication->GetActualVoltage(Global::Channel1);
+        mCommunication->GetActualVoltage(Global::Channel2);
 
         disconnect(mCommunication, &Communication::onGetCurrentSet, mMainWindow, &MainWindow::UpdateActualCurrent);
         disconnect(mCommunication, &Communication::onGetVoltageSet, mMainWindow, &MainWindow::UpdateActualVoltage);
@@ -128,32 +128,32 @@ void Application::OutputStatus(const Protocol::DeviceStatus &status) {
         connect(mCommunication, &Communication::onGetVoltageSet, mMainWindow, &MainWindow::UpdateActualVoltage);
     }
 
-    mCommunication->GetCurrentSet(Protocol::Channel1);
-    mCommunication->GetCurrentSet(Protocol::Channel2);
-    mCommunication->GetVoltageSet(Protocol::Channel1);
-    mCommunication->GetVoltageSet(Protocol::Channel2);
+    mCommunication->GetCurrentSet(Global::Channel1);
+    mCommunication->GetCurrentSet(Global::Channel2);
+    mCommunication->GetVoltageSet(Global::Channel1);
+    mCommunication->GetVoltageSet(Global::Channel2);
 
-    if (status.Protection == Protocol::OverVoltageProtectionOnly || status.Protection == Protocol::OutputProtectionAllEnabled) {
-        mCommunication->GetOverVoltageProtectionValue(Protocol::Channel1);
-        mCommunication->GetOverVoltageProtectionValue(Protocol::Channel2);
+    if (status.Protection == Global::OverVoltageProtectionOnly || status.Protection == Global::OutputProtectionAllEnabled) {
+        mCommunication->GetOverVoltageProtectionValue(Global::Channel1);
+        mCommunication->GetOverVoltageProtectionValue(Global::Channel2);
     }
-    if (status.Protection == Protocol::OverCurrentProtectionOnly || status.Protection == Protocol::OutputProtectionAllEnabled) {
-        mCommunication->GetOverCurrentProtectionValue(Protocol::Channel1);
-        mCommunication->GetOverCurrentProtectionValue(Protocol::Channel2);
+    if (status.Protection == Global::OverCurrentProtectionOnly || status.Protection == Global::OutputProtectionAllEnabled) {
+        mCommunication->GetOverCurrentProtectionValue(Global::Channel1);
+        mCommunication->GetOverCurrentProtectionValue(Global::Channel2);
     }
 
-    mMainWindow->UpdateChannelMode(Protocol::Channel1, status.ModeCh1);
-    mMainWindow->UpdateChannelMode(Protocol::Channel2, status.ModeCh2);
+    mMainWindow->UpdateChannelMode(Global::Channel1, status.ModeCh1);
+    mMainWindow->UpdateChannelMode(Global::Channel2, status.ModeCh2);
     mMainWindow->SetEnableOutputSwitch(status.OutputSwitch);
     mMainWindow->UpdateOutputProtectionMode(status.Protection);
     mMainWindow->UpdateChannelTrackingMode(status.Tracking);
 }
 
-void Application::OutputProtectionChanged(Protocol::OutputProtection protection) {
+void Application::OutputProtectionChanged(Global::OutputProtection protection) {
     mCommunication->SetEnableOverVoltageProtection(
-            protection == Protocol::OverVoltageProtectionOnly || protection == Protocol::OutputProtectionAllEnabled);
+            protection == Global::OverVoltageProtectionOnly || protection == Global::OutputProtectionAllEnabled);
     mCommunication->SetEnableOverCurrentProtection(
-            protection == Protocol::OverCurrentProtectionOnly || protection == Protocol::OutputProtectionAllEnabled);
+            protection == Global::OverCurrentProtectionOnly || protection == Global::OutputProtectionAllEnabled);
 }
 
 void Application::TuneDeviceUpdaterTimerInterval(const CommunicationMetrics &metrics) {

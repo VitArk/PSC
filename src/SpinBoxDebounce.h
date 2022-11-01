@@ -10,29 +10,37 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-//
-// Created by Vitalii Arkusha on 30.05.2021.
 //
 
-#include "Debounce.h"
+// Created by Vitalii Arkusha on 27.10.2022.
+//
 
-const int debounceTimeoutMs = 250;
+#ifndef PS_MANAGEMENT_SPINBOXDEBOUNCE_H
+#define PS_MANAGEMENT_SPINBOXDEBOUNCE_H
 
-Debounce::Debounce(QObject *parent) :
-        QObject(parent) {
-    mTimer.setInterval(debounceTimeoutMs);
-    mTimer.setSingleShot(true);
-    connect(&mTimer, &QTimer::timeout, this, &Debounce::Timeout);
-}
+#include <QDoubleSpinBox>
+#include <QBasicTimer>
 
-void Debounce::setValue(double value) {
-    if (mValue != value && mValue > 0.0) {
-        mTimer.start();
-    }
-    mValue = value;
-}
+class SpinBoxDebounce : public QDoubleSpinBox {
+Q_OBJECT
+public:
+    explicit SpinBoxDebounce(QWidget *parent);
+    void setValue(double value);
 
-void Debounce::Timeout() {
-    emit onChangedDebounced(mValue);
-}
+signals:
+    void onSetValue(double value);
+
+protected:
+    void timerEvent(QTimerEvent *event) override;
+
+private slots:
+    void ValueChanged();
+
+private:
+    QBasicTimer mTimer;
+    double      mExternalValue = 0.0;
+};
+
+
+
+#endif //PS_MANAGEMENT_SPINBOXDEBOUNCE_H

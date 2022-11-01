@@ -34,12 +34,28 @@ namespace Protocol {
             return QString("%1 Programmable DC Power Supply").arg(name());
         }
 
+        double minChannelCurrent() const override {
+            return 0.001; // Amp
+        };
+
         double maxChannelCurrent() const override {
             return 3.000; // Amp
-        }
+        };
+
+        double currentSetPrecision() const override {
+            return 0.001;
+        };
+
+        double minChannelVoltage() const override {
+            return 0.00; // Volts
+        };
 
         double maxChannelVoltage() const override {
             return 30.00; // Volts
+        };
+
+        double voltageSetPrecision() const override {
+            return 0.00;
         }
 
         int activeChannelsCount() const override {

@@ -16,11 +16,15 @@
 
 #include <QMainWindow>
 #include <QLabel>
-#include "protocol/Commons.h"
-#include "Debounce.h"
+#include "Global.h"
 #include "Settings.h"
 #include "CommunicationMetrics.h"
 #include "ClickableLabel.h"
+#include "DialWidget.h"
+#include "ProtectionWidget.h"
+#include "DisplayWidget.h"
+#include "PresetWidget.h"
+#include "ProtectionControlWidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -39,14 +43,14 @@ signals:
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
     void onSerialPortDoClose();
 
-    void onSetChannelTracking(Protocol::ChannelTracking tracking);
-    void onSetEnableOutputProtection(Protocol::OutputProtection protection);
-    void onSetOverVoltageProtectionValue(Protocol::Channel channel, double value);
-    void onSetOverCurrentProtectionValue(Protocol::Channel channel, double value);
-    void onSetPreset(Protocol::MemoryKey key);
-    void onSavePreset(Protocol::MemoryKey key);
-    void onSetVoltage(Protocol::Channel channel, double value);
-    void onSetCurrent(Protocol::Channel channel, double value);
+    void onSetChannelTracking(Global::ChannelTracking tracking);
+    void onSetEnableOutputProtection(Global::OutputProtection protection);
+    void onSetOverVoltageProtectionValue(Global::Channel channel, double value);
+    void onSetOverCurrentProtectionValue(Global::Channel channel, double value);
+    void onSetPreset(Global::MemoryKey key);
+    void onSavePreset(Global::MemoryKey key);
+    void onSetVoltage(Global::Channel channel, double value);
+    void onSetCurrent(Global::Channel channel, double value);
     void onSetEnableOutputSwitch(bool state);
     void onSetLocked(bool enable);
     void onSetEnabledBeep(bool enable);
@@ -54,23 +58,23 @@ signals:
 public slots:
     void SerialPortOpened(const QString& serialPortName, int baudRate);
     void SerialPortClosed();
-    void SerialPortErrorOccurred(QString error);
+    void SerialPortErrorOccurred(const QString &error);
 
-    void ConnectionDeviceReady(const Protocol::DeviceInfo &info);
+    void ConnectionDeviceReady(const Global::DeviceInfo &info);
     void ConnectionUnknownDevice(QString deviceID);
 
     void UpdateCommunicationMetrics(const CommunicationMetrics &info);
 
-    void UpdateChannelTrackingMode(Protocol::ChannelTracking tracking);
-    void UpdateOutputProtectionMode(Protocol::OutputProtection protection);
-    void UpdateChannelMode(Protocol::Channel channel, Protocol::OutputMode mode);
-    void UpdateActivePreset(Protocol::MemoryKey key);
-    void UpdateActualVoltage(Protocol::Channel channel, double voltage);
-    void UpdateActualCurrent(Protocol::Channel channel, double current);
-    void UpdateVoltageSet(Protocol::Channel channel, double voltage);
-    void UpdateCurrentSet(Protocol::Channel channel, double current);
-    void UpdateOverVoltageProtectionSet(Protocol::Channel channel, double voltage);
-    void UpdateOverCurrentProtectionSet(Protocol::Channel channel, double current);
+    void UpdateChannelTrackingMode(Global::ChannelTracking tracking);
+    void UpdateOutputProtectionMode(Global::OutputProtection protection);
+    void UpdateChannelMode(Global::Channel channel, Global::OutputMode mode);
+    void UpdateActivePreset(Global::MemoryKey key);
+    void UpdateActualVoltage(Global::Channel channel, double voltage);
+    void UpdateActualCurrent(Global::Channel channel, double current);
+    void UpdateVoltageSet(Global::Channel channel, double voltage);
+    void UpdateCurrentSet(Global::Channel channel, double current);
+    void UpdateOverVoltageProtectionSet(Global::Channel channel, double voltage);
+    void UpdateOverCurrentProtectionSet(Global::Channel channel, double current);
     void SetEnableOutputSwitch(bool enable);
     void SetEnableLock(bool enable);
     void SetEnableBeep(bool enable);
@@ -80,20 +84,7 @@ private slots:
     void SerialPortChanged(bool toggled);
 
     void ChannelTrackingChanged();
-    void OutputProtectionChanged(); // TODO ???? what do the method comparing to OverProtectionValueChanged
-    void PresetChanged();
-    void PresetSave();
     void SetEnableReadonlyMode(bool enable);
-
-
-    void ControlValueChanged();
-
-    void slotDialControlChanged();
-    void slotSpinControlChanged();
-    void slotControlValueChanged();
-    void slotControlValueChangedDebounced(double value);
-
-    void OverProtectionValueChanged();
 
     void slotCreateSerialPortMenuItems(); // TODO ????
 
@@ -104,31 +95,37 @@ private:
     Ui::MainWindow *ui;
     Settings mSettings;
 
-    Debounce mDebouncedCh1V;
-    Debounce mDebouncedCh1A;
-    Debounce mDebouncedCh2V;
-    Debounce mDebouncedCh2A;
-
     QLabel *mStatusBarConnectionStatus;
     ClickableLabel *mStatusBarDeviceInfo;
     QLabel *mStatusBarDeviceLock;
     QLabel *mStatusCommunicationMetrics;
 
+    DialWidget   *mInputCh1V;
+    DialWidget   *mInputCh1A;
+    DialWidget   *mInputCh2V;
+    DialWidget   *mInputCh2A;
+
+    ProtectionWidget *mProtectionSetCh1;
+    ProtectionWidget *mProtectionSetCh2;
+    ProtectionControlWidget *mProtectionControl;
+
+    DisplayWidget *mDisplayCh1;
+    DisplayWidget *mDisplayCh2;
+
+    PresetWidget  *mPreset;
+
     bool mIsSerialConnected = false;
-    Protocol::DeviceInfo  mDeviceInfo;
+    Global::DeviceInfo  mDeviceInfo;
 
 private:
     bool acceptEnable() const;
     void enableControls(bool enable);
-    void setControlLimits(const Protocol::DeviceInfo &info);
-    void enableChannel(Protocol::Channel ch, bool enable);
+    void setControlLimits(const Global::DeviceInfo &info);
+    void enableChannel(Global::Channel ch, bool enable);
     void openSvg(const QString &resource);
     void createBaudRatesMenu();
     QString chosenSerialPort() const;
     int chosenBaudRates(int defaultValue = 9600) const;
-
-    static QString currentFormat(double value);
-    static QString voltageFormat(double value);
 };
 
 #endif // MAINWINDOW_H

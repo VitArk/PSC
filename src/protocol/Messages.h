@@ -19,21 +19,21 @@
 #define PSC_PROTOCOL_H
 
 #include <QString>
-#include "Commons.h"
+#include "Global.h"
 
 namespace Protocol {
     class IMessage {
     public:
         virtual ~IMessage() = default;
 
-        virtual Channel channel() const { return mChannel;}
+        virtual Global::Channel channel() const { return mChannel;}
         virtual QByteArray query() const = 0;
         virtual int replySize() const { return 0; }
         virtual bool isCommandWithReply() const { return replySize() > 0; }
         // messages that return true, will be dropped in case overflowing messages queue.
         virtual bool allowToDrop() const { return false; }
     protected:
-        Channel mChannel = Channel1;
+        Global::Channel mChannel = Global::Channel1;
     };
 
     /**
@@ -87,7 +87,7 @@ namespace Protocol {
      */
     class MessageSetCurrent : public IMessage {
     public:
-        MessageSetCurrent(Channel channel, double current) {
+        MessageSetCurrent(Global::Channel channel, double current) {
             mChannel = channel;
             mCurrent = current;
         }
@@ -108,7 +108,7 @@ namespace Protocol {
      */
     class MessageGetCurrentSet : public IMessage {
     public:
-        explicit MessageGetCurrentSet(Channel channel) {
+        explicit MessageGetCurrentSet(Global::Channel channel) {
             mChannel = channel;
         }
 
@@ -129,7 +129,7 @@ namespace Protocol {
      */
     class MessageSetVoltage : public IMessage {
     public:
-        explicit MessageSetVoltage(Channel channel, double voltage) {
+        explicit MessageSetVoltage(Global::Channel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
@@ -150,7 +150,7 @@ namespace Protocol {
      */
     class MessageGetVoltageSet : public IMessage {
     public:
-        explicit MessageGetVoltageSet(Channel channel) {
+        explicit MessageGetVoltageSet(Global::Channel channel) {
             mChannel = channel;
         }
 
@@ -171,7 +171,7 @@ namespace Protocol {
      */
     class MessageGetActualCurrent : public IMessage {
     public:
-        explicit MessageGetActualCurrent(Channel channel) {
+        explicit MessageGetActualCurrent(Global::Channel channel) {
             mChannel = channel;
         }
 
@@ -192,7 +192,7 @@ namespace Protocol {
     */
     class MessageGetActualVoltage : public IMessage {
     public:
-        explicit MessageGetActualVoltage(Channel channel) {
+        explicit MessageGetActualVoltage(Global::Channel channel) {
             mChannel = channel;
         }
 
@@ -310,7 +310,7 @@ namespace Protocol {
      */
     class MessageSetPreset : public IMessage {
     public:
-        explicit MessageSetPreset(MemoryKey key) {
+        explicit MessageSetPreset(Global::MemoryKey key) {
             mKey = key;
         }
 
@@ -318,7 +318,7 @@ namespace Protocol {
             return QString("RCL%1").arg(mKey).toLatin1();
         }
     private:
-        MemoryKey mKey;
+        Global::MemoryKey mKey;
     };
 
     /**
@@ -345,7 +345,7 @@ namespace Protocol {
      */
     class MessageSavePreset : public IMessage {
     public:
-        explicit MessageSavePreset(MemoryKey key) {
+        explicit MessageSavePreset(Global::MemoryKey key) {
             mKey = key;
         }
 
@@ -353,7 +353,7 @@ namespace Protocol {
             return QString("SAV%1").arg(mKey).toLatin1();
         }
     private:
-        MemoryKey mKey;
+        Global::MemoryKey mKey;
     };
 
     /**
@@ -364,7 +364,7 @@ namespace Protocol {
      */
     class MessageSetChannelTracking : public IMessage {
     public:
-        explicit MessageSetChannelTracking(ChannelTracking mode) {
+        explicit MessageSetChannelTracking(Global::ChannelTracking mode) {
             mMode = mode;
         }
 
@@ -372,7 +372,7 @@ namespace Protocol {
             return QString("TRACK%1").arg(mMode).toLatin1();
         }
     private:
-        ChannelTracking mMode;
+        Global::ChannelTracking mMode;
     };
 
     /**
@@ -421,7 +421,7 @@ namespace Protocol {
     */
     class MessageSetOverCurrentProtectionValue : public IMessage {
     public:
-        explicit MessageSetOverCurrentProtectionValue(Channel channel, double value) {
+        explicit MessageSetOverCurrentProtectionValue(Global::Channel channel, double value) {
             mChannel = channel;
             mValue = value;
         }
@@ -441,7 +441,7 @@ namespace Protocol {
     */
     class MessageGetOverCurrentProtectionValue : public IMessage {
     public:
-        explicit MessageGetOverCurrentProtectionValue(Channel channel) {
+        explicit MessageGetOverCurrentProtectionValue(Global::Channel channel) {
             mChannel = channel;
         }
 
@@ -465,7 +465,7 @@ namespace Protocol {
      */
     class MessageSetOverVoltageProtectionValue : public IMessage {
     public:
-        explicit MessageSetOverVoltageProtectionValue(Channel channel, double voltage) {
+        explicit MessageSetOverVoltageProtectionValue(Global::Channel channel, double voltage) {
             mChannel = channel;
             mVoltage = voltage;
         }
@@ -485,7 +485,7 @@ namespace Protocol {
      */
     class MessageGetOverVoltageProtectionValue : public IMessage {
     public:
-        explicit MessageGetOverVoltageProtectionValue(Channel channel) {
+        explicit MessageGetOverVoltageProtectionValue(Global::Channel channel) {
             mChannel = channel;
         }
 

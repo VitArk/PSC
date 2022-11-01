@@ -19,9 +19,10 @@
 #define PSM_BASESCPI_H
 
 #include <QString>
-#include <QScopedPointer>
-#include "Commons.h"
+#include <QDebug>
+#include "Global.h"
 #include "Messages.h"
+
 
 namespace Protocol {
 class BaseSCPI {
@@ -31,30 +32,40 @@ public:
     virtual QString name() const = 0;
     virtual QString deviceID() const = 0;
     virtual QString description() const = 0;
+
+    virtual double minChannelCurrent() const = 0;
     virtual double maxChannelCurrent() const = 0;
+    virtual double currentSetPrecision() const = 0;
+
+    virtual double minChannelVoltage() const = 0;
     virtual double maxChannelVoltage() const = 0;
+    virtual double voltageSetPrecision() const = 0;
     virtual int activeChannelsCount() const = 0;
 
     virtual bool isRecognized(QString deviceID) const {
         return deviceID == this->deviceID();
     }
 
-    virtual DeviceInfo deviceInfo() const {
+    virtual Global::DeviceInfo deviceInfo() const {
         return {
             .Name = name(),
             .ID = deviceID(),
             .Description = description(),
+            .MinCurrent = minChannelCurrent(),
             .MaxCurrent = maxChannelCurrent(),
+            .CurrentSetPrecision = currentSetPrecision(),
+            .MinVoltage = minChannelVoltage(),
             .MaxVoltage = maxChannelVoltage(),
+            .VoltageSetPrecision = voltageSetPrecision(),
             .ActiveChannelsCount = activeChannelsCount(),
         };
     }
 
-    virtual DeviceStatus processDeviceStatusReply(const QByteArray &rawReply) const {
+    virtual Global::DeviceStatus processDeviceStatusReply(const QByteArray &rawReply) const {
         Q_ASSERT(!rawReply.isEmpty());
         return {
-            .ModeCh1   = evaluateOutputMode(rawReply, Channel1),
-            .ModeCh2   = evaluateOutputMode(rawReply, Channel2),
+            .ModeCh1        = evaluateOutputMode(rawReply, Global::Channel1),
+            .ModeCh2        = evaluateOutputMode(rawReply, Global::Channel2),
             .Tracking       = evaluateChannelTracking(rawReply),
             .Protection     = evaluateOutputProtection(rawReply),
             .OutputSwitch   = evaluateOutputSwitchState(rawReply),
@@ -67,22 +78,22 @@ public:
     virtual IMessage* createMessageGetIsLocked() {
         return new MessageGetIsLocked();
     }
-    virtual IMessage* createMessageSetCurrent(Channel channel, double value) {
+    virtual IMessage* createMessageSetCurrent(Global::Channel channel, double value) {
         return new MessageSetCurrent(channel, value);
     }
-    virtual IMessage* createMessageGetCurrentSet(Channel channel) {
+    virtual IMessage* createMessageGetCurrentSet(Global::Channel channel) {
         return new MessageGetCurrentSet(channel);
     }
-    virtual IMessage* createMessageSetVoltage(Channel channel, double value) {
+    virtual IMessage* createMessageSetVoltage(Global::Channel channel, double value) {
         return new MessageSetVoltage(channel, value);
     }
-    virtual IMessage* createMessageGetVoltageSet(Channel channel) {
+    virtual IMessage* createMessageGetVoltageSet(Global::Channel channel) {
         return new MessageGetVoltageSet(channel);
     }
-    virtual IMessage* createMessageGetActualCurrent(Channel channel) {
+    virtual IMessage* createMessageGetActualCurrent(Global::Channel channel) {
         return new MessageGetActualCurrent(channel);
     }
-    virtual IMessage* createMessageGetActualVoltage(Channel channel) {
+    virtual IMessage* createMessageGetActualVoltage(Global::Channel channel) {
         return new MessageGetActualVoltage(channel);
     }
     virtual IMessage* createMessageSetEnableOutputSwitch(bool enable) {
@@ -100,16 +111,16 @@ public:
     virtual IMessage* createMessageGetDeviceID() {
         return new MessageGetDeviceID();
     }
-    virtual IMessage* createMessageSetPreset(MemoryKey key) {
+    virtual IMessage* createMessageSetPreset(Global::MemoryKey key) {
         return new MessageSetPreset(key);
     }
     virtual IMessage* createMessageGetPreset() {
         return new MessageGetPreset();
     }
-    virtual IMessage* createMessageSavePreset(MemoryKey key) {
+    virtual IMessage* createMessageSavePreset(Global::MemoryKey key) {
         return new MessageSavePreset(key);
     }
-    virtual IMessage* createMessageSetChannelTracking(ChannelTracking method) {
+    virtual IMessage* createMessageSetChannelTracking(Global::ChannelTracking method) {
         return new MessageSetChannelTracking(method);
     }
     virtual IMessage* createMessageSetEnableOverCurrentProtection(bool enable) {
@@ -118,37 +129,39 @@ public:
     virtual IMessage* createMessageSetEnableOverVoltageProtection(bool enable) {
         return new MessageSetEnableOverVoltageProtection(enable);
     }
-    virtual IMessage* createMessageSetOverCurrentProtectionValue(Channel channel, double current) {
+    virtual IMessage* createMessageSetOverCurrentProtectionValue(Global::Channel channel, double current) {
         return new MessageSetOverCurrentProtectionValue(channel, current);
     }
-    virtual IMessage* createMessageGetOverCurrentProtectionValue(Channel channel) {
+    virtual IMessage* createMessageGetOverCurrentProtectionValue(Global::Channel channel) {
         return new MessageGetOverCurrentProtectionValue(channel);
     }
-    virtual IMessage* createMessageSetOverVoltageProtectionValue(Channel channel, double voltage) {
+    virtual IMessage* createMessageSetOverVoltageProtectionValue(Global::Channel channel, double voltage) {
         return new MessageSetOverVoltageProtectionValue(channel, voltage);
     }
-    virtual IMessage* createMessageGetOverVoltageProtectionValue(Channel channel) {
+    virtual IMessage* createMessageGetOverVoltageProtectionValue(Global::Channel channel) {
         return new MessageGetOverVoltageProtectionValue(channel);
     }
 
 protected:
-    virtual OutputMode evaluateOutputMode(const QByteArray &data, Channel channel) const {
-        return channel == Channel1 ? OutputMode(data[0] & 0x1) : OutputMode(data[0] & 0x2);
+    virtual Global::OutputMode evaluateOutputMode(QByteArray data, Global::Channel channel) const {
+        return channel == Global::Channel1
+            ? Global::OutputMode(bool(data[0] & 0x1))
+            : Global::OutputMode(bool(data[0] & 0x2));
     }
 
-    virtual ChannelTracking evaluateChannelTracking(const QByteArray &data) const {
-        ChannelTracking tracking = Independent;
-        tracking = bool(data[0] & 0x4) ? Serial : tracking;
-        tracking = bool(data[0] & 0x8) ? Parallel : tracking;
+    virtual Global::ChannelTracking evaluateChannelTracking(const QByteArray &data) const {
+        Global::ChannelTracking tracking = Global::Independent;
+        tracking = bool(data[0] & 0x4) ? Global::Serial : tracking;
+        tracking = bool(data[0] & 0x8) ? Global::Parallel : tracking;
 
         return tracking;
     }
 
-    virtual OutputProtection evaluateOutputProtection(const QByteArray &data) const {
-        OutputProtection protection = OutputProtectionAllDisabled;
-        protection = bool(data[0] & 0x10) ? OverVoltageProtectionOnly : protection;
-        protection = bool(data[0] & 0x20) ? OverCurrentProtectionOnly : protection;
-        protection = bool((data[0] & 0x30) == 0x30) ? OutputProtectionAllEnabled : protection;
+    virtual Global::OutputProtection evaluateOutputProtection(const QByteArray &data) const {
+        Global::OutputProtection protection = Global::OutputProtectionAllDisabled;
+        protection = bool(data[0] & 0x10) ? Global::OverVoltageProtectionOnly : protection;
+        protection = bool(data[0] & 0x20) ? Global::OverCurrentProtectionOnly : protection;
+        protection = bool((data[0] & 0x30) == 0x30) ? Global::OutputProtectionAllEnabled : protection;
 
         return protection;
     }
