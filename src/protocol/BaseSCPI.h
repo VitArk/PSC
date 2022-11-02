@@ -120,7 +120,7 @@ public:
     virtual IMessage* createMessageSavePreset(Global::MemoryKey key) {
         return new MessageSavePreset(key);
     }
-    virtual IMessage* createMessageSetChannelTracking(Global::ChannelTracking method) {
+    virtual IMessage* createMessageSetChannelTracking(Global::ChannelsTracking method) {
         return new MessageSetChannelTracking(method);
     }
     virtual IMessage* createMessageSetEnableOverCurrentProtection(bool enable) {
@@ -149,8 +149,8 @@ protected:
             : Global::OutputMode(bool(data[0] & 0x2));
     }
 
-    virtual Global::ChannelTracking evaluateChannelTracking(const QByteArray &data) const {
-        Global::ChannelTracking tracking = Global::Independent;
+    virtual Global::ChannelsTracking evaluateChannelTracking(const QByteArray &data) const {
+        Global::ChannelsTracking tracking = Global::Independent;
         tracking = bool(data[0] & 0x4) ? Global::Serial : tracking;
         tracking = bool(data[0] & 0x8) ? Global::Parallel : tracking;
 

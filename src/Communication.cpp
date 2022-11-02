@@ -271,7 +271,7 @@ void Communication::SavePreset(Global::MemoryKey key) {
     enqueueMessage(mDeviceProtocol->createMessageSavePreset(key));
 }
 
-void Communication::SetChannelTracking(Global::ChannelTracking mode) {
+void Communication::SetChannelTracking(Global::ChannelsTracking mode) {
     enqueueMessage(mDeviceProtocol->createMessageSetChannelTracking(mode));
 }
 

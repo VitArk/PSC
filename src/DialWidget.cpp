@@ -31,6 +31,9 @@ DialWidget::DialWidget(const QString &title, QWidget *parent) : QGroupBox(title,
     layout()->addWidget(mDial);
 
     mSpinBox = new QDoubleSpinBox(this);
+    mSpinBox->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    mSpinBox->setValue(0.0);
+
     layout()->addWidget(mSpinBox);
 
     setupDial();
@@ -44,7 +47,7 @@ DialWidget::DialWidget(const QString &title, QWidget *parent) : QGroupBox(title,
 void DialWidget::setupDial() {
     mDial->setMaximumSize(DialSizeW, DialSizeH);
     mDial->setMinimumSize(DialSizeW,DialSizeH);
-    mDial->setMinimum(1);
+    mDial->setMinimum(0);
     mDial->setMaximum(3000);
     mDial->setSingleStep(10);
     mDial->setPageStep(100);
@@ -54,7 +57,7 @@ void DialWidget::setupDial() {
 
 void DialWidget::setupSpinBox() {
     mSpinBox->setFrame(false);
-    mSpinBox->setMinimum(mPrecision);
+    mSpinBox->setMinimum(0.0);
     mSpinBox->setMaximum(30.0);
     mSpinBox->setSingleStep(mPrecision);
 }
@@ -77,6 +80,9 @@ void DialWidget::ValueChanged() {
 }
 
 int DialWidget::toInteger(double value) const {
+    if (mPrecision == 0)
+        return 0;
+
     return int(1.0/mPrecision * value);
 }
 
@@ -104,11 +110,12 @@ double DialWidget::value() const {
 }
 
 void DialWidget::setValue(double value) {
+
     mExternalValue = value;
     if (mDial->underMouse() || mSpinBox->underMouse() || mTimer.isActive()) {
         return;
     }
-
+    qDebug() << value;
     mSpinBox->setValue(value);
 }
 
@@ -118,6 +125,7 @@ void DialWidget::setLimits(double min, double max, double precision) {
 
     setPrecision(precision);
     mSpinBox->setMinimum(min);
+    qDebug() << max;
     mSpinBox->setMaximum(max);
     mDial->setMinimum(toInteger(min));
     mDial->setMaximum(toInteger(max));

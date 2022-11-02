@@ -25,6 +25,7 @@
 #include "DisplayWidget.h"
 #include "PresetWidget.h"
 #include "ProtectionControlWidget.h"
+#include "ChannelsTrackingWidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -43,7 +44,7 @@ signals:
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
     void onSerialPortDoClose();
 
-    void onSetChannelTracking(Global::ChannelTracking tracking);
+    void onSetChannelsTracking(Global::ChannelsTracking tracking);
     void onSetEnableOutputProtection(Global::OutputProtection protection);
     void onSetOverVoltageProtectionValue(Global::Channel channel, double value);
     void onSetOverCurrentProtectionValue(Global::Channel channel, double value);
@@ -65,7 +66,7 @@ public slots:
 
     void UpdateCommunicationMetrics(const CommunicationMetrics &info);
 
-    void UpdateChannelTrackingMode(Global::ChannelTracking tracking);
+    void UpdateChannelTrackingMode(Global::ChannelsTracking tracking);
     void UpdateOutputProtectionMode(Global::OutputProtection protection);
     void UpdateChannelMode(Global::Channel channel, Global::OutputMode mode);
     void UpdateActivePreset(Global::MemoryKey key);
@@ -82,8 +83,6 @@ public slots:
 private slots:
     // Serial port
     void SerialPortChanged(bool toggled);
-
-    void ChannelTrackingChanged();
     void SetEnableReadonlyMode(bool enable);
 
     void slotCreateSerialPortMenuItems(); // TODO ????
@@ -113,6 +112,7 @@ private:
     DisplayWidget *mDisplayCh2;
 
     PresetWidget  *mPreset;
+    ChannelsTrackingWidget *mChannelsTracking;
 
     bool mIsSerialConnected = false;
     Global::DeviceInfo  mDeviceInfo;
@@ -122,7 +122,7 @@ private:
     void enableControls(bool enable);
     void setControlLimits(const Global::DeviceInfo &info);
     void enableChannel(Global::Channel ch, bool enable);
-    void openSvg(const QString &resource);
+
     void createBaudRatesMenu();
     QString chosenSerialPort() const;
     int chosenBaudRates(int defaultValue = 9600) const;

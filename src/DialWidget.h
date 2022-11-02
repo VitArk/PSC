@@ -54,7 +54,7 @@ private:
     QDial*           mDial;
     QDoubleSpinBox*  mSpinBox;
 
-    double           mPrecision;
+    double           mPrecision = 0.01;
     QBasicTimer      mTimer;
 
     double           mExternalValue = 0.0;

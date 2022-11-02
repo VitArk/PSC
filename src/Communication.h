@@ -75,7 +75,7 @@ public slots:
     void SetPreset(Global::MemoryKey key);
     void GetPreset();
     void SavePreset(Global::MemoryKey key);
-    void SetChannelTracking(Global::ChannelTracking mode);
+    void SetChannelTracking(Global::ChannelsTracking mode);
     void SetEnableOverCurrentProtection(bool enable);
     void SetEnableOverVoltageProtection(bool enable);
     void SetOverCurrentProtectionValue(Global::Channel channel, double current);

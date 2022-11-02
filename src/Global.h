@@ -32,7 +32,7 @@ namespace Global {
         M5 = 5,
     };
 
-    enum ChannelTracking {
+    enum ChannelsTracking {
         Independent = 0,
         Serial = 1,
         Parallel = 2,
@@ -53,7 +53,7 @@ namespace Global {
     struct DeviceStatus {
         OutputMode         ModeCh1;
         OutputMode         ModeCh2;
-        ChannelTracking    Tracking;
+        ChannelsTracking    Tracking;
         OutputProtection   Protection;
         bool               OutputSwitch;
     };

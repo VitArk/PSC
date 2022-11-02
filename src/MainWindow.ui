@@ -106,7 +106,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBoxOutputMode">
+        <widget class="QGroupBox" name="groupBoxChannelsTracking">
          <property name="title">
           <string>Output Connection method</string>
          </property>
@@ -232,8 +232,8 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>220</width>
-        <height>390</height>
+        <width>255</width>
+        <height>464</height>
        </size>
       </property>
       <property name="styleSheet">
@@ -278,8 +278,8 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>220</width>
-        <height>390</height>
+        <width>255</width>
+        <height>464</height>
        </size>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">

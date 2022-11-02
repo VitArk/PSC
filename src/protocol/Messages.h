@@ -364,7 +364,7 @@ namespace Protocol {
      */
     class MessageSetChannelTracking : public IMessage {
     public:
-        explicit MessageSetChannelTracking(Global::ChannelTracking mode) {
+        explicit MessageSetChannelTracking(Global::ChannelsTracking mode) {
             mMode = mode;
         }
 
@@ -372,7 +372,7 @@ namespace Protocol {
             return QString("TRACK%1").arg(mMode).toLatin1();
         }
     private:
-        Global::ChannelTracking mMode;
+        Global::ChannelsTracking mMode;
     };
 
     /**

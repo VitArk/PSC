@@ -63,7 +63,7 @@ void Application::Run() {
     connect(mMainWindow, &MainWindow::onSavePreset, mCommunication, &Communication::SavePreset);
 
     connect(mMainWindow, &MainWindow::onSetEnableOutputSwitch, mCommunication, &Communication::SetEnableOutputSwitch);
-    connect(mMainWindow, &MainWindow::onSetChannelTracking, mCommunication,
+    connect(mMainWindow, &MainWindow::onSetChannelsTracking, mCommunication,
             &Communication::SetChannelTracking);
     connect(mMainWindow, &MainWindow::onSetEnableOutputProtection, this, &Application::OutputProtectionChanged);
     connect(mCommunication, &Communication::onGetOverCurrentProtectionValue, mMainWindow,
@@ -87,7 +87,7 @@ void Application::Run() {
     connect(mMainWindow, &MainWindow::onSetCurrent, mCommunication, &Communication::SetCurrent);
 
     mMainWindow->show();
-    mMainWindow->autoOpenSerialPort();
+    //mMainWindow->autoOpenSerialPort();
 }
 
 void Application::DeviceReady(const Global::DeviceInfo &info) {

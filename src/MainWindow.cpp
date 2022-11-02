@@ -42,9 +42,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->groupBoxCh1->setMinimumSize(QSize(0,0));
     ui->groupBoxCh2->setMinimumSize(QSize(0,0));
 
-    ui->graphicsView->setScene(new QGraphicsScene(this));
-    ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    ui->graphicsView->setStyleSheet("background-color: transparent;");
+    qDebug() << ui->groupBoxCh1->size();
+    qDebug() << ui->groupBoxCh2->size();
+//    ui->graphicsView->setScene(new QGraphicsScene(this));
+//    ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+//    ui->graphicsView->setStyleSheet("background-color: transparent;");
 
     mStatusBarDeviceInfo = new ClickableLabel(this);
     connect(mStatusBarDeviceInfo, &ClickableLabel::onDoubleClick, this, &MainWindow::ShowDeviceNameOrID);
@@ -94,15 +96,26 @@ MainWindow::MainWindow(QWidget *parent) :
     mPreset = new PresetWidget(this);
     ui->groupBoxPreset->addWidget(mPreset);
 
+    ui->horizontalLayout_2->deleteLater();
+    ui->graphicsView->deleteLater();
+    ui->lblOutputModeHint->deleteLater();
+    ui->rdoBtnOutIndependent->deleteLater();
+    ui->rdoBtnOutSerial->deleteLater();
+    ui->rdoBtnOutParallel->deleteLater();
+
+    mChannelsTracking = new ChannelsTrackingWidget(this);
+    ui->groupBoxChannelsTracking->layout()->addWidget(mChannelsTracking);
+
     connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::SetEnableReadonlyMode);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::onSerialPortDoClose);
     connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onSetLocked);
     connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onSetEnabledBeep);
     connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
 
-    connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::ChannelTrackingChanged);
-    connect(ui->rdoBtnOutParallel, &QRadioButton::clicked, this, &MainWindow::ChannelTrackingChanged);
-    connect(ui->rdoBtnOutSerial, &QRadioButton::clicked, this, &MainWindow::ChannelTrackingChanged);
+//    connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::ChannelsTrackingChanged);
+//    connect(ui->rdoBtnOutParallel, &QRadioButton::clicked, this, &MainWindow::ChannelsTrackingChanged);
+//    connect(ui->rdoBtnOutSerial, &QRadioButton::clicked, this, &MainWindow::ChannelsTrackingChanged);
+    connect(mChannelsTracking, &ChannelsTrackingWidget::onSetChannelsTracking, this, &MainWindow::onSetChannelsTracking);
 
     connect(mPreset, &PresetWidget::onPresetClicked,  this, &MainWindow::onSetPreset);
     connect(mPreset, &PresetWidget::onSaveClicked,  this, &MainWindow::onSavePreset);
@@ -152,6 +165,8 @@ void MainWindow::ConnectionDeviceReady(const Global::DeviceInfo &info) {
     ShowDeviceNameOrID();
     setControlLimits(info);
     enableControls(true);
+    qDebug() << ui->groupBoxCh1->size();
+    qDebug() << ui->groupBoxCh2->size();
 }
 
 void MainWindow::ConnectionUnknownDevice(QString deviceID) {
@@ -225,48 +240,26 @@ void MainWindow::SetEnableBeep(bool enable) {
     ui->actionBuzzer->setChecked(enable);
 }
 
-void MainWindow::ChannelTrackingChanged() {
-    auto channelTracking = Global::Independent;
-    if (ui->rdoBtnOutParallel->isChecked()) {
-        channelTracking = Global::Parallel;
-    } else if (ui->rdoBtnOutSerial->isChecked()) {
-        channelTracking = Global::Serial;
+void MainWindow::UpdateChannelTrackingMode(Global::ChannelsTracking tracking) {
+    if (mChannelsTracking->channelsTracking() == tracking) {
+        return;
     }
 
-    emit onSetChannelTracking(channelTracking);
-}
-
-void MainWindow::UpdateChannelTrackingMode(Global::ChannelTracking tracking) {
-    QString resourceName;
-    QString labelText;
+    mChannelsTracking->SetChannelsTracking(tracking);
     switch (tracking) {
         case Global::Independent:
-            ui->rdoBtnOutIndependent->setChecked(true);
             enableChannel(Global::Channel1, true);
             enableChannel(Global::Channel2, true);
-
-            resourceName = ":independent-mode";
-            labelText = tr("Two independent channels U: 0-30V, I: 0-5A");
             break;
         case Global::Serial:
-            ui->rdoBtnOutSerial->setChecked(true);
             enableChannel(Global::Channel1, false);
             enableChannel(Global::Channel2, true);
-
-            resourceName = ":serial-mode";
-            labelText = tr("One channel U: 0-60V, I: 0-5A");
             break;
         case Global::Parallel:
-            ui->rdoBtnOutParallel->setChecked(true);
             enableChannel(Global::Channel1, false);
             enableChannel(Global::Channel2, true);
-
-            resourceName = ":parallel-mode";
-            labelText = tr("One channel U: 0-30V, I: 0-10A");
             break;
     }
-    ui->lblOutputModeHint->setText(labelText);
-    openSvg(QFile(resourceName).fileName());
 }
 
 void MainWindow::UpdateOutputProtectionMode(Global::OutputProtection protection) {
@@ -477,22 +470,6 @@ void MainWindow::createBaudRatesMenu() {
 
         connect(action, &QAction::toggled, this, &MainWindow::SerialPortChanged);
     }
-}
-
-void MainWindow::openSvg(const QString &resource) {
-    QGraphicsScene *s = ui->graphicsView->scene();
-    QScopedPointer<QGraphicsSvgItem> svgItem(new QGraphicsSvgItem(resource));
-    if (!svgItem->renderer()->isValid())
-        return;
-
-    s->clear();
-    ui->graphicsView->resetTransform();
-
-    auto item = svgItem.take();
-    item->setFlags(QGraphicsItem::ItemClipsToShape);
-    item->setCacheMode(QGraphicsItem::NoCache);
-    item->setZValue(0);
-    s->addItem(item);
 }
 
 void MainWindow::ShowAboutBox() {

@@ -45,7 +45,7 @@ add_executable(${PROJECT_NAME}
         src/PresetWidget.cpp
         src/PresetWidget.h
         src/ProtectionControlWidget.cpp
-        src/ProtectionControlWidget.h )
+        src/ProtectionControlWidget.h src/ChannelsTrackingWidget.cpp src/ChannelsTrackingWidget.h)
 
 #if (NOT CMAKE_PREFIX_PATH)
 #    message(WARNING "CMAKE_PREFIX_PATH is not defined, you may need to set it "
