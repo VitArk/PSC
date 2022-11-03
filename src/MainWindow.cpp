@@ -422,7 +422,12 @@ void MainWindow::ShowAboutBox() {
     QMessageBox aboutBox(
             QMessageBox::NoIcon,
             tr("About PS Management"),
-            trUtf8("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p><p>GUI application for remote control of Programmable Power Supply.</p><p>Supported protocol: <ul><li>UNI-T UTP3303C</li><li>UNI-T UTP3305C</li></ul></p><p>This is a free software distributed under GPLv3 license.</p><p>Visit official <a href=\"https://github.com/vitark/PS-Management\">GitHub</a> page for more details.</p> <p>Ⓒ 2021-2022 VitArk</p>").arg(Application::applicationVersion()),
+            trUtf8("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p>"
+                   "<p>GUI application for remote control of Programmable Power Supply.</p>"
+                   "<p>Supported devices:<ul><li>UNI-T UTP3303C</li><li>UNI-T UTP3305C</li></ul></p>"
+                   "<p>This is a free software distributed under GPLv3 license.</p>"
+                   "<p>Visit official <a href=\"https://github.com/vitark/PS-Management\">GitHub</a> page for more details.</p>"
+                   "<p>Ⓒ 2021-2022 VitArk</p>").arg(Application::applicationVersion()),
             QMessageBox::Ok
     );
     aboutBox.setIconPixmap(icon);

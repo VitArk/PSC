@@ -93,7 +93,7 @@ namespace Protocol {
         }
 
         QByteArray query() const override {
-            return QString("ISET%1:%2").arg(mChannel).arg(mCurrent).toLatin1();
+            return QString("ISET%1:%2").arg(mChannel).arg(QString::asprintf("%05.03f", mCurrent)).toLatin1();
         }
 
     private:
@@ -135,7 +135,7 @@ namespace Protocol {
         }
 
         QByteArray query() const override {
-            return QString("VSET%1:%2").arg(mChannel).arg(mVoltage).toLatin1();
+            return QString("VSET%1:%2").arg(mChannel).arg(QString::asprintf("%05.02f", mVoltage)).toLatin1();
         }
 
     private:
@@ -427,7 +427,7 @@ namespace Protocol {
         }
 
         QByteArray query() const override {
-            return QString("OCPSET%1:%2").arg(mChannel).arg(mValue).toLatin1();
+            return QString("OCPSET%1:%2").arg(mChannel).arg(QString::asprintf("%05.03f", mValue)).toLatin1();
         }
 
     private:
@@ -471,7 +471,7 @@ namespace Protocol {
         }
 
         QByteArray query() const override {
-            return QString("OVPSET%1:%2").arg(mChannel).arg(mVoltage).toLatin1();
+            return QString("OVPSET%1:%2").arg(mChannel).arg(QString::asprintf("%05.02f", mVoltage)).toLatin1();
         }
 
     private:
