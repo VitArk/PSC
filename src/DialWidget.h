@@ -18,6 +18,7 @@
 #ifndef PS_MANAGEMENT_DIALWIDGET_H
 #define PS_MANAGEMENT_DIALWIDGET_H
 
+#include <QWidget>
 #include <QGroupBox>
 #include <QDial>
 #include <QDoubleSpinBox>
@@ -41,8 +42,9 @@ protected:
     void timerEvent(QTimerEvent *event) override;
 
 private:
-    void setupDial();
-    void setupSpinBox();
+    void setupUI();
+    QDial* createDial();
+    QDoubleSpinBox* createSpinBox();
 
     inline int toInteger(double value) const;
     inline double toDouble(int value) const;

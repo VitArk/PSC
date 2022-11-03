@@ -19,47 +19,50 @@
 #include <QLayout>
 #include <QDebug>
 
-const int DialSizeW = 60;
-const int DialSizeH = 60;
-
 const int DebounceTime = 1000;
 
 DialWidget::DialWidget(const QString &title, QWidget *parent) : QGroupBox(title, parent) {
-    setLayout(new QVBoxLayout(this));
-
-    mDial = new QDial(this);
-    layout()->addWidget(mDial);
-
-    mSpinBox = new QDoubleSpinBox(this);
-    mSpinBox->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    mSpinBox->setValue(0.0);
-
-    layout()->addWidget(mSpinBox);
-
-    setupDial();
-    setupSpinBox();
-    setPrecision(0.01);
-
-    connect(mDial, &QDial::valueChanged, this, &DialWidget::ValueChanged);
-    connect(mSpinBox, SIGNAL(valueChanged(double)), this, SLOT(ValueChanged()));
+    setupUI();
 }
 
-void DialWidget::setupDial() {
-    mDial->setMaximumSize(DialSizeW, DialSizeH);
-    mDial->setMinimumSize(DialSizeW,DialSizeH);
-    mDial->setMinimum(0);
-    mDial->setMaximum(3000);
-    mDial->setSingleStep(10);
-    mDial->setPageStep(100);
-    mDial->setWrapping(false);
-    mDial->setNotchesVisible(true);
+void DialWidget::setupUI() {
+    setFixedWidth(100);
+    auto vLayout = new QVBoxLayout(this);
+    setLayout(vLayout);
+
+    mDial = createDial();
+    vLayout->addWidget(mDial, 0, Qt::AlignHCenter);
+
+    mSpinBox = createSpinBox();
+    vLayout->addWidget(mSpinBox);
 }
 
-void DialWidget::setupSpinBox() {
-    mSpinBox->setFrame(false);
-    mSpinBox->setMinimum(0.0);
-    mSpinBox->setMaximum(30.0);
-    mSpinBox->setSingleStep(mPrecision);
+
+QDial* DialWidget::createDial() {
+    auto dial = new QDial(this);
+    dial->setMaximumSize(QSize(60, 60));
+    dial->setMinimumSize(QSize(60, 60));
+    dial->setMinimum(0);
+    dial->setMaximum(3000);
+    dial->setSingleStep(10);
+    dial->setPageStep(100);
+    dial->setWrapping(false);
+    dial->setNotchesVisible(true);
+    connect(dial, &QDial::valueChanged, this, &DialWidget::ValueChanged);
+
+    return dial;
+}
+
+QDoubleSpinBox* DialWidget::createSpinBox() {
+    auto spinBox = new QDoubleSpinBox(this);
+    spinBox->setFrame(false);
+    spinBox->setMinimum(0.0);
+    spinBox->setMaximum(30.0);
+    spinBox->setSingleStep(0.01);
+    spinBox->setValue(0.0);
+    connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(ValueChanged()));
+
+    return spinBox;
 }
 
 void DialWidget::ValueChanged() {
@@ -110,12 +113,10 @@ double DialWidget::value() const {
 }
 
 void DialWidget::setValue(double value) {
-
     mExternalValue = value;
     if (mDial->underMouse() || mSpinBox->underMouse() || mTimer.isActive()) {
         return;
     }
-    qDebug() << value;
     mSpinBox->setValue(value);
 }
 
@@ -125,7 +126,6 @@ void DialWidget::setLimits(double min, double max, double precision) {
 
     setPrecision(precision);
     mSpinBox->setMinimum(min);
-    qDebug() << max;
     mSpinBox->setMaximum(max);
     mDial->setMinimum(toInteger(min));
     mDial->setMaximum(toInteger(max));
@@ -133,6 +133,7 @@ void DialWidget::setLimits(double min, double max, double precision) {
     mSpinBox->blockSignals(false);
     mDial->blockSignals(false);
 }
+
 
 
 

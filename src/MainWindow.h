@@ -26,6 +26,7 @@
 #include "PresetWidget.h"
 #include "ProtectionControlWidget.h"
 #include "ChannelsTrackingWidget.h"
+#include "OutputSwitch.h"
 
 namespace Ui {
 class MainWindow;
@@ -113,6 +114,7 @@ private:
 
     PresetWidget  *mPreset;
     ChannelsTrackingWidget *mChannelsTracking;
+    OutputSwitch *mOutputSwitch;
 
     bool mIsSerialConnected = false;
     Global::DeviceInfo  mDeviceInfo;

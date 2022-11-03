@@ -87,7 +87,7 @@ void Application::Run() {
     connect(mMainWindow, &MainWindow::onSetCurrent, mCommunication, &Communication::SetCurrent);
 
     mMainWindow->show();
-    //mMainWindow->autoOpenSerialPort();
+    mMainWindow->autoOpenSerialPort();
 }
 
 void Application::DeviceReady(const Global::DeviceInfo &info) {

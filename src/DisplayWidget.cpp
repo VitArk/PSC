@@ -68,8 +68,8 @@ QLabel *DisplayWidget::createLabel(const QString &text, int fontSize) {
 
 QLCDNumber *DisplayWidget::createLCD() {
     auto lcd = new QLCDNumber(this);
-    lcd->setMinimumSize(QSize(175, 75));
-    lcd->setMaximumSize(QSize(175, 75));
+    lcd->setMinimumSize(QSize(184, 75));
+    lcd->setMaximumSize(QSize(184, 75));
     lcd->setFrameShape(QFrame::StyledPanel);
     lcd->setLineWidth(1);
     lcd->setSmallDecimalPoint(true);

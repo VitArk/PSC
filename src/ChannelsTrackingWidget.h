@@ -29,7 +29,7 @@ class ChannelsTrackingWidget : public QWidget {
 Q_OBJECT
 public:
     explicit ChannelsTrackingWidget(QWidget *parent);
-    Global::ChannelsTracking channelsTracking();
+    inline Global::ChannelsTracking channelsTracking() { return mTracking; }
 
 signals:
     void onSetChannelsTracking(Global::ChannelsTracking tracking);
@@ -41,18 +41,21 @@ private:
     void setupUI();
     QRadioButton *createRadioButton(const QString &text);
     QGraphicsView *createGraphicsView();
+
+    void showChannelsTrackingMode(Global::ChannelsTracking tracking);
+
     void loadSvg(const QString &resource);
 
 private slots:
     void ChannelsTrackingChanged();
 
 private:
-    QRadioButton *mButtonIndependent;
-    QRadioButton *mButtonSerial;
-    QRadioButton *mButtonParallel;
-
-    QGraphicsView *mGraphicsView;
-    QLabel        *mLabelHint;
+    QRadioButton*            mButtonIndependent;
+    QRadioButton*            mButtonSerial;
+    QRadioButton*            mButtonParallel;
+    QGraphicsView*           mGraphicsView;
+    QLabel*                  mLabelHint;
+    Global::ChannelsTracking mTracking = Global::Independent;
 };
 
 

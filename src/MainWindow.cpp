@@ -22,6 +22,7 @@
 #include <QGraphicsSvgItem>
 #include <QSerialPortInfo>
 
+
 #include "Application.h"
 
 const double V0= 00.00;
@@ -41,12 +42,6 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle(tr("Power Supply Management v%1").arg(Application::applicationVersion()));
     ui->groupBoxCh1->setMinimumSize(QSize(0,0));
     ui->groupBoxCh2->setMinimumSize(QSize(0,0));
-
-    qDebug() << ui->groupBoxCh1->size();
-    qDebug() << ui->groupBoxCh2->size();
-//    ui->graphicsView->setScene(new QGraphicsScene(this));
-//    ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-//    ui->graphicsView->setStyleSheet("background-color: transparent;");
 
     mStatusBarDeviceInfo = new ClickableLabel(this);
     connect(mStatusBarDeviceInfo, &ClickableLabel::onDoubleClick, this, &MainWindow::ShowDeviceNameOrID);
@@ -96,15 +91,16 @@ MainWindow::MainWindow(QWidget *parent) :
     mPreset = new PresetWidget(this);
     ui->groupBoxPreset->addWidget(mPreset);
 
-    ui->horizontalLayout_2->deleteLater();
-    ui->graphicsView->deleteLater();
-    ui->lblOutputModeHint->deleteLater();
-    ui->rdoBtnOutIndependent->deleteLater();
-    ui->rdoBtnOutSerial->deleteLater();
-    ui->rdoBtnOutParallel->deleteLater();
-
     mChannelsTracking = new ChannelsTrackingWidget(this);
     ui->groupBoxChannelsTracking->layout()->addWidget(mChannelsTracking);
+
+
+    ui->btnOutput->deleteLater();
+    //ui->verticalLayout->deleteLater();
+
+    mOutputSwitch = new OutputSwitch(this);
+    ui->verticalLayout->addWidget(mOutputSwitch);
+    //ui->groupBoxOperation->layout()->addWidget(mOutputSwitch);
 
     connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::SetEnableReadonlyMode);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::onSerialPortDoClose);
@@ -112,15 +108,25 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onSetEnabledBeep);
     connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
 
-//    connect(ui->rdoBtnOutIndependent, &QRadioButton::clicked, this, &MainWindow::ChannelsTrackingChanged);
-//    connect(ui->rdoBtnOutParallel, &QRadioButton::clicked, this, &MainWindow::ChannelsTrackingChanged);
-//    connect(ui->rdoBtnOutSerial, &QRadioButton::clicked, this, &MainWindow::ChannelsTrackingChanged);
     connect(mChannelsTracking, &ChannelsTrackingWidget::onSetChannelsTracking, this, &MainWindow::onSetChannelsTracking);
 
     connect(mPreset, &PresetWidget::onPresetClicked,  this, &MainWindow::onSetPreset);
     connect(mPreset, &PresetWidget::onSaveClicked,  this, &MainWindow::onSavePreset);
 
-    connect(ui->btnOutput, &QPushButton::clicked, this,&MainWindow::onSetEnableOutputSwitch);
+    connect(mOutputSwitch, &QPushButton::clicked, this,&MainWindow::onSetEnableOutputSwitch);
+//    qDebug() << ui->btnOutput->palette().background().color();
+//    ui->btnOutput->setStyleSheet("background-color: rgb(240,240,240); border:none;");
+//
+//    connect(ui->btnOutput, &QPushButton::clicked, [this](){
+//        if (ui->btnOutput->isChecked()) {
+//            ui->btnOutput->setStyleSheet("background-color: rgb(0, 210, 0);border:none;");
+//            qDebug() << ui->btnOutput->palette().background().color();
+//        } else {
+//            ui->btnOutput->setStyleSheet("background-color: rgb(240,240,240);border:none;");
+//            qDebug() << ui->btnOutput->palette().background().color();
+//        }
+//
+//    });
 
     connect(mInputCh1V, &DialWidget::onSetValue, [this] (double value){ emit onSetVoltage(Global::Channel1, value);});
     connect(mInputCh1A, &DialWidget::onSetValue, [this] (double value){ emit onSetCurrent(Global::Channel1, value);});
@@ -165,8 +171,6 @@ void MainWindow::ConnectionDeviceReady(const Global::DeviceInfo &info) {
     ShowDeviceNameOrID();
     setControlLimits(info);
     enableControls(true);
-    qDebug() << ui->groupBoxCh1->size();
-    qDebug() << ui->groupBoxCh2->size();
 }
 
 void MainWindow::ConnectionUnknownDevice(QString deviceID) {
@@ -252,9 +256,6 @@ void MainWindow::UpdateChannelTrackingMode(Global::ChannelsTracking tracking) {
             enableChannel(Global::Channel2, true);
             break;
         case Global::Serial:
-            enableChannel(Global::Channel1, false);
-            enableChannel(Global::Channel2, true);
-            break;
         case Global::Parallel:
             enableChannel(Global::Channel1, false);
             enableChannel(Global::Channel2, true);
@@ -276,15 +277,7 @@ void MainWindow::UpdateChannelMode(Global::Channel channel, Global::OutputMode m
 }
 
 void MainWindow::SetEnableOutputSwitch(bool enable) {
-    if (enable) {
-        ui->btnOutput->setChecked(true);
-        ui->btnOutput->setStyleSheet(STYLE_BG_GREEN);
-        ui->btnOutput->setText(tr("OUTPUT ON"));
-    } else {
-        ui->btnOutput->setChecked(false);
-        ui->btnOutput->setStyleSheet(STYLE_BG_NONE);
-        ui->btnOutput->setText(tr("OUTPUT OFF"));
-    }
+    mOutputSwitch->SetSwitchOn(enable);
 }
 
 void MainWindow::enableChannel(Global::Channel ch, bool enable) {

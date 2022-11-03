@@ -28,7 +28,7 @@
 ChannelsTrackingWidget::ChannelsTrackingWidget(QWidget *parent)
 : QWidget(parent) {
     setupUI();
-    mButtonIndependent->click();
+    showChannelsTrackingMode(mTracking);
 }
 
 void ChannelsTrackingWidget::setupUI() {
@@ -50,7 +50,8 @@ void ChannelsTrackingWidget::setupUI() {
     mGraphicsView = createGraphicsView();
     vLayout->addWidget(mGraphicsView);
 
-    mLabelHint = new QLabel("Two independent channels U: 0-30V, I: 0-5A",this);
+    mLabelHint = new QLabel("Two independent channels U: 0-30V, I: 0-5A", this);
+    mLabelHint->setAlignment(Qt::AlignCenter);
     vLayout->addWidget(mLabelHint);
 
     setLayout(vLayout);
@@ -84,54 +85,46 @@ QGraphicsView *ChannelsTrackingWidget::createGraphicsView() {
     return graphicsView;
 }
 
-Global::ChannelsTracking ChannelsTrackingWidget::channelsTracking() {
-    if (mButtonSerial->isChecked()) {
-        return Global::Serial;
-    }
-
-    if (mButtonParallel->isChecked()) {
-        return Global::Parallel;
-    }
-
-    return Global::Independent;
-}
-
 void ChannelsTrackingWidget::SetChannelsTracking(Global::ChannelsTracking tracking) {
     if (channelsTracking() == tracking) {
         return;
     }
 
-    switch (tracking) {
-        case Global::Independent:
-            mButtonIndependent->click();
-            break;
-        case Global::Serial:
-            mButtonSerial->click();
-            break;
-        case Global::Parallel:
-            mButtonParallel->click();
-            break;
-    }
+    mTracking = tracking;
+    showChannelsTrackingMode(tracking);
 }
 
 void ChannelsTrackingWidget::ChannelsTrackingChanged() {
-    if (mButtonIndependent->isChecked()) {
-        loadSvg(QFile(":independent-mode").fileName());
-        mLabelHint->setText(tr("Two independent channels U: 0-30V, I: 0-5A"));
-        return emit onSetChannelsTracking(Global::Independent);
+    auto tracking = Global::Independent;
+    if (mButtonParallel->isChecked()) {
+        tracking = Global::Parallel;
+    } else if (mButtonSerial->isChecked()) {
+        tracking = Global::Serial;
     }
 
-    if (mButtonParallel->isChecked()) {
-        loadSvg(QFile(":parallel-mode").fileName());
-        mLabelHint->setText(tr("One channel U: 0-30V, I: 0-10A"));
-        return emit onSetChannelsTracking(Global::Parallel);
-    }
-    if (mButtonSerial->isChecked()) {
-        loadSvg(QFile(":serial-mode").fileName());
-        mLabelHint->setText(tr("One channel U: 0-60V, I: 0-5A"));
-        return emit onSetChannelsTracking(Global::Serial);
+    emit onSetChannelsTracking(tracking);
+}
+
+void ChannelsTrackingWidget::showChannelsTrackingMode(Global::ChannelsTracking tracking) {
+    switch (tracking) {
+        case Global::Independent:
+            mButtonIndependent->setChecked(true);
+            loadSvg(QFile(":independent-mode").fileName());
+            mLabelHint->setText(tr("Two independent channels U: 0-30V, I: 0-5A"));
+            break;
+        case Global::Serial:
+            mButtonSerial->setChecked(true);
+            loadSvg(QFile(":serial-mode").fileName());
+            mLabelHint->setText(tr("One channel U: 0-60V, I: 0-5A"));
+            break;
+        case Global::Parallel:
+            mButtonParallel->setChecked(true);
+            loadSvg(QFile(":parallel-mode").fileName());
+            mLabelHint->setText(tr("One channel U: 0-30V, I: 0-10A"));
+            break;
     }
 }
+
 
 void ChannelsTrackingWidget::loadSvg(const QString &resource) {
     QGraphicsScene *s = mGraphicsView->scene();
