@@ -15,133 +15,20 @@
 #include "ui_mainwindow.h"
 
 #include <QDebug>
-#include <QFile>
 #include <QMessageBox>
-#include <QSvgRenderer>
-#include <QTextCharFormat>
-#include <QGraphicsSvgItem>
 #include <QSerialPortInfo>
-
 
 #include "Application.h"
 
 const double V0= 00.00;
 const double A0 = 0.000;
 
-const char* const STYLE_BG_RED = "background-color: rgb(210, 0, 0)";
-const char* const STYLE_BG_GREEN = "background-color: rgb(0, 210, 0)";
-const char* const STYLE_BG_NONE = "";
-
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow) {
 
     ui->setupUi(this);
-    setAttribute(Qt::WA_DeleteOnClose);
-    setFixedSize(maximumSize());
-    setWindowTitle(tr("Power Supply Management v%1").arg(Application::applicationVersion()));
-    ui->groupBoxCh1->setMinimumSize(QSize(0,0));
-    ui->groupBoxCh2->setMinimumSize(QSize(0,0));
-
-    mStatusBarDeviceInfo = new ClickableLabel(this);
-    connect(mStatusBarDeviceInfo, &ClickableLabel::onDoubleClick, this, &MainWindow::ShowDeviceNameOrID);
-    QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceInfo, 100);
-    mStatusBarDeviceLock = new QLabel(this);
-    QMainWindow::statusBar()->addPermanentWidget(mStatusBarDeviceLock, 120);
-    mStatusCommunicationMetrics = new QLabel(this);
-    QMainWindow::statusBar()->addPermanentWidget(mStatusCommunicationMetrics, 80);
-    mStatusBarConnectionStatus = new QLabel(this);
-    QMainWindow::statusBar()->addPermanentWidget(mStatusBarConnectionStatus);
-
-    mDisplayCh1 = new DisplayWidget(this);
-    ui->layoutDisplayCh1->addWidget(mDisplayCh1);
-
-    mDisplayCh2 = new DisplayWidget(this);
-    ui->layoutDisplayCh2->addWidget(mDisplayCh2);
-
-    mInputCh1V = new DialWidget(tr("Voltage (V)"), this);
-    mInputCh1V->setPrecision(0.01);
-    mInputCh1V->setSuffix(tr("V"));
-    ui->layoutControlCh1->addWidget(mInputCh1V);
-
-    mInputCh1A = new DialWidget(tr("Current (A)"), this);
-    mInputCh1A->setPrecision(0.001);
-    mInputCh1A->setSuffix(tr("A"));
-    ui->layoutControlCh1->addWidget(mInputCh1A);
-
-    mInputCh2V = new DialWidget(tr("Voltage (V)"), this);
-    mInputCh2V->setPrecision(0.01);
-    mInputCh2V->setSuffix(tr("V"));
-    ui->layoutControlCh2->addWidget(mInputCh2V);
-
-    mInputCh2A = new DialWidget(tr("Current (A)"), this);
-    mInputCh2A->setPrecision(0.001);
-    mInputCh2A->setSuffix(tr("A"));
-    ui->layoutControlCh2->addWidget(mInputCh2A);
-
-    mProtectionSetCh1 = new ProtectionWidget(this);
-    ui->layoutProtectionCh1->addWidget(mProtectionSetCh1);
-
-    mProtectionSetCh2 = new ProtectionWidget(this);
-    ui->layoutProtectionCh2->addWidget(mProtectionSetCh2);
-
-    mProtectionControl = new ProtectionControlWidget(this);
-    ui->groupBoxOutProtection->layout()->addWidget(mProtectionControl);
-
-    mPreset = new PresetWidget(this);
-    ui->groupBoxPreset->addWidget(mPreset);
-
-    mChannelsTracking = new ChannelsTrackingWidget(this);
-    ui->groupBoxChannelsTracking->layout()->addWidget(mChannelsTracking);
-
-
-    ui->btnOutput->deleteLater();
-    //ui->verticalLayout->deleteLater();
-
-    mOutputSwitch = new OutputSwitch(this);
-    ui->verticalLayout->addWidget(mOutputSwitch);
-    //ui->groupBoxOperation->layout()->addWidget(mOutputSwitch);
-
-    connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::SetEnableReadonlyMode);
-    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::onSerialPortDoClose);
-    connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onSetLocked);
-    connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onSetEnabledBeep);
-    connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
-
-    connect(mChannelsTracking, &ChannelsTrackingWidget::onSetChannelsTracking, this, &MainWindow::onSetChannelsTracking);
-
-    connect(mPreset, &PresetWidget::onPresetClicked,  this, &MainWindow::onSetPreset);
-    connect(mPreset, &PresetWidget::onSaveClicked,  this, &MainWindow::onSavePreset);
-
-    connect(mOutputSwitch, &QPushButton::clicked, this,&MainWindow::onSetEnableOutputSwitch);
-//    qDebug() << ui->btnOutput->palette().background().color();
-//    ui->btnOutput->setStyleSheet("background-color: rgb(240,240,240); border:none;");
-//
-//    connect(ui->btnOutput, &QPushButton::clicked, [this](){
-//        if (ui->btnOutput->isChecked()) {
-//            ui->btnOutput->setStyleSheet("background-color: rgb(0, 210, 0);border:none;");
-//            qDebug() << ui->btnOutput->palette().background().color();
-//        } else {
-//            ui->btnOutput->setStyleSheet("background-color: rgb(240,240,240);border:none;");
-//            qDebug() << ui->btnOutput->palette().background().color();
-//        }
-//
-//    });
-
-    connect(mInputCh1V, &DialWidget::onSetValue, [this] (double value){ emit onSetVoltage(Global::Channel1, value);});
-    connect(mInputCh1A, &DialWidget::onSetValue, [this] (double value){ emit onSetCurrent(Global::Channel1, value);});
-    connect(mInputCh2V, &DialWidget::onSetValue, [this] (double value){ emit onSetVoltage(Global::Channel2, value);});
-    connect(mInputCh2A, &DialWidget::onSetValue, [this] (double value){ emit onSetCurrent(Global::Channel2, value);});
-
-    connect(mProtectionSetCh1, &ProtectionWidget::onSetOVP, [this] (double value) { emit onSetOverVoltageProtectionValue(Global::Channel1, value); });
-    connect(mProtectionSetCh2, &ProtectionWidget::onSetOVP, [this] (double value) { emit onSetOverVoltageProtectionValue(Global::Channel2, value); });
-    connect(mProtectionSetCh1, &ProtectionWidget::onSetOCP, [this] (double value) { emit onSetOverCurrentProtectionValue(Global::Channel1, value); });
-    connect(mProtectionSetCh2, &ProtectionWidget::onSetOCP, [this] (double value) { emit onSetOverCurrentProtectionValue(Global::Channel2, value); });
-
-    connect(mProtectionControl, &ProtectionControlWidget::onProtectionChanged, this, &MainWindow::onSetEnableOutputProtection);
-
-    connect(ui->menuPort, &QMenu::aboutToShow, this, &MainWindow::slotCreateSerialPortMenuItems);
-    connect(ui->menuHelp, &QMenu::triggered, this, &MainWindow::ShowAboutBox);
+    setupUI();
 
     createBaudRatesMenu();
     SerialPortClosed();
@@ -149,7 +36,95 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow() {
     SerialPortClosed();
+    blockSignals(true);
     delete ui;
+}
+
+void MainWindow::setupUI() {
+    setAttribute(Qt::WA_DeleteOnClose);
+    setFixedSize(maximumSize());
+    setWindowTitle(tr("Power Supply Management v%1").arg(Application::applicationVersion()));
+    ui->groupBoxCh1->setMinimumSize(QSize(0,0));
+    ui->groupBoxCh2->setMinimumSize(QSize(0,0));
+
+    connect(ui->actionReadonlyMode, &QAction::toggled, this, &MainWindow::SetEnableReadonlyMode);
+    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::onSerialPortDoClose);
+    connect(ui->actionLockDevice, &QAction::toggled, this, &MainWindow::onSetLocked);
+    connect(ui->actionBuzzer, &QAction::toggled, this, &MainWindow::onSetEnabledBeep);
+    connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
+    connect(ui->menuPort, &QMenu::aboutToShow, this, &MainWindow::CreateSerialPortMenuItems);
+    connect(ui->menuHelp, &QMenu::triggered, this, &MainWindow::ShowAboutBox);
+
+    mStatusBar = new StatusBar(this);
+    connect(mStatusBar, &StatusBar::onDeviceInfoDoubleClick, this, &MainWindow::ShowDeviceNameOrID);
+    setStatusBar(mStatusBar);
+
+    auto display = new DisplayWidget(this);
+    ui->layoutDisplayCh1->addWidget(display);
+    mDisplay[Global::Channel1] = display;
+
+    display = new DisplayWidget(this);
+    ui->layoutDisplayCh2->addWidget(display);
+    mDisplay[Global::Channel2] = display;
+
+    auto dial = createDialWidget(tr("Voltage (V)"), tr("V"), 0.01, [=](double value){ emit onSetVoltage(Global::Channel1, value);});
+    ui->layoutControlCh1->addWidget(dial);
+    mInputVoltage[Global::Channel1] = dial;
+
+    dial = createDialWidget(tr("Voltage (V)"), tr("V"), 0.01, [=](double value){ emit onSetVoltage(Global::Channel2, value);});
+    ui->layoutControlCh2->addWidget(dial);
+    mInputVoltage[Global::Channel2] = dial;
+
+    dial = createDialWidget(tr("Current (A)"), tr("A"), 0.001, [=](double value){ emit onSetCurrent(Global::Channel1, value);});
+    ui->layoutControlCh1->addWidget(dial);
+    mInputCurrent[Global::Channel1] = dial;
+
+    dial = createDialWidget(tr("Current (A)"), tr("A"), 0.001, [=](double value){ emit onSetCurrent(Global::Channel2, value);});
+    ui->layoutControlCh2->addWidget(dial);
+    mInputCurrent[Global::Channel2] = dial;
+
+    auto protectionSet = createProtectionWidget(Global::Channel1);
+    ui->layoutProtectionCh1->addWidget(protectionSet);
+    mProtectionSet[Global::Channel1] = protectionSet;
+
+    protectionSet = createProtectionWidget(Global::Channel2);
+    ui->layoutProtectionCh2->addWidget(protectionSet);
+    mProtectionSet[Global::Channel2] = protectionSet;
+
+    mProtectionControl = new ProtectionControlWidget(this);
+    ui->groupBoxOutProtection->layout()->addWidget(mProtectionControl);
+    connect(mProtectionControl, &ProtectionControlWidget::onProtectionChanged, this, &MainWindow::onSetEnableOutputProtection);
+
+    mPreset = new PresetWidget(this);
+    ui->groupBoxPreset->addWidget(mPreset);
+    connect(mPreset, &PresetWidget::onPresetClicked,  this, &MainWindow::onSetPreset);
+    connect(mPreset, &PresetWidget::onSaveClicked,  this, &MainWindow::onSavePreset);
+
+    mChannelsTracking = new ChannelsTrackingWidget(this);
+    ui->groupBoxChannelsTracking->layout()->addWidget(mChannelsTracking);
+    connect(mChannelsTracking, &ChannelsTrackingWidget::onSetChannelsTracking, this, &MainWindow::onSetChannelsTracking);
+
+    mOutputSwitch = new OutputSwitch(this);
+    ui->outputSwitchLayout->addWidget(mOutputSwitch);
+    connect(mOutputSwitch, &QPushButton::clicked, this,&MainWindow::onSetEnableOutputSwitch);
+}
+
+template<typename func>
+DialWidget *MainWindow::createDialWidget(const QString &title, const QString &suffix, double precision, func lambdaFn) {
+    auto dial = new DialWidget(title, this);
+    dial->setPrecision(precision);
+    dial->setSuffix(suffix);
+    connect(dial, &DialWidget::onSetValue, lambdaFn);
+
+    return dial;
+}
+
+ProtectionWidget *MainWindow::createProtectionWidget(Global::Channel channel) {
+    auto protection = new ProtectionWidget(this);
+    connect(protection, &ProtectionWidget::onSetOVP, [=] (double value) { emit onSetOverVoltageProtectionValue(channel, value); });
+    connect(protection, &ProtectionWidget::onSetOCP, [=] (double value) { emit onSetOverCurrentProtectionValue(channel, value); });
+
+    return protection;
 }
 
 bool MainWindow::acceptEnable() const {
@@ -158,7 +133,7 @@ bool MainWindow::acceptEnable() const {
 
 void MainWindow::SerialPortOpened(const QString &serialPortName, int baudRate) {
     mIsSerialConnected = true;
-    mStatusBarConnectionStatus->setText(tr("Connected: %1@%2").arg(serialPortName).arg(baudRate));
+    mStatusBar->setText(tr("Connected: %1@%2").arg(serialPortName).arg(baudRate), StatusBar::ConnectionStatus);
     ui->actionDisconnect->setEnabled(true);
 }
 
@@ -173,7 +148,7 @@ void MainWindow::ConnectionDeviceReady(const Global::DeviceInfo &info) {
     enableControls(true);
 }
 
-void MainWindow::ConnectionUnknownDevice(QString deviceID) {
+void MainWindow::ConnectionUnknownDevice(const QString& deviceID) {
     QMessageBox::warning(this, tr("Unknown Device"),
                          tr("Unknown Device (ID: %1)").arg(deviceID),
                          QMessageBox::Close
@@ -181,20 +156,20 @@ void MainWindow::ConnectionUnknownDevice(QString deviceID) {
 }
 
 void MainWindow::UpdateCommunicationMetrics(const CommunicationMetrics &info) {
-    mStatusCommunicationMetrics->setText(tr("Q:%1 E:%2 D:%3 T:%4")
+    mStatusBar->setText(tr("Q:%1 E:%2 D:%3 T:%4")
                                   .arg(info.queueLength())
                                   .arg(info.errorCount)
                                   .arg(info.droppedCount)
-                                  .arg(info.responseTimeoutCount));
+                                  .arg(info.responseTimeoutCount), StatusBar::DebugInfo);
 }
 
 void MainWindow::SerialPortClosed() {
     mIsSerialConnected = false;
 
     ui->actionDisconnect->setEnabled(false);
-    mStatusBarConnectionStatus->setText(tr("Disconnected"));
-    mStatusBarDeviceInfo->setText(tr("N/A"));
-    mStatusBarDeviceLock->setText(tr("N/A"));
+    mStatusBar->setText(tr("Disconnected"), StatusBar::ConnectionStatus);
+    mStatusBar->setText(tr("N/A"), StatusBar::DeviceInfo);
+    mStatusBar->setText(tr("N/A"), StatusBar::LockStatus);
 
     UpdateChannelTrackingMode(Global::Independent);
     enableControls(false);
@@ -224,15 +199,15 @@ void MainWindow::enableControls(bool enable) {
 }
 
 void MainWindow::setControlLimits(const Global::DeviceInfo &info) {
-    mInputCh1V->setLimits(info.MinVoltage, info.MaxVoltage, info.VoltageSetPrecision);
-    mInputCh1A->setLimits(info.MinCurrent, info.MaxCurrent, info.CurrentSetPrecision);
-    mInputCh2V->setLimits(info.MinVoltage, info.MaxVoltage, info.VoltageSetPrecision);
-    mInputCh2A->setLimits(info.MinCurrent, info.MaxCurrent, info.CurrentSetPrecision);
+    mInputVoltage[Global::Channel1]->setLimits(info.MinVoltage, info.MaxVoltage, info.VoltageSetPrecision);
+    mInputVoltage[Global::Channel2]->setLimits(info.MinVoltage, info.MaxVoltage, info.VoltageSetPrecision);
+    mInputCurrent[Global::Channel1]->setLimits(info.MinCurrent, info.MaxCurrent, info.CurrentSetPrecision);
+    mInputCurrent[Global::Channel2]->setLimits(info.MinCurrent, info.MaxCurrent, info.CurrentSetPrecision);
 
-    mProtectionSetCh1->setLimitsOVP(info.MinVoltage, info.MaxVoltage, info.VoltageSetPrecision);
-    mProtectionSetCh2->setLimitsOVP(info.MinVoltage, info.MaxVoltage, info.VoltageSetPrecision);
-    mProtectionSetCh1->setLimitsOCP(info.MinCurrent, info.MaxCurrent, info.CurrentSetPrecision);
-    mProtectionSetCh2->setLimitsOCP(info.MinCurrent, info.MaxCurrent, info.CurrentSetPrecision);
+    mProtectionSet[Global::Channel1]->setLimitsOVP(info.MinVoltage, info.MaxVoltage, info.VoltageSetPrecision);
+    mProtectionSet[Global::Channel2]->setLimitsOVP(info.MinVoltage, info.MaxVoltage, info.VoltageSetPrecision);
+    mProtectionSet[Global::Channel1]->setLimitsOCP(info.MinCurrent, info.MaxCurrent, info.CurrentSetPrecision);
+    mProtectionSet[Global::Channel2]->setLimitsOCP(info.MinCurrent, info.MaxCurrent, info.CurrentSetPrecision);
 }
 
 void MainWindow::SetEnableReadonlyMode(bool enable) {
@@ -268,11 +243,10 @@ void MainWindow::UpdateOutputProtectionMode(Global::OutputProtection protection)
 }
 
 void MainWindow::UpdateChannelMode(Global::Channel channel, Global::OutputMode mode) {
-    if (channel == Global::Channel1) {
-        mode == Global::ConstantVoltage ? mDisplayCh1->constantVoltage() : mDisplayCh1->constantCurrent();
-    }
-    if (channel == Global::Channel2) {
-        mode == Global::ConstantVoltage ? mDisplayCh2->constantVoltage() : mDisplayCh2->constantCurrent();
+    if (mode == Global::ConstantVoltage) {
+        mDisplay[channel]->constantVoltage();
+    } else {
+        mDisplay[channel]->constantCurrent();
     }
 }
 
@@ -288,9 +262,13 @@ void MainWindow::enableChannel(Global::Channel ch, bool enable) {
     if (ch == Global::Channel1) {
         ui->lblCh1->setEnabled(enable);
         ui->groupBoxCh1->setEnabled(enable);
-    } else {
+        return;
+    }
+
+    if (ch == Global::Channel2) {
         ui->lblCh2->setEnabled(enable);
         ui->groupBoxCh2->setEnabled(enable);
+        return;
     }
 }
 
@@ -299,62 +277,35 @@ void MainWindow::UpdateActivePreset(Global::MemoryKey key) {
 }
 
 void MainWindow::UpdateActualVoltage(Global::Channel channel, double voltage) {
-    if (channel == Global::Channel1) {
-        mDisplayCh1->displayVoltage(voltage);
-    } else {
-        mDisplayCh2->displayVoltage(voltage);
-    }
+    mDisplay[channel]->displayVoltage(voltage);
 }
 
 void MainWindow::UpdateActualCurrent(Global::Channel channel, double current) {
-    if (channel == Global::Channel1) {
-        mDisplayCh1->displayCurrent(current);
-    } else {
-        mDisplayCh2->displayCurrent(current);
-    }
+    mDisplay[channel]->displayCurrent(current);
 }
 
 void MainWindow::UpdateVoltageSet(Global::Channel channel, double voltage) {
-    if (channel == Global::Channel1) {
-        mInputCh1V->setValue(voltage);
-    }
-    if (channel == Global::Channel2) {
-        mInputCh2V->setValue(voltage);
-    }
+    mInputVoltage[channel]->setValue(voltage);
 }
 
 void MainWindow::UpdateCurrentSet(Global::Channel channel, double current) {
-    if (channel == Global::Channel1) {
-        mInputCh1A->setValue(current);
-    }
-    if (channel == Global::Channel2) {
-        mInputCh2A->setValue(current);
-    }
+    mInputCurrent[channel]->setValue(current);
 }
 
 void MainWindow::UpdateOverCurrentProtectionSet(Global::Channel channel, double current) {
-    if (channel == Global::Channel1) {
-        mProtectionSetCh1->setValueOCP(current);
-    } else {
-        mProtectionSetCh2->setValueOCP(current);
-    }
+    mProtectionSet[channel]->setValueOCP(current);
 }
 
 void MainWindow::UpdateOverVoltageProtectionSet(Global::Channel channel, double voltage) {
-    if (channel == Global::Channel1) {
-        mProtectionSetCh1->setValueOVP(voltage);
-    } else {
-        mProtectionSetCh2->setValueOVP(voltage);
-    }
+    mProtectionSet[channel]->setValueOVP(voltage);
 }
-
 
 void MainWindow::SetEnableLock(bool enable) {
     if (enable) {
-        mStatusBarDeviceLock->setText(tr("Device Controls: Lock"));
+        mStatusBar->setText(tr("Device Controls: Lock"), StatusBar::LockStatus);
         ui->actionLockDevice->setText(tr("Unlock Device Controls"));
     } else {
-        mStatusBarDeviceLock->setText(tr("Device Controls: Unlocked"));
+        mStatusBar->setText(tr("Device Controls: Unlocked"), StatusBar::LockStatus);
         ui->actionLockDevice->setText(tr("Lock Device Controls"));
     }
 }
@@ -410,7 +361,7 @@ void MainWindow::SerialPortChanged(bool toggled) {
     emit onSerialPortSettingsChanged(portName, baudRate);
 }
 
-void MainWindow::slotCreateSerialPortMenuItems() {
+void MainWindow::CreateSerialPortMenuItems() {
     foreach (auto a, ui->menuPort->actions()) {
         a->deleteLater();
     }
@@ -471,7 +422,7 @@ void MainWindow::ShowAboutBox() {
     QMessageBox aboutBox(
             QMessageBox::NoIcon,
             tr("About PS Management"),
-            trUtf8("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p><p>GUI application for remote control of Programmable Power Supply.</p><p>Supported protocol: <ul><li>UNI-T UTP3303C</li><li>UNI-T UTP3305C</li></ul></p><p>This is a free software distributed under MIT license.</p><p>Visit official <a href=\"https://github.com/vitark/PS-Management\">GitHub</a> page for more details.</p> <p>Ⓒ 2021-2022 VitArk</p>").arg(Application::applicationVersion()),
+            trUtf8("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p><p>GUI application for remote control of Programmable Power Supply.</p><p>Supported protocol: <ul><li>UNI-T UTP3303C</li><li>UNI-T UTP3305C</li></ul></p><p>This is a free software distributed under GPLv3 license.</p><p>Visit official <a href=\"https://github.com/vitark/PS-Management\">GitHub</a> page for more details.</p> <p>Ⓒ 2021-2022 VitArk</p>").arg(Application::applicationVersion()),
             QMessageBox::Ok
     );
     aboutBox.setIconPixmap(icon);
@@ -487,9 +438,9 @@ void MainWindow::ShowAboutBox() {
 void MainWindow::ShowDeviceNameOrID() {
     static bool showDeviceID = false;
     if (showDeviceID) {
-        mStatusBarDeviceInfo->setText(mDeviceInfo.ID);
+        mStatusBar->setText(mDeviceInfo.ID, StatusBar::DeviceInfo);
     } else {
-        mStatusBarDeviceInfo->setText(mDeviceInfo.Name);
+        mStatusBar->setText(mDeviceInfo.Name, StatusBar::DeviceInfo);
     }
     showDeviceID = !showDeviceID;
 }

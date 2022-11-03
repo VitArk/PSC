@@ -216,6 +216,7 @@ void Communication::GetIsLocked() {
 }
 
 void Communication::SetCurrent(Global::Channel channel, double value) {
+    qDebug() << value << channel;
     enqueueMessage(mDeviceProtocol->createMessageSetCurrent(channel, value));
 }
 
@@ -224,6 +225,7 @@ void Communication::GetCurrentSet(Global::Channel channel) {
 }
 
 void Communication::SetVoltage(Global::Channel channel, double value) {
+    qDebug() << value << channel;
     enqueueMessage(mDeviceProtocol->createMessageSetVoltage(channel, value));
 }
 
@@ -284,6 +286,7 @@ void Communication::SetEnableOverVoltageProtection(bool enable) {
 }
 
 void Communication::SetOverCurrentProtectionValue(Global::Channel channel, double current) {
+    qDebug() << current << channel;
     enqueueMessage(mDeviceProtocol->createMessageSetOverCurrentProtectionValue(channel, current));
 }
 
@@ -292,6 +295,7 @@ void Communication::GetOverCurrentProtectionValue(Global::Channel channel) {
 }
 
 void Communication::SetOverVoltageProtectionValue(Global::Channel channel, double voltage) {
+    qDebug() << voltage << channel;
     enqueueMessage(mDeviceProtocol->createMessageSetOverVoltageProtectionValue(channel, voltage));
 }
 

@@ -15,36 +15,34 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QLabel>
+#include <QMap>
 #include "Global.h"
 #include "Settings.h"
 #include "CommunicationMetrics.h"
-#include "ClickableLabel.h"
-#include "DialWidget.h"
-#include "ProtectionWidget.h"
-#include "DisplayWidget.h"
-#include "PresetWidget.h"
-#include "ProtectionControlWidget.h"
-#include "ChannelsTrackingWidget.h"
-#include "OutputSwitch.h"
+#include "widgets/ClickableLabel.h"
+#include "widgets/DialWidget.h"
+#include "widgets/ProtectionWidget.h"
+#include "widgets/DisplayWidget.h"
+#include "widgets/PresetWidget.h"
+#include "widgets/ProtectionControlWidget.h"
+#include "widgets/ChannelsTrackingWidget.h"
+#include "widgets/OutputSwitch.h"
+#include "widgets/StatusBar.h"
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
-
     void autoOpenSerialPort();
 
 signals:
     void onSerialPortSettingsChanged(QString serialPortName, int baudRate);
     void onSerialPortDoClose();
-
     void onSetChannelsTracking(Global::ChannelsTracking tracking);
     void onSetEnableOutputProtection(Global::OutputProtection protection);
     void onSetOverVoltageProtectionValue(Global::Channel channel, double value);
@@ -58,15 +56,12 @@ signals:
     void onSetEnabledBeep(bool enable);
 
 public slots:
-    void SerialPortOpened(const QString& serialPortName, int baudRate);
+    void SerialPortOpened(const QString &serialPortName, int baudRate);
     void SerialPortClosed();
     void SerialPortErrorOccurred(const QString &error);
-
     void ConnectionDeviceReady(const Global::DeviceInfo &info);
-    void ConnectionUnknownDevice(QString deviceID);
-
+    void ConnectionUnknownDevice(const QString &deviceID);
     void UpdateCommunicationMetrics(const CommunicationMetrics &info);
-
     void UpdateChannelTrackingMode(Global::ChannelsTracking tracking);
     void UpdateOutputProtectionMode(Global::OutputProtection protection);
     void UpdateChannelMode(Global::Channel channel, Global::OutputMode mode);
@@ -82,52 +77,40 @@ public slots:
     void SetEnableBeep(bool enable);
 
 private slots:
-    // Serial port
     void SerialPortChanged(bool toggled);
     void SetEnableReadonlyMode(bool enable);
-
-    void slotCreateSerialPortMenuItems(); // TODO ????
-
-    void ShowAboutBox();
+    void CreateSerialPortMenuItems();
+    static void ShowAboutBox();
     void ShowDeviceNameOrID();
+
+private:
+    void setupUI();
+    template<typename func> DialWidget *createDialWidget(const QString &title, const QString &suffix, double precision, func lambdaFn);
+    ProtectionWidget *createProtectionWidget(Global::Channel ch);
+    bool acceptEnable() const;
+    void enableControls(bool enable);
+    void setControlLimits(const Global::DeviceInfo &info);
+    void enableChannel(Global::Channel ch, bool enable);
+    void createBaudRatesMenu();
+    QString chosenSerialPort() const;
+    int chosenBaudRates(int defaultValue = 9600) const;
 
 private:
     Ui::MainWindow *ui;
     Settings mSettings;
 
-    QLabel *mStatusBarConnectionStatus;
-    ClickableLabel *mStatusBarDeviceInfo;
-    QLabel *mStatusBarDeviceLock;
-    QLabel *mStatusCommunicationMetrics;
-
-    DialWidget   *mInputCh1V;
-    DialWidget   *mInputCh1A;
-    DialWidget   *mInputCh2V;
-    DialWidget   *mInputCh2A;
-
-    ProtectionWidget *mProtectionSetCh1;
-    ProtectionWidget *mProtectionSetCh2;
-    ProtectionControlWidget *mProtectionControl;
-
-    DisplayWidget *mDisplayCh1;
-    DisplayWidget *mDisplayCh2;
-
-    PresetWidget  *mPreset;
-    ChannelsTrackingWidget *mChannelsTracking;
-    OutputSwitch *mOutputSwitch;
+    QMap<Global::Channel, DialWidget*>          mInputVoltage;
+    QMap<Global::Channel, DialWidget*>          mInputCurrent;
+    QMap<Global::Channel, ProtectionWidget*>    mProtectionSet;
+    QMap<Global::Channel, DisplayWidget*>       mDisplay;
+    ProtectionControlWidget                     *mProtectionControl = nullptr;
+    PresetWidget                                *mPreset = nullptr;
+    OutputSwitch                                *mOutputSwitch = nullptr;
+    ChannelsTrackingWidget                      *mChannelsTracking = nullptr;
+    StatusBar                                   *mStatusBar = nullptr;
 
     bool mIsSerialConnected = false;
-    Global::DeviceInfo  mDeviceInfo;
-
-private:
-    bool acceptEnable() const;
-    void enableControls(bool enable);
-    void setControlLimits(const Global::DeviceInfo &info);
-    void enableChannel(Global::Channel ch, bool enable);
-
-    void createBaudRatesMenu();
-    QString chosenSerialPort() const;
-    int chosenBaudRates(int defaultValue = 9600) const;
+    Global::DeviceInfo mDeviceInfo;
 };
 
 #endif // MAINWINDOW_H

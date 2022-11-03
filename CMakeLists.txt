@@ -32,20 +32,20 @@ add_executable(${PROJECT_NAME}
         src/protocol/Factory.h
         src/protocol/Factory.cpp
         src/CommunicationMetrics.h
-        src/ClickableLabel.cpp
-        src/ClickableLabel.h
-        src/DialWidget.cpp
-        src/DialWidget.h
-        src/ProtectionWidget.cpp
-        src/ProtectionWidget.h
-        src/SpinBoxDebounce.cpp
-        src/SpinBoxDebounce.h
-        src/DisplayWidget.cpp
-        src/DisplayWidget.h
-        src/PresetWidget.cpp
-        src/PresetWidget.h
-        src/ProtectionControlWidget.cpp
-        src/ProtectionControlWidget.h src/ChannelsTrackingWidget.cpp src/ChannelsTrackingWidget.h src/OutputSwitch.cpp src/OutputSwitch.h)
+        src/widgets/ClickableLabel.cpp
+        src/widgets/ClickableLabel.h
+        src/widgets/DialWidget.cpp
+        src/widgets/DialWidget.h
+        src/widgets/ProtectionWidget.cpp
+        src/widgets/ProtectionWidget.h
+        src/widgets/SpinBoxDebounce.cpp
+        src/widgets/SpinBoxDebounce.h
+        src/widgets/DisplayWidget.cpp
+        src/widgets/DisplayWidget.h
+        src/widgets/PresetWidget.cpp
+        src/widgets/PresetWidget.h
+        src/widgets/ProtectionControlWidget.cpp
+        src/widgets/ProtectionControlWidget.h src/widgets/ChannelsTrackingWidget.cpp src/widgets/ChannelsTrackingWidget.h src/widgets/OutputSwitch.cpp src/widgets/OutputSwitch.h src/widgets/StatusBar.cpp src/widgets/StatusBar.h)
 
 #if (NOT CMAKE_PREFIX_PATH)
 #    message(WARNING "CMAKE_PREFIX_PATH is not defined, you may need to set it "
