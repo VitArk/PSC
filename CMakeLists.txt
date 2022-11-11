@@ -24,7 +24,7 @@ set(target ${PROJECT_NAME})
 
 # Default Qt5 path
 if(WIN32)
-    set(Qt5_DIR "c:/Qt/5.12.10/msvc2017_64/lib/cmake/Qt5/" CACHE PATH "directory where Qt5Config.cmake exists.")
+    set(Qt5_DIR "d:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5/" CACHE PATH "directory where Qt5Config.cmake exists.")
     set(CMAKE_WIN32_EXECUTABLE ON)
 elseif(APPLE)
     set(Qt5_DIR "/usr/local/Cellar/qt/5.12.0/clang_64/lib/cmake/Qt5/" CACHE PATH "directory where Qt5Config.cmake exists.")
@@ -86,7 +86,7 @@ qt5_add_resources(ICON_RESOURCE_ADDED ${ICON_RESOURCE})
 if(UNIX AND NOT APPLE)
 
 elseif(WIN32)
-
+    list(APPEND ICON_RESOURCE_ADDED "${CMAKE_CURRENT_SOURCE_DIR}/src/assets/windows.rc")
 elseif(APPLE)
     set(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/power-supply.icns)
     list(APPEND ICON_RESOURCE_ADDED ${APP_ICON})

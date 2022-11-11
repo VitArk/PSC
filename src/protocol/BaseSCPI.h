@@ -47,29 +47,31 @@ public:
     }
 
     virtual Global::DeviceInfo deviceInfo() const {
-        return {
-            .Name = name(),
-            .ID = deviceID(),
-            .Description = description(),
-            .MinCurrent = minChannelCurrent(),
-            .MaxCurrent = maxChannelCurrent(),
-            .CurrentSetPrecision = currentSetPrecision(),
-            .MinVoltage = minChannelVoltage(),
-            .MaxVoltage = maxChannelVoltage(),
-            .VoltageSetPrecision = voltageSetPrecision(),
-            .ActiveChannelsCount = activeChannelsCount(),
-        };
+        auto info =  Global::DeviceInfo();
+        info.Name                = name();
+        info.ID                  = deviceID();
+        info.Description         = description();
+        info.MinCurrent          = minChannelCurrent();
+        info.MaxCurrent          = maxChannelCurrent();
+        info.CurrentSetPrecision = currentSetPrecision();
+        info.MinVoltage          = minChannelVoltage();
+        info.MaxVoltage          = maxChannelVoltage();
+        info.VoltageSetPrecision = voltageSetPrecision();
+        info.ActiveChannelsCount = activeChannelsCount();
+
+        return info;
     }
 
     virtual Global::DeviceStatus processDeviceStatusReply(const QByteArray &rawReply) const {
         Q_ASSERT(!rawReply.isEmpty());
-        return {
-            .ModeCh1        = evaluateOutputMode(rawReply, Global::Channel1),
-            .ModeCh2        = evaluateOutputMode(rawReply, Global::Channel2),
-            .Tracking       = evaluateChannelTracking(rawReply),
-            .Protection     = evaluateOutputProtection(rawReply),
-            .OutputSwitch   = evaluateOutputSwitchState(rawReply),
-        };
+        auto status = Global::DeviceStatus();
+        status.ModeCh1        = evaluateOutputMode(rawReply, Global::Channel1);
+        status.ModeCh2        = evaluateOutputMode(rawReply, Global::Channel2);
+        status.Tracking       = evaluateChannelTracking(rawReply);
+        status.Protection     = evaluateOutputProtection(rawReply);
+        status.OutputSwitch   = evaluateOutputSwitchState(rawReply);
+
+        return status;
     }
 
     virtual IMessage* createMessageSetLocked(bool lock) {

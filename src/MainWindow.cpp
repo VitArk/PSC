@@ -20,7 +20,7 @@
 
 #include "Application.h"
 
-const double V0= 00.00;
+const double V0 = 0.00;
 const double A0 = 0.000;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -380,7 +380,7 @@ void MainWindow::CreateSerialPortMenuItems() {
         if (info.isNull())
             continue;
 
-#if not defined(Q_OS_WIN)
+#ifndef Q_OS_WIN
         if ( !info.portName().startsWith("cu."))
             continue;
 #endif
@@ -422,7 +422,7 @@ void MainWindow::ShowAboutBox() {
     QMessageBox aboutBox(
             QMessageBox::NoIcon,
             tr("About PS Management"),
-            trUtf8("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p>"
+            tr("<p align=\"center\">Power Supply Management</p><p align=\"center\">Version %1</p>"
                    "<p>GUI application for remote control of Programmable Power Supply.</p>"
                    "<p>Supported devices:<ul><li>UNI-T UTP3303C</li><li>UNI-T UTP3305C</li></ul></p>"
                    "<p>This is a free software distributed under GPLv3 license.</p>"
