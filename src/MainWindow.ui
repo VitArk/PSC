@@ -10,19 +10,19 @@
     <x>0</x>
     <y>0</y>
     <width>890</width>
-    <height>532</height>
+    <height>542</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>890</width>
-    <height>532</height>
+    <height>542</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>890</width>
-    <height>532</height>
+    <height>542</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -40,19 +40,6 @@
      <number>0</number>
     </property>
     <item row="0" column="2">
-     <spacer name="verticalSpacer_5">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="1" column="2">
      <widget class="QGroupBox" name="groupBoxOperation">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -64,6 +51,9 @@
        <string/>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_11">
+       <property name="spacing">
+        <number>25</number>
+       </property>
        <property name="leftMargin">
         <number>12</number>
        </property>
@@ -72,6 +62,12 @@
          <property name="spacing">
           <number>4</number>
          </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
         </layout>
        </item>
        <item>
@@ -79,11 +75,7 @@
          <property name="title">
           <string>Output protection</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <property name="bottomMargin">
-           <number>12</number>
-          </property>
-         </layout>
+         <layout class="QHBoxLayout" name="horizontalLayout_5"/>
         </widget>
        </item>
        <item>
@@ -113,10 +105,10 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="1">
+    <item row="0" column="1">
      <widget class="QGroupBox" name="groupBoxCh2">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -124,7 +116,7 @@
       <property name="minimumSize">
        <size>
         <width>255</width>
-        <height>464</height>
+        <height>465</height>
        </size>
       </property>
       <property name="styleSheet">
@@ -136,6 +128,7 @@
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -165,10 +158,10 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="0">
+    <item row="0" column="0">
      <widget class="QGroupBox" name="groupBoxCh1">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -185,6 +178,7 @@
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -219,7 +213,7 @@
      <x>0</x>
      <y>0</y>
      <width>890</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

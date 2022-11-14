@@ -45,10 +45,9 @@ void MainWindow::setupUI() {
     setWindowTitle(tr("Power Supply Management v%1").arg(Application::applicationVersion()));
 
 #ifdef Q_OS_WIN
-    setMaximumHeight(maximumHeight() - 55);
+    setMaximumHeight(maximumHeight() - 65);
     setMaximumWidth(maximumWidth() - 55);
 #endif
-
     setFixedSize(maximumSize());
     ui->groupBoxCh1->setMinimumSize(QSize(0,0));
     ui->groupBoxCh2->setMinimumSize(QSize(0,0));

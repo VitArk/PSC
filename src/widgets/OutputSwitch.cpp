@@ -50,11 +50,12 @@ void OutputSwitch::SetSwitchOn(bool on) {
 }
 
 QString OutputSwitch::customStyle(const QString &color) {
-   // return QString("background-color: %1;border:1px;").arg(color);
+    // return QString("background-color: %1;border:1px;").arg(color);
+    const char* BorderColor = "rgb(185, 185, 185)"; //beige
     return QString("background-color: %1; "
                    "border-style: outset;"
                    "border-width: 1px;"
-                   "border-color: beige;").arg(color);
+                   "border-color: %2;").arg(color).arg(BorderColor);
 }
 
 void OutputSwitch::applyStyle(const QString &style)
