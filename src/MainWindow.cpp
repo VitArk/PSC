@@ -49,6 +49,7 @@ void MainWindow::setupUI() {
     setMaximumWidth(maximumWidth() - 55);
     ui->groupBoxOperationLayout->setSpacing(12);
 #endif
+
     setFixedSize(maximumSize());
     ui->groupBoxCh1->setMinimumSize(QSize(0,0));
     ui->groupBoxCh2->setMinimumSize(QSize(0,0));
