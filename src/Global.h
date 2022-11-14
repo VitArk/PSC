@@ -18,6 +18,8 @@
 #ifndef POWER_SUPPLY_CONTROLLER_GLOBAL_H
 #define POWER_SUPPLY_CONTROLLER_GLOBAL_H
 
+#include <QString>
+
 namespace Global {
     enum Channel {
         Channel1 = 1,

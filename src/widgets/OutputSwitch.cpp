@@ -24,7 +24,7 @@ const char* const BG_GREEN="rgb(0, 210, 0)";
 
 OutputSwitch::OutputSwitch(QWidget *parent)
 : QPushButton(parent) {
-    mBackgroundColorDefault = palette().background().color().name();
+    mBackgroundColorDefault = palette().window().color().name();
     setupUI();
 }
 
@@ -33,7 +33,7 @@ void OutputSwitch::setupUI() {
     setMinimumSize(QSize(0, 80));
     setCheckable(true);
     setChecked(false);
-    setStyleSheet(customStyle(mBackgroundColorDefault));
+    applyStyle(customStyle(mBackgroundColorDefault));
     connect(this, &QPushButton::clicked, this, &OutputSwitch::SetSwitchOn);
 }
 
@@ -41,14 +41,25 @@ void OutputSwitch::SetSwitchOn(bool on) {
     if (on) {
         setChecked(true);
         setText(tr("OUTPUT ON"));
-        setStyleSheet(customStyle(BG_GREEN));
+        applyStyle(customStyle(BG_GREEN));
     } else {
         setChecked(false);
         setText(tr("OUTPUT OFF"));
-        setStyleSheet(customStyle(mBackgroundColorDefault));
+        applyStyle(customStyle(mBackgroundColorDefault));
     }
 }
 
 QString OutputSwitch::customStyle(const QString &color) {
-    return QString("background-color: %1;border:none;").arg(color);
+   // return QString("background-color: %1;border:1px;").arg(color);
+    return QString("background-color: %1; "
+                   "border-style: outset;"
+                   "border-width: 1px;"
+                   "border-color: beige;").arg(color);
+}
+
+void OutputSwitch::applyStyle(const QString &style)
+{
+#ifndef Q_OS_WIN
+    setStyleSheet(style);
+#endif
 }

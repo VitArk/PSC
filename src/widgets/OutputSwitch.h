@@ -34,6 +34,7 @@ public slots:
 private:
     void setupUI();
     static QString customStyle(const QString &color);
+    void applyStyle(const QString &style);
 private:
     QString mBackgroundColorDefault;
 };

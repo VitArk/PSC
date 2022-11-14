@@ -42,8 +42,14 @@ MainWindow::~MainWindow() {
 
 void MainWindow::setupUI() {
     setAttribute(Qt::WA_DeleteOnClose);
-    setFixedSize(maximumSize());
     setWindowTitle(tr("Power Supply Management v%1").arg(Application::applicationVersion()));
+
+#ifdef Q_OS_WIN
+    setMaximumHeight(maximumHeight() - 55);
+    setMaximumWidth(maximumWidth() - 55);
+#endif
+
+    setFixedSize(maximumSize());
     ui->groupBoxCh1->setMinimumSize(QSize(0,0));
     ui->groupBoxCh2->setMinimumSize(QSize(0,0));
 
@@ -121,8 +127,8 @@ DialWidget *MainWindow::createDialWidget(const QString &title, const QString &su
 
 ProtectionWidget *MainWindow::createProtectionWidget(Global::Channel channel) {
     auto protection = new ProtectionWidget(this);
-    connect(protection, &ProtectionWidget::onSetOVP, [=] (double value) { emit onSetOverVoltageProtectionValue(channel, value); });
-    connect(protection, &ProtectionWidget::onSetOCP, [=] (double value) { emit onSetOverCurrentProtectionValue(channel, value); });
+    connect(protection, &ProtectionWidget::onSetOVP, this, [=] (double value) { emit onSetOverVoltageProtectionValue(channel, value); });
+    connect(protection, &ProtectionWidget::onSetOCP, this, [=] (double value) { emit onSetOverCurrentProtectionValue(channel, value); });
 
     return protection;
 }
