@@ -33,8 +33,23 @@ else()
     set(Qt5_DIR "" CACHE PATH "directory where Qt5Config.cmake exists.")
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(
+        ${CMAKE_CURRENT_BINARY_DIR} # config.h
+)
 
+# configure a header file to pass some of the CMake settings
+# to the source code
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/config.h
+)
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/windows.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/windows.rc
+)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(HEADER
         ${CMAKE_CURRENT_SOURCE_DIR}/src/MainWindow.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/MainWindow.ui
@@ -86,7 +101,7 @@ qt5_add_resources(ICON_RESOURCE_ADDED ${ICON_RESOURCE})
 if(UNIX AND NOT APPLE)
 
 elseif(WIN32)
-    list(APPEND ICON_RESOURCE_ADDED "${CMAKE_CURRENT_SOURCE_DIR}/src/assets/windows.rc")
+    list(APPEND ICON_RESOURCE_ADDED "${CMAKE_CURRENT_BINARY_DIR}/windows.rc")
 elseif(APPLE)
     set(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/power-supply.icns)
     list(APPEND ICON_RESOURCE_ADDED ${APP_ICON})

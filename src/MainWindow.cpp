@@ -42,7 +42,7 @@ MainWindow::~MainWindow() {
 
 void MainWindow::setupUI() {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowTitle(tr("Power Supply Management v%1").arg(Application::applicationVersion()));
+    setWindowTitle(tr("Power Supply Management %1").arg(Application::applicationVersion()));
 
 #ifdef Q_OS_WIN
     setMaximumHeight(maximumHeight() - 65);
