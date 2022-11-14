@@ -49,6 +49,11 @@ configure_file(
         ${CMAKE_CURRENT_BINARY_DIR}/windows.rc
 )
 
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/PS-Management.desktop.in
+        ${CMAKE_CURRENT_BINARY_DIR}/PS-Management.desktop
+)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(HEADER
         ${CMAKE_CURRENT_SOURCE_DIR}/src/MainWindow.h
@@ -144,17 +149,17 @@ elseif(APPLE)
 endif()
 
 
-#set(desktop.path applications)
-#set(desktop.files resources/example.desktop)
-#set(icon.path icons/hicolor/64x64/apps)
-#set(icon.files resources/icon64.png)
-#set(iconsvg.path icons/hicolor/scalable/apps)
-#set(iconsvg.files resources/icon.svg)
-#foreach(items IN ITEMS desktop icon iconsvg)
-#    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${${items}.files}
-#            DESTINATION share/${${items}.path}
-#            PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
-#endforeach()
+set(desktop.path applications)
+set(desktop.files ${CMAKE_CURRENT_BINARY_DIR}/PS-Management.desktop)
+set(icon.path icons/hicolor/64x64/apps)
+set(icon.files ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/power-supply_64.png)
+set(iconsvg.path icons/hicolor/scalable/apps)
+set(iconsvg.files ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/power-supply.svg)
+foreach(items IN ITEMS desktop icon iconsvg)
+    install(FILES ${${items}.files}
+            DESTINATION share/${${items}.path}
+            PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+endforeach()
 # Components:
 if(CMAKE_BUILD_TYPE_UPPER MATCHES "^(DEBUG|RELWITHDEBINFO)$")
     set(CPACK_STRIP_FILES FALSE)

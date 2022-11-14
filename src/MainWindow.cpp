@@ -387,7 +387,7 @@ void MainWindow::CreateSerialPortMenuItems() {
         if (info.isNull())
             continue;
 
-#ifndef Q_OS_WIN
+#ifdef Q_OS_MACOS
         if ( !info.portName().startsWith("cu."))
             continue;
 #endif
