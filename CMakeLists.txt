@@ -57,7 +57,7 @@ configure_file(
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(HEADER
         ${CMAKE_CURRENT_SOURCE_DIR}/src/MainWindow.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/MainWindow.ui
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/mainwindow.ui
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Application.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Global.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/resources.qrc

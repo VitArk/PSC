@@ -179,11 +179,16 @@ else()
         message(STATUS "   + RPM                                  NO ")
     endif()
 
-    # list(APPEND CPACK_GENERATOR DEB)
-    message(STATUS "   + DEB                                  NO ")
+    list(APPEND CPACK_GENERATOR DEB)
+    message(STATUS "   + DEB                                  YES ")
+    set(CPACK_PACKAGE_NAME "vitark-${PROJECT_NAME}"
+            CACHE STRING "The resulting package name"
+    )
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+    set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
     set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
     set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${PROJECT_URL}")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_AUTHORS}")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OFF)  # ON When build with libraries only from debian packages
 
     if(LINUXDEPLOY_EXECUTABLE)
