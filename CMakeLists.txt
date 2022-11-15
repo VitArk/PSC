@@ -50,8 +50,8 @@ configure_file(
 )
 
 configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/PS-Management.desktop.in
-        ${CMAKE_CURRENT_BINARY_DIR}/PS-Management.desktop
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/ps-management.desktop.in
+        ${CMAKE_CURRENT_BINARY_DIR}/ps-management.desktop
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -150,11 +150,11 @@ endif()
 
 
 set(desktop.path applications)
-set(desktop.files ${CMAKE_CURRENT_BINARY_DIR}/PS-Management.desktop)
+set(desktop.files ${CMAKE_CURRENT_BINARY_DIR}/ps-management.desktop)
 set(icon.path icons/hicolor/64x64/apps)
-set(icon.files ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/power-supply_64.png)
+set(icon.files ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/ps-management.png)
 set(iconsvg.path icons/hicolor/scalable/apps)
-set(iconsvg.files ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/power-supply.svg)
+set(iconsvg.files ${CMAKE_CURRENT_SOURCE_DIR}/src/assets/ps-management.svg)
 foreach(items IN ITEMS desktop icon iconsvg)
     install(FILES ${${items}.files}
             DESTINATION share/${${items}.path}

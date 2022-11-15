@@ -181,20 +181,17 @@ else()
 
     list(APPEND CPACK_GENERATOR DEB)
     message(STATUS "   + DEB                                  YES ")
-    set(CPACK_PACKAGE_NAME "vitark-${PROJECT_NAME}"
-            CACHE STRING "The resulting package name"
-    )
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
     set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
     set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
     set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${PROJECT_URL}")
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_AUTHORS}")
-    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OFF)  # ON When build with libraries only from debian packages
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)  # ON When build with libraries only from debian packages. Package dpkg-dev is required to be installed
 
     if(LINUXDEPLOY_EXECUTABLE)
         message(STATUS "   + AppImage                             YES ")
         if(CMAKE_VERSION VERSION_LESS 3.13)
-            linuxdeployqt("${CPACK_PACKAGE_DIRECTORY}/_CPack_Packages/Linux/AppImage" "share/applications/PS-Management.desktop")
+            linuxdeployqt("${CPACK_PACKAGE_DIRECTORY}/_CPack_Packages/Linux/AppImage" "share/applications/ps-management.desktop")
         else()
             set(CPACK_GENERATOR "External;${CPACK_GENERATOR}")
             configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CPackLinuxDeployQt.cmake.in "${CMAKE_BINARY_DIR}/CPackExternal.cmake")
@@ -204,7 +201,7 @@ else()
         message(STATUS "   + AppImage                              NO ")
     endif()
 
-    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/src/assets/power-supply_64.png")
+    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/src/assets/ps-management.png")
 endif()
 
 include(CPack)
