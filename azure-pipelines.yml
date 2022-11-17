@@ -1,7 +1,7 @@
 jobs:
 - job: Ubuntu_Linux
   pool:
-    vmImage: 'ubuntu-22.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
       inputs:
