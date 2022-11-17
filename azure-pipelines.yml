@@ -74,7 +74,7 @@ jobs:
       displayName: configure
       inputs:
         workingDirectory: $(Build.BinariesDirectory)
-        cmakeArgs: -DQt5_DIR=$(Build.BinariesDirectory)\5.15.2\msvc2019_64\lib\cmake\Qt5 $(Build.SourcesDirectory)
+        cmakeArgs: -G "Visual Studio 16 2019" -A Win32 -DQt5_DIR=$(Build.BinariesDirectory)\5.15.2\msvc2019\lib\cmake\Qt5 $(Build.SourcesDirectory)
     - task: CMake@1
       displayName: build
       inputs:
