@@ -39,7 +39,7 @@ jobs:
     - script: |
         pip install aqtinstall
         mkdir -p /usr/local/opt/Qt
-        (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt install-qt 5.15.2 mac desktop clang_64)
+        (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt install-qt mac desktop 5.12.2 clang_64)
       displayName: install qt
     - task: CMake@1
       displayName: configure
@@ -69,7 +69,7 @@ jobs:
         pip install aqtinstall
         cd $(Build.BinariesDirectory)
         python -m aqt list-qt windows desktop --arch 5.15.2
-        python -m aqt install-qt 5.15.2 windows desktop win32_msvc2019
+        python -m aqt install-qt windows desktop 5.12.2 win32_msvc2019
       displayName: install qt
     - task: CMake@1
       displayName: configure
