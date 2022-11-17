@@ -29,34 +29,34 @@ jobs:
         cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
     - script: ls -l $(Build.BinariesDirectory)/build
 
-#- job: macOS
-#  pool:
-#    vmImage: 'macOS-10.14'
-#  steps:
-#    - task: UsePythonVersion@0
-#      inputs:
-#        versionSpec: '3.x'
-#    - script: |
-#        pip install aqtinstall
-#        mkdir -p /usr/local/opt/Qt
-#        (cd /usr/local/opt/Qt && python -m aqt install 5.12.10 mac desktop clang_64)
-#      displayName: install qt
-#    - task: CMake@1
-#      displayName: configure
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: -DQt5_DIR=/usr/local/opt/Qt/5.12.10/clang_64/lib/cmake/Qt5/ $(Build.SourcesDirectory)
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: --build $(Build.BinariesDirectory)/build
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
-#    - script: ls -l $(Build.BinariesDirectory)/build
+- job: macOS
+  pool:
+    vmImage: 'macOS-11'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+    - script: |
+        pip install aqtinstall
+        mkdir -p /usr/local/opt/Qt
+        (cd /usr/local/opt/Qt && python -m aqt install 5.15.3 mac desktop clang_64)
+      displayName: install qt
+    - task: CMake@1
+      displayName: configure
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: -DQt5_DIR=/usr/local/opt/Qt/5.15.3/clang_64/lib/cmake/Qt5/ $(Build.SourcesDirectory)
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: --build $(Build.BinariesDirectory)/build
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
+    - script: ls -l $(Build.BinariesDirectory)/build
 #
 #- job: Windows64
 #  pool:
