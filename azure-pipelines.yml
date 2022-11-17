@@ -3,7 +3,7 @@ jobs:
 #  pool:
 #    vmImage: 'ubuntu-20.04'
 #  steps:
-#    - task: UsePythonVersion@0
+#   р - task: UsePythonVersion@0
 #      inputs:
 #        versionSpec: '3.x'
 #    - script: |
@@ -57,35 +57,35 @@ jobs:
         workingDirectory: '$(Build.BinariesDirectory)/build'
         cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
     - script: ls -l $(Build.BinariesDirectory)/build
-#
-#- job: Windows64
-#  pool:
-#    vmImage: 'vs2017-win2016'
-#  steps:
-#    - task: UsePythonVersion@0
-#      inputs:
-#        versionSpec: '3.x'
-#    - script: |
-#        pip install aqtinstall
-#        cd $(Build.BinariesDirectory)
-#        python -m aqt install 5.12.10 windows desktop win64_msvc2017_64
-#      displayName: install qt
-#    - task: CMake@1
-#      displayName: configure
-#      inputs:
-#        workingDirectory: $(Build.BinariesDirectory)
-#        cmakeArgs: -G "Visual Studio 15 2017 Win64" -DQt5_DIR=$(Build.BinariesDirectory)\5.12.10\msvc2017_64\lib\cmake\Qt5 $(Build.SourcesDirectory)
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: $(Build.BinariesDirectory)
-#        cmakeArgs: --build . --config Release
-#    - task: CMake@1
-#      displayName: build package
-#      inputs:
-#        workingDirectory: $(Build.BinariesDirectory)
-#        cmakeArgs: --build . --target bundle --config Release
-#    - script: |
-#        cat $(Build.BinariesDirectory)/_CPack_Packages/win64/NSIS/NSISOutput.log
-#        ls -l $(Build.BinariesDirectory)
+
+- job: Windows64
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+    - script: |
+        pip install aqtinstall
+        cd $(Build.BinariesDirectory)
+        python -m aqt install 5.15.2 windows desktop win64_msvc2019_64
+      displayName: install qt
+    - task: CMake@1
+      displayName: configure
+      inputs:
+        workingDirectory: $(Build.BinariesDirectory)
+        cmakeArgs: -DQt5_DIR=$(Build.BinariesDirectory)\5.15.2\msvc2019_64\lib\cmake\Qt5 $(Build.SourcesDirectory)
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: $(Build.BinariesDirectory)
+        cmakeArgs: --build . --config Release
+    - task: CMake@1
+      displayName: build package
+      inputs:
+        workingDirectory: $(Build.BinariesDirectory)
+        cmakeArgs: --build . --target bundle --config Release
+    - script: |
+        cat $(Build.BinariesDirectory)/_CPack_Packages/win64/NSIS/NSISOutput.log
+        ls -l $(Build.BinariesDirectory)
 
