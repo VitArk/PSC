@@ -39,7 +39,7 @@ jobs:
         Contents: |
           PS-Management-*.rpm
           PS-Management-*.tar.bz2
-          ps-management-*.deb
+          ps-management_*.deb
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
     - task: PublishBuildArtifacts@1
@@ -154,14 +154,9 @@ jobs:
     - macOS
     - Windows64
   steps:
-    - task: PowerShell@2
-      displayName: 'Get latest SHA commmit from repo'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $commits = Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/vitark/PS-Management/commits/develop"
-          $sha = $commits[0].sha
-          Write-Host "##vso[task.setvariable variable=sha;]$sha"
+    - script: |
+        ls -l $(Build.ArtifactStagingDirectory)
+        ls -l $(Build.ArtifactStagingDirectory)/release
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: 'github.com_vitark'
@@ -170,4 +165,4 @@ jobs:
         target: '$(Build.SourceVersion)'
         tagSource: 'gitTag'
         assets: '$(Build.ArtifactStagingDirectory)/release/*'
-        addChangeLog: true
+        addChangeLog: false
