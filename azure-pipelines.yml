@@ -49,110 +49,110 @@ jobs:
         ArtifactName: 'release'
         publishLocation: 'Container'
 
-#- job: macOS
-#  pool:
-#    vmImage: 'macOS-11'
-#  steps:
-#    - task: UsePythonVersion@0
-#      inputs:
-#        versionSpec: '3.x'
-#    - script: |
-#        pip install aqtinstall
-#        mkdir -p /usr/local/opt/Qt
-#        (cd /usr/local/opt/Qt && python -m aqt install-qt mac desktop 5.15.2 clang_64)
-#  #      (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt install 5.15.2 mac desktop clang_64)
-#      displayName: install qt
-#    - task: CMake@1
-#      displayName: configure
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: -DQt5_DIR=/usr/local/opt/Qt/5.15.2/clang_64/lib/cmake/Qt5/ $(Build.SourcesDirectory)
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: --build $(Build.BinariesDirectory)/build
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
-#    - script: ls -l $(Build.BinariesDirectory)/build
-#    - task: ArchiveFiles@2
-#      displayName: ZIP app-package
-#      inputs:
-#        rootFolderOrFile: '$(Build.BinariesDirectory)/build/PS-Management.app'
-#        includeRootFolder: true
-#        archiveType: 'zip'
-#        archiveFile: '$(Build.ArtifactStagingDirectory)/PS-Management.app.zip'
-#        replaceExistingArchive: true
-#    - task: CopyFiles@2
-#      displayName: Copy artifacts files into ArtifactStagingDirectory
-#      inputs:
-#        SourceFolder: '$(Build.BinariesDirectory)/build/'
-#        Contents: |
-#          PS-Management.app.zip
-#          PS-Management.dmg
-#        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-#
-#    - task: PublishBuildArtifacts@1
-#      displayName: 'Publish Artifact: release'
-#      inputs:
-#        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-#        ArtifactName: 'release'
-#        publishLocation: 'Container'
-#
-#- job: Windows64
-#  pool:
-#    vmImage: 'windows-2019'
-#  steps:
-#    - task: UsePythonVersion@0
-#      inputs:
-#        versionSpec: '3.x'
-#    - script: |
-#        pip install aqtinstall
-#        cd $(Build.BinariesDirectory)
-#        python -m aqt list-qt windows desktop --arch 5.15.2
-#        python -m aqt install-qt windows desktop 5.15.2 win32_msvc2019
-#      displayName: install qt
-#    - task: CMake@1
-#      displayName: configure
-#      inputs:
-#        workingDirectory: $(Build.BinariesDirectory)
-#        cmakeArgs: -G "Visual Studio 16 2019" -A Win32 -DQt5_DIR=$(Build.BinariesDirectory)\5.15.2\msvc2019\lib\cmake\Qt5 $(Build.SourcesDirectory)
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: $(Build.BinariesDirectory)
-#        cmakeArgs: --build . --config Release
-#    - task: CMake@1
-#      displayName: build package
-#      inputs:
-#        workingDirectory: $(Build.BinariesDirectory)
-#        cmakeArgs: --build . --target bundle --config Release
-#    - script: |
-#        cat $(Build.BinariesDirectory)/_CPack_Packages/win64/NSIS/NSISOutput.log
-#        ls -l $(Build.BinariesDirectory)
-#    - task: CopyFiles@2
-#      displayName: Copy artifacts files into ArtifactStagingDirectory
-#      inputs:
-#        SourceFolder: '$(Build.BinariesDirectory)\'
-#        Contents: |
-#          PS-Management-*.exe
-#          PS-Management-*.zip
-#        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-#    - task: PublishBuildArtifacts@1
-#      displayName: 'Publish Artifact: release'
-#      inputs:
-#        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-#        ArtifactName: 'release'
-#        publishLocation: 'Container'
+- job: macOS
+  pool:
+    vmImage: 'macOS-11'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+    - script: |
+        pip install aqtinstall
+        mkdir -p /usr/local/opt/Qt
+        (cd /usr/local/opt/Qt && python -m aqt install-qt mac desktop 5.15.2 clang_64)
+  #      (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt install 5.15.2 mac desktop clang_64)
+      displayName: install qt
+    - task: CMake@1
+      displayName: configure
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: -DQt5_DIR=/usr/local/opt/Qt/5.15.2/clang_64/lib/cmake/Qt5/ $(Build.SourcesDirectory)
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: --build $(Build.BinariesDirectory)/build
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
+    - script: ls -l $(Build.BinariesDirectory)/build
+    - task: ArchiveFiles@2
+      displayName: ZIP app-package
+      inputs:
+        rootFolderOrFile: '$(Build.BinariesDirectory)/build/PS-Management.app'
+        includeRootFolder: true
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/PS-Management.app.zip'
+        replaceExistingArchive: true
+    - task: CopyFiles@2
+      displayName: Copy artifacts files into ArtifactStagingDirectory
+      inputs:
+        SourceFolder: '$(Build.BinariesDirectory)/build/'
+        Contents: |
+          PS-Management.app.zip
+          PS-Management.dmg
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: release'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'release'
+        publishLocation: 'Container'
+
+- job: Windows64
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+    - script: |
+        pip install aqtinstall
+        cd $(Build.BinariesDirectory)
+        python -m aqt list-qt windows desktop --arch 5.15.2
+        python -m aqt install-qt windows desktop 5.15.2 win32_msvc2019
+      displayName: install qt
+    - task: CMake@1
+      displayName: configure
+      inputs:
+        workingDirectory: $(Build.BinariesDirectory)
+        cmakeArgs: -G "Visual Studio 16 2019" -A Win32 -DQt5_DIR=$(Build.BinariesDirectory)\5.15.2\msvc2019\lib\cmake\Qt5 $(Build.SourcesDirectory)
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: $(Build.BinariesDirectory)
+        cmakeArgs: --build . --config Release
+    - task: CMake@1
+      displayName: build package
+      inputs:
+        workingDirectory: $(Build.BinariesDirectory)
+        cmakeArgs: --build . --target bundle --config Release
+    - script: |
+        cat $(Build.BinariesDirectory)/_CPack_Packages/win64/NSIS/NSISOutput.log
+        ls -l $(Build.BinariesDirectory)
+    - task: CopyFiles@2
+      displayName: Copy artifacts files into ArtifactStagingDirectory
+      inputs:
+        SourceFolder: '$(Build.BinariesDirectory)\'
+        Contents: |
+          PS-Management-*.exe
+          PS-Management-*.zip
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: release'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'release'
+        publishLocation: 'Container'
 
 - job: GitHub_Release
   dependsOn:
     - Ubuntu_Linux
-#    - macOS
-#    - Windows64
+    - macOS
+    - Windows64
   steps:
     - task: PowerShell@2
       displayName: 'Get latest SHA commmit from repo'
@@ -169,5 +169,5 @@ jobs:
         action: 'create'
         target: '$(Build.SourceVersion)'
         tagSource: 'gitTag'
-        assets: '$(Build.ArtifactStagingDirectory)\release\*.rpm'
-        addChangeLog: false
+        assets: '$(Build.ArtifactStagingDirectory)/release/*'
+        addChangeLog: true
