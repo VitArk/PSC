@@ -70,7 +70,7 @@ jobs:
         pip install aqtinstall
         cd $(Build.BinariesDirectory)
         python -m aqt list-qt windows desktop --arch 5.15.2
-        python -m aqt install-qt windows desktop 5.12.2 win32_msvc2019
+        python -m aqt install-qt windows desktop 5.12.2 win64_msvc2019_64
       displayName: install qt
     - task: CMake@1
       displayName: configure
