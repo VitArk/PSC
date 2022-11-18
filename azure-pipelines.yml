@@ -74,13 +74,20 @@ jobs:
         workingDirectory: '$(Build.BinariesDirectory)/build'
         cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
     - script: ls -l $(Build.BinariesDirectory)/build
-
+    - task: ArchiveFiles@2
+      displayName: ZIP app-package
+      inputs:
+        rootFolderOrFile: '$(Build.BinariesDirectory)/build/PS-Management.app'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/PS-Management.app.zip'
+        replaceExistingArchive: true
     - task: CopyFiles@2
       displayName: Copy artifacts files into ArtifactStagingDirectory
       inputs:
         SourceFolder: '$(Build.BinariesDirectory)/build/'
         Contents: |
-          PS-Management.app
+          PS-Management.app.zip
           PS-Management.dmg
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
