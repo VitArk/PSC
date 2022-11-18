@@ -31,7 +31,7 @@ jobs:
     - task: CopyFiles@2
       displayName: Copy artifacts files into ArtifactStagingDirectory
       inputs:
-        SourceFolder: '$(Build.BinariesDirectory)\'
+        SourceFolder: '$(Build.BinariesDirectory)/build/'
         Contents: |
           PS-Management-*.rpm
           PS-Management-*.tar.bz2
@@ -78,7 +78,7 @@ jobs:
     - task: CopyFiles@2
       displayName: Copy artifacts files into ArtifactStagingDirectory
       inputs:
-        SourceFolder: '$(Build.BinariesDirectory)\'
+        SourceFolder: '$(Build.BinariesDirectory)/build/'
         Contents: |
           PS-Management.app
           PS-Management.dmg
