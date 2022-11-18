@@ -78,7 +78,7 @@ jobs:
       displayName: ZIP app-package
       inputs:
         rootFolderOrFile: '$(Build.BinariesDirectory)/build/PS-Management.app'
-        includeRootFolder: false
+        includeRootFolder: true
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/PS-Management.app.zip'
         replaceExistingArchive: true
