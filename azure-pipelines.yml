@@ -97,6 +97,7 @@ jobs:
         action: 'create'
         target: '$(Build.SourceVersion)'
         tagSource: 'gitTag'
+        tagPattern: '*'
         isDraft: true
         addChangeLog: false
 
