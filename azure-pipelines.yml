@@ -90,4 +90,15 @@ jobs:
     - script: |
         cat $(Build.BinariesDirectory)/_CPack_Packages/win64/NSIS/NSISOutput.log
         ls -l $(Build.BinariesDirectory)
+    - task: GitHubRelease@1
+      displayName: Create GitHub Release
+      inputs:
+        githubConnection: vitark
+        repositoryName: '$(Build.Repository.Name)'
+        action: 'create'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'gitTag'
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
+
 
