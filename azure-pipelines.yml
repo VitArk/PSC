@@ -90,15 +90,6 @@ jobs:
     - script: |
         cat $(Build.BinariesDirectory)/_CPack_Packages/win64/NSIS/NSISOutput.log
         ls -l $(Build.BinariesDirectory)
-    - task: GitHubRelease@1
-      inputs:
-        gitHubConnection: 'github.com_vitark'
-        repositoryName: 'vitark/PS-Management'
-        action: 'create'
-        target: '$(Build.SourceVersion)'
-        tagSource: 'gitTag'
-        tagPattern: '*'
-        isDraft: true
-        addChangeLog: false
+
 
 
