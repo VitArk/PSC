@@ -39,7 +39,7 @@ jobs:
     - script: |
         pip install aqtinstall
         mkdir -p /usr/local/opt/Qt
-        (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt list-qt mac desktop --modules 5.15.2 clang_64 && python -m aqt install-qt mac desktop 5.15.2 clang_64 -m qtsvg qtserialport qtwidgets)
+        (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt list-qt mac desktop --modules 5.15.2 clang_64 && python -m aqt install-qt mac desktop 5.15.2 clang_64)
   #      (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt install 5.15.2 mac desktop clang_64)
       displayName: install qt
     - task: CMake@1
