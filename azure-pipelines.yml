@@ -35,7 +35,7 @@ jobs:
         Contents: |
           PS-Management-*.rpm
           PS-Management-*.tar.bz2
-          PS-Management-*.deb
+          ps-management-*.deb
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
     - task: PublishBuildArtifacts@1
@@ -144,3 +144,10 @@ jobs:
         ArtifactName: 'release'
         publishLocation: 'Container'
 
+- job: Release
+  dependsOn:
+    - Ubuntu_Linux
+    - macOS
+    - Windows64
+  steps:
+    - script: echo this will run when B runs and succeeds
