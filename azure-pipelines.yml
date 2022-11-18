@@ -167,9 +167,8 @@ jobs:
         gitHubConnection: 'github.com_vitark'
         repositoryName: 'vitark/PS-Management'
         action: 'create'
-        target: '$(sha)'
-        tagSource: 'userSpecifiedTag'
-        tag: '$(tag)'
-        title: 'v$(tag)'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'gitTag'
+        tagPattern: 'v*'
         assets: '$(Build.ArtifactStagingDirectory)\release\*.rpm'
         addChangeLog: false
