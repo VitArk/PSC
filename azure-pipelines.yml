@@ -1,63 +1,95 @@
 jobs:
-#- job: Ubuntu_Linux
-#  pool:
-#    vmImage: 'ubuntu-20.04'
-#  steps:
-#   р - task: UsePythonVersion@0
-#      inputs:
-#        versionSpec: '3.x'
-#    - script: |
-#        sudo apt-get -q update
-#        sudo apt-get install -y -q cmake ninja-build make g++ rpm dpkg-dev
-#        sudo apt-get install -y -q qtbase5-dev qt5-style-plugins qt5-qmake libqt5widgets5 libqt5svg5 libqt5svg5-dev libqt5serialport5 libqt5serialport5-dev
-#        wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-#        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-#        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage
-#        sudo install linuxdeploy-x86_64.AppImage /usr/local/bin/
-#        sudo install linuxdeploy-plugin-qt-x86_64.AppImage /usr/local/bin/
-#        sudo install linuxdeploy-plugin-appimage-x86_64.AppImage /usr/local/bin/
-#      displayName: install dependencies
-#    - task: CMake@1
-#      displayName: configure
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: $(Build.SourcesDirectory)
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
-#    - script: ls -l $(Build.BinariesDirectory)/build
+- job: Ubuntu_Linux
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+   р - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+    - script: |
+        sudo apt-get -q update
+        sudo apt-get install -y -q cmake ninja-build make g++ rpm dpkg-dev
+        sudo apt-get install -y -q qtbase5-dev qt5-style-plugins qt5-qmake libqt5widgets5 libqt5svg5 libqt5svg5-dev libqt5serialport5 libqt5serialport5-dev
+        wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage
+        sudo install linuxdeploy-x86_64.AppImage /usr/local/bin/
+        sudo install linuxdeploy-plugin-qt-x86_64.AppImage /usr/local/bin/
+        sudo install linuxdeploy-plugin-appimage-x86_64.AppImage /usr/local/bin/
+      displayName: install dependencies
+    - task: CMake@1
+      displayName: configure
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: $(Build.SourcesDirectory)
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
+    - script: ls -l $(Build.BinariesDirectory)/build
+    - task: CopyFiles@2
+      displayName: Copy artifacts files into ArtifactStagingDirectory
+      inputs:
+        SourceFolder: '$(Build.BinariesDirectory)\'
+        Contents: |
+          PS-Management-*.rpm
+          PS-Management-*.tar.bz2
+          PS-Management-*.deb
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-#- job: macOS
-#  pool:
-#    vmImage: 'macOS-11'
-#  steps:
-#    - task: UsePythonVersion@0
-#      inputs:
-#        versionSpec: '3.x'
-#    - script: |
-#        pip install aqtinstall
-#        mkdir -p /usr/local/opt/Qt
-#        (cd /usr/local/opt/Qt && python -m aqt install-qt mac desktop 5.15.2 clang_64)
-#  #      (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt install 5.15.2 mac desktop clang_64)
-#      displayName: install qt
-#    - task: CMake@1
-#      displayName: configure
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: -DQt5_DIR=/usr/local/opt/Qt/5.15.2/clang_64/lib/cmake/Qt5/ $(Build.SourcesDirectory)
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: --build $(Build.BinariesDirectory)/build
-#    - task: CMake@1
-#      displayName: build
-#      inputs:
-#        workingDirectory: '$(Build.BinariesDirectory)/build'
-#        cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
-#    - script: ls -l $(Build.BinariesDirectory)/build
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: release'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'release'
+        publishLocation: 'Container'
+
+- job: macOS
+  pool:
+    vmImage: 'macOS-11'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.x'
+    - script: |
+        pip install aqtinstall
+        mkdir -p /usr/local/opt/Qt
+        (cd /usr/local/opt/Qt && python -m aqt install-qt mac desktop 5.15.2 clang_64)
+  #      (cd /usr/local/opt/Qt && python -m aqt list-qt mac desktop && python -m aqt install 5.15.2 mac desktop clang_64)
+      displayName: install qt
+    - task: CMake@1
+      displayName: configure
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: -DQt5_DIR=/usr/local/opt/Qt/5.15.2/clang_64/lib/cmake/Qt5/ $(Build.SourcesDirectory)
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: --build $(Build.BinariesDirectory)/build
+    - task: CMake@1
+      displayName: build
+      inputs:
+        workingDirectory: '$(Build.BinariesDirectory)/build'
+        cmakeArgs: --build $(Build.BinariesDirectory)/build --target bundle
+    - script: ls -l $(Build.BinariesDirectory)/build
+
+    - task: CopyFiles@2
+      displayName: Copy artifacts files into ArtifactStagingDirectory
+      inputs:
+        SourceFolder: '$(Build.BinariesDirectory)\'
+        Contents: |
+          PS-Management.app
+          PS-Management.dmg
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: release'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'release'
+        publishLocation: 'Container'
 
 - job: Windows64
   pool:
