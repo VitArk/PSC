@@ -3,7 +3,7 @@ jobs:
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
-   р - task: UsePythonVersion@0
+    - task: UsePythonVersion@0
       inputs:
         versionSpec: '3.x'
     - script: |
