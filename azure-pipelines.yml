@@ -155,7 +155,7 @@ jobs:
       inputs:
         targetType: 'inline'
         script: |
-          $commits = Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/vitark/PS-Management/commits"
+          $commits = Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/vitark/PS-Management/commits/develop"
           $sha = $commits[0].sha
           Write-Host "##vso[task.setvariable variable=sha;]$sha"
     - task: GitHubRelease@1
@@ -167,5 +167,5 @@ jobs:
         tagSource: 'userSpecifiedTag'
         tag: '$(tag)'
         title: 'v$(tag)'
-        assets: '$(Build.ArtifactStagingDirectory)\release\*.deb'
+        assets: '$(Build.ArtifactStagingDirectory)\release\*.rpm'
         addChangeLog: false
