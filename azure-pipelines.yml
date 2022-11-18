@@ -158,3 +158,14 @@ jobs:
           $commits = Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/vitark/PS-Management/commits"
           $sha = $commits[0].sha
           Write-Host "##vso[task.setvariable variable=sha;]$sha"
+    - task: GitHubRelease@1
+      inputs:
+        gitHubConnection: 'github.com_vitark'
+        repositoryName: 'vitark/PS-Management'
+        action: 'create'
+        target: '$(sha)'
+        tagSource: 'userSpecifiedTag'
+        tag: '$(tag)'
+        title: 'v$(tag)'
+        assets: '$(Build.ArtifactStagingDirectory)\release\*.deb'
+        addChangeLog: false
