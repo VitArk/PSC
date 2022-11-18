@@ -169,6 +169,5 @@ jobs:
         action: 'create'
         target: '$(Build.SourceVersion)'
         tagSource: 'gitTag'
-        tagPattern: 'v*'
         assets: '$(Build.ArtifactStagingDirectory)\release\*.rpm'
         addChangeLog: false
