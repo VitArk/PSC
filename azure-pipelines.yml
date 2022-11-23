@@ -157,8 +157,8 @@ jobs:
     - Windows64
   steps:
     - script: |
-        ls -l $(Build.ArtifactStagingDirectory)
-        ls -l $(Build.ArtifactStagingDirectory)/release
+        ls -l $(System.DefaultWorkingDirectory)
+        ls -l $(System.DefaultWorkingDirectory))/release
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: 'github.com_vitark'
@@ -166,5 +166,7 @@ jobs:
         action: 'create'
         target: '$(Build.SourceVersion)'
         tagSource: 'gitTag'
-        assets: '$(Build.ArtifactStagingDirectory)/release/*'
+        assets: '$(System.DefaultWorkingDirectory)/release/*'
         addChangeLog: false
+        isDraft: true
+
