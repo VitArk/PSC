@@ -149,6 +149,8 @@ jobs:
         publishLocation: 'Container'
 
 - job: GitHub_Release
+  pool:
+    vmImage: 'ubuntu-20.04'
   dependsOn:
     - Ubuntu_Linux
     - macOS
