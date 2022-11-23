@@ -158,7 +158,7 @@ jobs:
   steps:
     - script: |
         ls -l $(System.DefaultWorkingDirectory)
-        ls -l $(System.DefaultWorkingDirectory))/release
+        ls -l $(System.DefaultWorkingDirectory)/release
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: 'github.com_vitark'
