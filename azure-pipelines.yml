@@ -46,7 +46,7 @@ jobs:
       displayName: 'Publish Artifact: release'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'release'
+        ArtifactName: release
         publishLocation: 'Container'
 
 - job: macOS
@@ -99,7 +99,7 @@ jobs:
       displayName: 'Publish Artifact: release'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'release'
+        ArtifactName: release
         publishLocation: 'Container'
 
 - job: Windows64
@@ -145,20 +145,20 @@ jobs:
       displayName: 'Publish Artifact: release'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'release'
+        ArtifactName: release
         publishLocation: 'Container'
 
 - job: GitHub_Release
-  pool:
-    vmImage: 'ubuntu-20.04'
   dependsOn:
     - Ubuntu_Linux
     - macOS
     - Windows64
   steps:
+    - download: current
+      artifact: release
     - script: |
-        ls -l $(System.DefaultWorkingDirectory)
-        ls -l $(System.DefaultWorkingDirectory)/release
+        ls -l $(Pipeline.Workspace)
+        ls -l $(Pipeline.Workspace)/release
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: 'github.com_vitark'
@@ -166,7 +166,7 @@ jobs:
         action: 'create'
         target: '$(Build.SourceVersion)'
         tagSource: 'gitTag'
-        assets: '$(System.DefaultWorkingDirectory)/release/*'
+        assets: '$(Pipeline.Workspace)/release/*'
         addChangeLog: false
         isDraft: true
 
