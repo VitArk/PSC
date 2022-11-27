@@ -93,12 +93,12 @@ jobs:
         Contents: |
           PS-Management.app.zip
           PS-Management.dmg
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/macOS'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: release'
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/macOS'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: release
         publishLocation: 'Container'
 
