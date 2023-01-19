@@ -1,4 +1,5 @@
 # Power Supply Management
+[![Build Status](https://dev.azure.com/vitark/PS-Management/_apis/build/status/vitark.PS-Management?branchName=main)](https://dev.azure.com/vitark/PS-Management/_build/latest?definitionId=1&branchName=main)
 
 Power Supply Management (PS-Management) is a GUI Qt Framework-based application for controlling laboratory power supplies of UNI-T UTP330xC and other devices that use the same SCPI.
 

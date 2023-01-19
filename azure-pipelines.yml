@@ -5,6 +5,10 @@ trigger:
   tags:
     include:
       - v*
+  paths:
+    exclude:
+      - README.md
+      - LICENSE
 jobs:
 - job: Ubuntu_Linux
   pool:
