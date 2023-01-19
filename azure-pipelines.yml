@@ -2,13 +2,13 @@ trigger:
   branches:
     include:
       - main
-  tags:
-    include:
-      - v*
   paths:
     exclude:
       - README.md
       - LICENSE
+  tags:
+    include:
+      - '*'
 jobs:
 - job: Ubuntu_Linux
   pool:
