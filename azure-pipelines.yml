@@ -168,5 +168,5 @@ jobs:
         tagSource: 'gitTag'
         assets: '$(Pipeline.Workspace)/release/*'
         addChangeLog: false
-        isDraft: true
+        isDraft: false
 
