@@ -11,17 +11,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Application.h"
-#include <config.h>
+//
+// Created by Vitalii Arkusha on 14.10.2022.
+//
 
-int main(int argc, char *argv[]) {
-    Application::setOrganizationName("vitark");
-    Application::setApplicationName("power-supply-management");
-    Application::setApplicationDisplayName("PS-Management");
-    Application::setApplicationVersion(QString("%1.%2.%3").arg(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH));
+#ifndef CONFIG_H_IN
+#define CONFIG_H_IN
 
-    Application a(argc, argv);
-    Application::setWindowIcon(QIcon(":power-supply-512"));
+#define VERSION_MAJOR "@PS-Management_VERSION_MAJOR@"
+#define VERSION_MINOR "@PS-Management_VERSION_MINOR@"
+#define VERSION_PATCH "@PS-Management_VERSION_PATCH@"
 
-    return Application::exec();
-}
+#endif  // CONFIG_H_IN

@@ -1,3 +1,16 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 //
 // Created by Vitalii Arkusha on 12.05.2021.
 //
@@ -7,10 +20,10 @@
 
 #include <QObject>
 #include <QApplication>
-#include "Commons.h"
+#include <QQueue>
+#include "Global.h"
 #include "Communication.h"
 #include "MainWindow.h"
-#include "Settings.h"
 
 class Application : public QApplication {
     Q_DISABLE_COPY(Application)
@@ -20,21 +33,20 @@ public:
     ~Application() override;
 
 private:
-    Communication *mCommunication;
-    MainWindow *mMainWindow;
-    QTimer     mWorkingTimer;
-    Settings   mSettings;
+    Communication   *mCommunication;
+    MainWindow      *mMainWindow;
+    QTimer          mDeviceUpdaterTimer;
 
 private slots:
-    void slotAppRun();
+    void Run();
 
-    void slotSerialPortOpened(const QString &name, int baudRate);
-    void slotSerialPortClosed();
+    void DeviceReady(const Global::DeviceInfo &info);
+    void SerialPortClosed();
 
-    void slotWorkingCycle();
-    void slotOutputStatus(DeviceStatus status);
-    void slotOutputProtectionChanged(TOutputProtection protection);
-
+    void DeviceUpdateCycle();
+    void OutputStatus(const Global::DeviceStatus &status);
+    void OutputProtectionChanged(Global::OutputProtection protection);
+    void TuneDeviceUpdaterTimerInterval(const CommunicationMetrics &metrics);
 };
 
 

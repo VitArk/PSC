@@ -10,18 +10,37 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 
-#include "Application.h"
-#include <config.h>
+// Created by Vitalii Arkusha on 27.10.2022.
+//
 
-int main(int argc, char *argv[]) {
-    Application::setOrganizationName("vitark");
-    Application::setApplicationName("power-supply-management");
-    Application::setApplicationDisplayName("PS-Management");
-    Application::setApplicationVersion(QString("%1.%2.%3").arg(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH));
+#ifndef PS_MANAGEMENT_SPINBOXDEBOUNCE_H
+#define PS_MANAGEMENT_SPINBOXDEBOUNCE_H
 
-    Application a(argc, argv);
-    Application::setWindowIcon(QIcon(":power-supply-512"));
+#include <QDoubleSpinBox>
+#include <QBasicTimer>
 
-    return Application::exec();
-}
+class SpinBoxDebounce : public QDoubleSpinBox {
+Q_OBJECT
+public:
+    explicit SpinBoxDebounce(QWidget *parent);
+    void setValue(double value);
+
+signals:
+    void onSetValue(double value);
+
+protected:
+    void timerEvent(QTimerEvent *event) override;
+
+private slots:
+    void ValueChanged();
+
+private:
+    QBasicTimer mTimer;
+    double      mExternalValue = 0.0;
+};
+
+
+
+#endif //PS_MANAGEMENT_SPINBOXDEBOUNCE_H

@@ -10,18 +10,34 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 
-#include "Application.h"
-#include <config.h>
+//
+// Created by Vitalii Arkusha on 02.11.2022.
+//
 
-int main(int argc, char *argv[]) {
-    Application::setOrganizationName("vitark");
-    Application::setApplicationName("power-supply-management");
-    Application::setApplicationDisplayName("PS-Management");
-    Application::setApplicationVersion(QString("%1.%2.%3").arg(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH));
+#ifndef PS_MANAGEMENT_OUTPUTSWITCH_H
+#define PS_MANAGEMENT_OUTPUTSWITCH_H
 
-    Application a(argc, argv);
-    Application::setWindowIcon(QIcon(":power-supply-512"));
+#include <QWidget>
+#include <QPushButton>
+#include <QPalette>
 
-    return Application::exec();
-}
+class OutputSwitch : public QPushButton {
+Q_OBJECT
+public:
+    OutputSwitch(QWidget *parent);
+
+public slots:
+    void SetSwitchOn(bool on);
+
+private:
+    void setupUI();
+    static QString customStyle(const QString &color);
+    void applyStyle(const QString &style);
+private:
+    QString mBackgroundColorDefault;
+};
+
+
+#endif //PS_MANAGEMENT_OUTPUTSWITCH_H

@@ -11,17 +11,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Application.h"
-#include <config.h>
+//
+// Created by Vitalii Arkusha on 20.10.2022.
+//
 
-int main(int argc, char *argv[]) {
-    Application::setOrganizationName("vitark");
-    Application::setApplicationName("power-supply-management");
-    Application::setApplicationDisplayName("PS-Management");
-    Application::setApplicationVersion(QString("%1.%2.%3").arg(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH));
+#include "ClickableLabel.h"
 
-    Application a(argc, argv);
-    Application::setWindowIcon(QIcon(":power-supply-512"));
-
-    return Application::exec();
+ClickableLabel::ClickableLabel(QWidget* parent, Qt::WindowFlags f)
+        : QLabel(parent) {
 }
+
+void ClickableLabel::mousePressEvent(QMouseEvent* event) {
+    if (mTimer.isActive()) {
+        mTimer.stop();
+        emit onDoubleClick();
+    }
+    else {
+        mTimer.start(300, this);
+    }
+}
+
+void ClickableLabel::timerEvent(QTimerEvent *) {
+    mTimer.stop();
+    emit onClick();
+}
+
+
+
+

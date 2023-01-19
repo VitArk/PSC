@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=@PS-Management_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_MINOR@
+Name=Power Supply Management
+GenericName=PSM
+Comment=@PS-Management_DESCRIPTION@
+Icon=ps-management
+Terminal=false
+Exec=PS-Management %F
+MimeType=text/text;
+Categories=Utility;
