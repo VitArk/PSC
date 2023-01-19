@@ -1,4 +1,7 @@
 trigger:
+  branches:
+    include:
+      - main
   tags:
     include:
       - v*
@@ -153,6 +156,7 @@ jobs:
     - Ubuntu_Linux
     - macOS
     - Windows64
+  condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'))
   steps:
     - download: current
       artifact: release
