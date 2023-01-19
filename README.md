@@ -80,9 +80,9 @@ Currently, the application only supports UNI-T devices using the [SCPI Protocol]
 #### Not supported, but support can be easily added:
 * Korad KA3003P; KA3005P; KA3010P
 * Korad KA6002P; KA6003P; KA6005P
-* Vellemann PS3005D (rebranded KA3005P)
 * Tenma 72-2535; 72-2540 (rebranded KA30XXP)
 * Tenma 72-2545; 72-2550 (rebranded KA60XXP)
+* Vellemann PS3005D (rebranded KA3005P)
 
 ## USB/COM cable and communications issues
 While developing the application, I tried many different cables, USB, and COM (with adaptors)
