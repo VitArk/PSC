@@ -22,6 +22,7 @@
 
 #define COLLECT_DEBUG_INFO_MS 500
 #define DELAY_BETWEEN_REQUESTS_MS 60
+#define RESPONSE_TIMEOUT DELAY_BETWEEN_REQUESTS_MS*2
 
 Communication::Communication(QObject *parent) : QObject(parent){
     mSerialPort.setDataBits(QSerialPort::Data8);
@@ -50,6 +51,7 @@ void Communication::OpenSerialPort(const QString &name, int baudRate) {
 
     if (mSerialPort.open(QIODevice::ReadWrite)) {
         mSerialPort.clear();
+        mSerialPort.clearError();
         emit onSerialPortOpened(name, baudRate);
 
         // The instance of Protocol::Factory is blocking all QT signals of QSerialPort (mSerialPort) until be destroyed.
@@ -116,7 +118,7 @@ void Communication::processMessageQueue(bool clearBusyFlag) {
             processMessageQueue(true);
         });
     } else {
-        mWaitResponseTimer.start(DELAY_BETWEEN_REQUESTS_MS * 2);
+        mWaitResponseTimer.start(RESPONSE_TIMEOUT);
     }
 }
 
