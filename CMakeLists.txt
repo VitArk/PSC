@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 project(PS-Management
-        VERSION 1.3.2
+        VERSION 1.3.3
         DESCRIPTION "Power Supply Management (PSM). GUI Qt-based application to control Programmable DC Power supplies using a SCPI based communication protocol, over RS232/USB interface."
         HOMEPAGE_URL "https://github.com/vitark/PS-Management"
         LANGUAGES C CXX)
