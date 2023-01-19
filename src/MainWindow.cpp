@@ -50,6 +50,10 @@ void MainWindow::setupUI() {
     ui->groupBoxOperationLayout->setSpacing(12);
 #endif
 
+#ifdef Q_OS_LINUX
+    setMaximumHeight(maximumHeight() + 5);
+#endif
+
     setFixedSize(maximumSize());
     ui->groupBoxCh1->setMinimumSize(QSize(0,0));
     ui->groupBoxCh2->setMinimumSize(QSize(0,0));
