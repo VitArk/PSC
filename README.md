@@ -11,14 +11,14 @@
          * [macOS and Linux](#macos-and-linux)
          * [Windows](#windows)
       * [Supported Hardware](#supported-hardware)
-         * [Officially supported:](#officially-supported)
-         * [Not supported, but support can be easily added:](#not-supported-but-support-can-be-easily-added)
+         * [Officially supported](#officially-supported)
+         * [Not supported, but support can be easily added](#not-supported-but-support-can-be-easily-added)
    * [USB/COM cable and communications issues](#usbcom-cable-and-communications-issues)
-         * [USB Cable](#usb-cable)
-         * [COM (with adaptors)](#com-with-adaptors)
+      * [USB Cable](#usb-cable)
+      * [COM with adaptors](#com-with-adaptors)
    * [Screenshots](#screenshots)
-         * [<em>PS-Management running on Windows 10</em>](#ps-management-running-on-windows-10)
-         * [<em>PS-Management running on Ubuntu 22.04.1 LTS</em>](#ps-management-running-on-ubuntu-22041-lts)
+      * [PS-Management running on Windows 10](#ps-management-running-on-windows-10)
+      * [PS-Management running on Ubuntu 22.04.1 LTS](#ps-management-running-on-ubuntu-22041-lts)
    * [Bugs, feature requests, ideas](#bugs-feature-requests-ideas)
    * [License](#license)
    * [Stand With Ukraine](#stand-with-ukraine)
@@ -108,17 +108,19 @@ Currently, the application only supports UNI-T devices using the [SCPI Protocol]
 
 ## USB/COM cable and communications issues
 While developing the application, I tried many different cables, USB, and COM (with adaptors)
-#### USB Cable
+
+### USB Cable
 Two meters and a longer generic USB2 cable didn't work on my set (Macbook via own USB host). Otherwise, an active USB cable (5m) is working fine. So try to use a USB2 cable as short as possible or an active USB.
-#### COM (with adaptors)
+
+### COM (with adaptors)
 USB-Serial adaptor (ST Lab, USB-Serial-4, based on PL2303) works fine.
 
 ## Screenshots
-#### *PS-Management running on Windows 10*
+### *PS-Management running on Windows 10*
 
 ![windows-Screenshot](https://user-images.githubusercontent.com/7736508/213516574-c8aa1049-60a9-4d86-8f7c-f4b4eb8f1567.png)
 
-#### *PS-Management running on Ubuntu 22.04.1 LTS*
+### *PS-Management running on Ubuntu 22.04.1 LTS*
 
 ![ubuntu-Screenshot](https://user-images.githubusercontent.com/7736508/213523550-c3a96186-f0bd-4e73-a215-5138870a77bd.png)
 
