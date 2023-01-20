@@ -2,6 +2,27 @@
 [![Build Status](https://dev.azure.com/vitark/PS-Management/_apis/build/status/vitark.PS-Management?branchName=main)](https://dev.azure.com/vitark/PS-Management/_build/latest?definitionId=1&branchName=main)
 [![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
+* [Power Supply Management](#power-supply-management)
+   * [Features](#features)
+   * [Getting PS-Management](#getting-ps-management)
+   * [Compiling from source](#compiling-from-source)
+      * [Dependencies](#dependencies)
+      * [Compilation](#compilation)
+         * [macOS and Linux](#macos-and-linux)
+         * [Windows](#windows)
+      * [Supported Hardware](#supported-hardware)
+         * [Officially supported:](#officially-supported)
+         * [Not supported, but support can be easily added:](#not-supported-but-support-can-be-easily-added)
+   * [USB/COM cable and communications issues](#usbcom-cable-and-communications-issues)
+         * [USB Cable](#usb-cable)
+         * [COM (with adaptors)](#com-with-adaptors)
+   * [Screenshots](#screenshots)
+         * [<em>PS-Management running on Windows 10</em>](#ps-management-running-on-windows-10)
+         * [<em>PS-Management running on Ubuntu 22.04.1 LTS</em>](#ps-management-running-on-ubuntu-22041-lts)
+   * [Bugs, feature requests, ideas](#bugs-feature-requests-ideas)
+   * [License](#license)
+   * [Stand With Ukraine](#stand-with-ukraine)
+
 Power Supply Management (PS-Management) is a GUI Qt Framework-based application for controlling laboratory power supplies of UNI-T UTP330xC and other devices that use the same SCPI.
 
 <img width="895" alt="macos_screen" src="https://user-images.githubusercontent.com/7736508/213449855-d5db9de5-ab18-4824-9683-a3351c993ea2.png">
@@ -108,6 +129,13 @@ to submit bugs or feature requests
 
 ## License
 ```
+                    GNU GENERAL PUBLIC LICENSE
+                     Version 3, 29 June 2007
+
+Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+ 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -121,3 +149,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ```
+
+## Stand With Ukraine
+
+[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
+
+### Additional terms of use for users from Russia and Belarus
+
+By using the code provided in these repositories you agree with the following:
+* Russia has [illegally annexed Crimea in 2014](https://en.wikipedia.org/wiki/Annexation_of_Crimea_by_the_Russian_Federation) and [brought the war in Donbas](https://en.wikipedia.org/wiki/War_in_Donbas) followed by [full-scale invasion of Ukraine in 2022](https://en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine).
+* Russia has brought sorrow and devastations to millions of Ukrainians, killed hundreds of innocent people, damaged thousands of buildings, and forced several million people to flee.
+* [Putin khuylo!](https://en.wikipedia.org/wiki/Putin_khuylo!)
+
+Glory to Ukraine! 🇺🇦
