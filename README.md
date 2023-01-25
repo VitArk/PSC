@@ -51,7 +51,7 @@ The following dependencies are required to run this software:
     * clang >= 3.4
     * MSVC >= 16 (Visual Studio 2019)
     * MinGW >= 4.9
-* Qt >= 5.15 (Qt5Widgets, Qt5Gui, Qt5Core, Qt5SerialPort)
+* Qt >= 5.15 (Qt5Widgets, Qt5Gui, Qt5Core, Qt5Svg, Qt5SerialPort)
 
 ### Compilation
 
